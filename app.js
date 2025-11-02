@@ -2,6 +2,7 @@
 const express = require('express');
 const https = require('https');
 const fs = require('fs');
+const CryptoJS = require('crypto-js');
 
 // Create an Express app
 const app = express();
@@ -40,14 +41,38 @@ app.post('/', (req, res) => {
   console.log('Headers:', JSON.stringify(req.headers, null, 2));
   console.log('Body:', JSON.stringify(req.body, null, 2));
   
-  // Create response object
-  const responseObj = { status: 'received' };
-  
-  // Convert response to base64
-  const responseBase64 = Buffer.from(JSON.stringify(responseObj)).toString('base64');
-  
-  // Send base64 encoded response
-  res.status(200).send(responseBase64);
+  try {
+    // Get the encryption key from headers or body
+    const encryptionKey = req.headers['x-hub-encryption-key'] || req.body.encryption_key;
+    
+    if (!encryptionKey) {
+      console.warn('No se encontró la clave de cifrado en la solicitud');
+      return res.status(400).send('Se requiere clave de cifrado');
+    }
+    
+    // Create response object
+    const responseObj = { 
+      status: 'received',
+      timestamp: new Date().toISOString()
+    };
+    
+    // Convert response object to string
+    const responseString = JSON.stringify(responseObj);
+    
+    // Encrypt the response with AES using the provided key
+    const encrypted = CryptoJS.AES.encrypt(responseString, encryptionKey).toString();
+    
+    // Convert to Base64
+    const responseBase64 = Buffer.from(encrypted).toString('base64');
+    
+    console.log('Encrypted response (Base64):', responseBase64);
+    
+    // Send encrypted and base64 encoded response
+    res.status(200).send(responseBase64);
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).send('Error processing webhook');
+  }
 });
 
 // Configuración del servidor para Render
