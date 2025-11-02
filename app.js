@@ -1,5 +1,7 @@
 // Import Express.js
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 
 // Create an Express app
 const app = express();
@@ -31,7 +33,13 @@ app.post('/', (req, res) => {
   res.status(200).end();
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`\nListening on port ${port}\n`);
+// Leer los archivos del certificado
+const privateKey = fs.readFileSync('whatsapp-webhook-key.pem', 'utf8');
+const certificate = fs.readFileSync('whatsapp-webhook-cert.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+
+// Crear y arrancar el servidor HTTPS
+const httpsServer = https.createServer(credentials, app);
+httpsServer.listen(port, () => {
+    console.log(`Servidor HTTPS escuchando en el puerto ${port}`);
 });
