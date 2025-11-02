@@ -57,9 +57,3 @@ try {
   console.error('Asegúrate de que las variables de entorno estén correctamente configuradas');
   process.exit(1);
 }
-
-// Crear y arrancar el servidor HTTPS
-const httpsServer = https.createServer(credentials, app);
-httpsServer.listen(port, () => {
-    console.log(`Servidor HTTPS escuchando en el puerto ${port}`);
-});
