@@ -44,27 +44,44 @@ app.post('/', (req, res) => {
   res.status(200).json({ status: 'received' });
 });
 
-/// Verificar y cargar las claves
-try {
-  const privateKey = process.env.PRIVATE_KEY;
-  const certificate = process.env.CERTIFICATE;
+// Configuración del servidor para Render
+const startServer = () => {
+  // En Render, usamos el puerto proporcionado por la variable de entorno
+  const port = process.env.PORT || 3000;
+  
+  // En producción (Render), usamos el puerto HTTP estándar
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Servidor HTTP escuchando en el puerto ${port} (modo producción)`);
+    });
+  } 
+  // En desarrollo local, usamos HTTPS con certificados autofirmados
+  else {
+    try {
+      const privateKey = process.env.PRIVATE_KEY;
+      const certificate = process.env.CERTIFICATE;
 
-  if (!privateKey || !certificate) {
-    throw new Error('Las variables de entorno PRIVATE_KEY y CERTIFICATE son requeridas');
+      if (!privateKey || !certificate) {
+        throw new Error('Las variables de entorno PRIVATE_KEY y CERTIFICATE son requeridas para desarrollo local');
+      }
+
+      const credentials = { 
+        key: privateKey, 
+        cert: certificate,
+        rejectUnauthorized: false // Solo para desarrollo
+      };
+
+      const httpsServer = https.createServer(credentials, app);
+      httpsServer.listen(port, () => {
+        console.log(`Servidor HTTPS escuchando en el puerto ${port} (modo desarrollo)`);
+      });
+    } catch (error) {
+      console.error('Error al configurar el servidor HTTPS:', error.message);
+      console.error('Asegúrate de que las variables de entorno estén correctamente configuradas');
+      process.exit(1);
+    }
   }
+};
 
-  const credentials = { 
-    key: privateKey, 
-    cert: certificate,
-    rejectUnauthorized: false // Solo para desarrollo
-  };
-
-  const httpsServer = https.createServer(credentials, app);
-  httpsServer.listen(port, () => {
-    console.log(`Servidor HTTPS escuchando en el puerto ${port}`);
-  });
-} catch (error) {
-  console.error('Error al configurar el servidor HTTPS:', error.message);
-  console.error('Asegúrate de que las variables de entorno estén correctamente configuradas');
-  process.exit(1);
-}
+// Iniciar el servidor
+startServer();

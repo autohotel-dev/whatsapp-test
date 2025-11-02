@@ -1,6 +1,23 @@
 {
+  "name": "whatsapp-webhook",
+  "version": "1.0.0",
+  "description": "Webhook server for WhatsApp Business API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js",
+    "test": "node test-webhook.js"
+  },
   "dependencies": {
     "express": "^5.1.0",
     "selfsigned": "^4.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "whatsapp",
+    "webhook",
+    "api"
+  ]
 }
