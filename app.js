@@ -33,17 +33,30 @@ app.post('/', (req, res) => {
   res.status(200).end();
 });
 
-// Leer los archivos del certificado
-const privateKey = process.env.PRIVATE_KEY;
-const certificate = process.env.CERTIFICATE;
+/// Verificar y cargar las claves
+try {
+  const privateKey = process.env.PRIVATE_KEY;
+  const certificate = process.env.CERTIFICATE;
 
-// Verificar que existan las variables
-if (!privateKey || !certificate) {
-  console.error('ERROR: Las variables de entorno PRIVATE_KEY y CERTIFICATE son requeridas');
+  if (!privateKey || !certificate) {
+    throw new Error('Las variables de entorno PRIVATE_KEY y CERTIFICATE son requeridas');
+  }
+
+  const credentials = { 
+    key: privateKey, 
+    cert: certificate,
+    rejectUnauthorized: false // Solo para desarrollo
+  };
+
+  const httpsServer = https.createServer(credentials, app);
+  httpsServer.listen(port, () => {
+    console.log(`Servidor HTTPS escuchando en el puerto ${port}`);
+  });
+} catch (error) {
+  console.error('Error al configurar el servidor HTTPS:', error.message);
+  console.error('Asegúrate de que las variables de entorno estén correctamente configuradas');
   process.exit(1);
 }
-
-const credentials = { key: privateKey, cert: certificate };
 
 // Crear y arrancar el servidor HTTPS
 const httpsServer = https.createServer(credentials, app);
