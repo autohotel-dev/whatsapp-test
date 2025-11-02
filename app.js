@@ -13,24 +13,35 @@ app.use(express.json());
 const port = process.env.PORT || 3000;
 const verifyToken = process.env.VERIFY_TOKEN;
 
-// Route for GET requests
+// Route for GET requests (Webhook verification)
 app.get('/', (req, res) => {
+  console.log('Received webhook verification request');
   const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
+  
+  console.log('Mode:', mode);
+  console.log('Token received:', token);
+  console.log('Expected token:', verifyToken);
 
   if (mode === 'subscribe' && token === verifyToken) {
     console.log('WEBHOOK VERIFIED');
-    res.status(200).send(challenge);
+    return res.status(200).send(challenge);
   } else {
-    res.status(403).end();
+    console.log('Verification failed. Check the verify token.');
+    return res.status(403).json({
+      error: 'Verification failed. Check the verify token.'
+    });
   }
 });
 
-// Route for POST requests
+// Route for POST requests (Webhook events)
 app.post('/', (req, res) => {
   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
-  console.log(`\n\nWebhook received ${timestamp}\n`);
-  console.log(JSON.stringify(req.body, null, 2));
-  res.status(200).end();
+  console.log(`\n\n🌐 Webhook received ${timestamp}`);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('Body:', JSON.stringify(req.body, null, 2));
+  
+  // Acknowledge receipt of the webhook
+  res.status(200).json({ status: 'received' });
 });
 
 /// Verificar y cargar las claves
