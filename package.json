@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node app.js",
-    "test": "node test-webhook.js"
+    "test": "node test-webhook.js",
+    "build": "echo 'Iniciando build...' && npm install && echo 'Build completado exitosamente'"
   },
   "dependencies": {
     "express": "^5.1.0",
