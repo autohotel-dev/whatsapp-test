@@ -34,8 +34,15 @@ app.post('/', (req, res) => {
 });
 
 // Leer los archivos del certificado
-const privateKey = fs.readFileSync('whatsapp-webhook-key.pem', 'utf8');
-const certificate = fs.readFileSync('whatsapp-webhook-cert.pem', 'utf8');
+const privateKey = process.env.PRIVATE_KEY;
+const certificate = process.env.CERTIFICATE;
+
+// Verificar que existan las variables
+if (!privateKey || !certificate) {
+  console.error('ERROR: Las variables de entorno PRIVATE_KEY y CERTIFICATE son requeridas');
+  process.exit(1);
+}
+
 const credentials = { key: privateKey, cert: certificate };
 
 // Crear y arrancar el servidor HTTPS
