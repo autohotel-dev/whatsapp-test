@@ -9,3 +9,5 @@
 node_modules/
 .DS_Store
 *.log
+whatsapp-webhook-key.pem
+whatsapp-webhook-cert.pem
