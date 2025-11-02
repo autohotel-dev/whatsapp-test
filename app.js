@@ -42,36 +42,53 @@ app.post('/', (req, res) => {
   console.log('Body:', JSON.stringify(req.body, null, 2));
   
   try {
-    // Get the encryption key from headers or body
-    const encryptionKey = req.headers['x-hub-encryption-key'] || req.body.encryption_key;
-    
-    if (!encryptionKey) {
-      console.warn('No se encontró la clave de cifrado en la solicitud');
-      return res.status(400).send('Se requiere clave de cifrado');
-    }
-    
-    // Create response object
+    // Create a basic response object
     const responseObj = { 
       status: 'received',
       timestamp: new Date().toISOString()
     };
     
-    // Convert response object to string
-    const responseString = JSON.stringify(responseObj);
+    // Try to get the encryption key from headers or body
+    const encryptionKey = req.headers['x-hub-encryption-key'] || 
+                         req.headers['x-hub-signature-256'] || 
+                         (req.body && req.body.encryption_key);
     
-    // Encrypt the response with AES using the provided key
-    const encrypted = CryptoJS.AES.encrypt(responseString, encryptionKey).toString();
+    let responseToSend = '';
     
-    // Convert to Base64
-    const responseBase64 = Buffer.from(encrypted).toString('base64');
+    if (encryptionKey) {
+      try {
+        // Convert response object to string
+        const responseString = JSON.stringify(responseObj);
+        
+        // Encrypt the response with AES using the provided key
+        const encrypted = CryptoJS.AES.encrypt(responseString, encryptionKey).toString();
+        
+        // Convert to Base64
+        responseToSend = Buffer.from(encrypted).toString('base64');
+        console.log('Encrypted response (Base64):', responseToSend);
+      } catch (encryptionError) {
+        console.warn('Error al cifrar la respuesta:', encryptionError);
+        // If encryption fails, send plain response
+        responseToSend = Buffer.from(JSON.stringify(responseObj)).toString('base64');
+      }
+    } else {
+      console.log('No se encontró clave de cifrado, enviando respuesta sin cifrar');
+      // If no encryption key, send plain response
+      responseToSend = Buffer.from(JSON.stringify(responseObj)).toString('base64');
+    }
     
-    console.log('Encrypted response (Base64):', responseBase64);
+    // Always return 200 status code
+    res.status(200).send(responseToSend);
     
-    // Send encrypted and base64 encoded response
-    res.status(200).send(responseBase64);
   } catch (error) {
     console.error('Error processing webhook:', error);
-    res.status(500).send('Error processing webhook');
+    // Even in case of error, return 200 to keep the webhook active
+    const errorResponse = Buffer.from(JSON.stringify({
+      status: 'error',
+      message: 'Error processing webhook',
+      timestamp: new Date().toISOString()
+    })).toString('base64');
+    res.status(200).send(errorResponse);
   }
 });
 
