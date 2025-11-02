@@ -40,8 +40,14 @@ app.post('/', (req, res) => {
   console.log('Headers:', JSON.stringify(req.headers, null, 2));
   console.log('Body:', JSON.stringify(req.body, null, 2));
   
-  // Acknowledge receipt of the webhook
-  res.status(200).json({ status: 'received' });
+  // Create response object
+  const responseObj = { status: 'received' };
+  
+  // Convert response to base64
+  const responseBase64 = Buffer.from(JSON.stringify(responseObj)).toString('base64');
+  
+  // Send base64 encoded response
+  res.status(200).send(responseBase64);
 });
 
 // Configuración del servidor para Render
