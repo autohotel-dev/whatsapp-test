@@ -13,15 +13,17 @@ app.use(express.json());
 const port = process.env.PORT || 3000;
 const verifyToken = process.env.VERIFY_TOKEN;
 
-// ... tus imports ...
-
-// Middleware de diagnóstico para TODAS las rutas
-app.use('*', (req, res, next) => {
+// ✅ MIDDLEWARE DE DIAGNÓSTICO CORREGIDO
+app.use((req, res, next) => {
   console.log('🔍 DIAGNÓSTICO - Solicitud recibida:');
   console.log('   Método:', req.method);
   console.log('   Ruta:', req.originalUrl);
-  console.log('   Headers:', req.headers);
-  console.log('   Body:', req.body);
+  console.log('   Headers:', JSON.stringify(req.headers, null, 2));
+  if (Object.keys(req.body).length > 0) {
+    console.log('   Body:', JSON.stringify(req.body, null, 2));
+  } else {
+    console.log('   Body: (vacío)');
+  }
   next();
 });
 
@@ -34,9 +36,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ✅ RUTA CATCH-ALL PARA GET (Para verificación de webhook)
-app.get('*', (req, res) => {
-  console.log('🔄 GET recibido en ruta catch-all:', req.originalUrl);
+// ✅ RUTA RAÍZ PARA GET (Para verificación de webhook)
+app.get('/', (req, res) => {
+  console.log('🔄 GET recibido en raíz:/');
   const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
   
   console.log('Parámetros de verificación:');
@@ -46,10 +48,10 @@ app.get('*', (req, res) => {
   console.log(' - verifyToken esperado:', verifyToken);
 
   if (mode === 'subscribe' && token === verifyToken) {
-    console.log('✅ WEBHOOK VERIFICADO en ruta:', req.originalUrl);
+    console.log('✅ WEBHOOK VERIFICADO en raíz');
     return res.status(200).send(challenge);
   } else {
-    console.log('❌ Verificación fallida en ruta:', req.originalUrl);
+    console.log('❌ Verificación fallida en raíz');
     return res.status(200).json({ 
       message: 'Webhook verification endpoint',
       received: { mode, token },
@@ -58,9 +60,9 @@ app.get('*', (req, res) => {
   }
 });
 
-// ✅ RUTA CATCH-ALL PARA POST (Para eventos de webhook)
-app.post('*', (req, res) => {
-  console.log('🔄 POST recibido en ruta catch-all:', req.originalUrl);
+// ✅ RUTA RAÍZ PARA POST (Para eventos de webhook)
+app.post('/', (req, res) => {
+  console.log('🔄 POST recibido en raíz:/');
   console.log('Body recibido:', JSON.stringify(req.body, null, 2));
   
   // Siempre responder con éxito a Meta
@@ -75,6 +77,36 @@ app.post('*', (req, res) => {
   res.status(200).json(response);
 });
 
+// ✅ RUTA CATCH-ALL PARA CUALQUIER OTRA RUTA GET
+app.get('*', (req, res) => {
+  console.log('🔄 GET recibido en ruta no definida:', req.originalUrl);
+  const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = req.query;
+  
+  if (mode === 'subscribe' && token === verifyToken) {
+    console.log('✅ WEBHOOK VERIFICADO en ruta alternativa:', req.originalUrl);
+    return res.status(200).send(challenge);
+  }
+  
+  res.status(200).json({
+    message: 'Esta ruta no está definida, pero el servidor está funcionando',
+    current_path: req.originalUrl,
+    available_routes: ['GET /', 'POST /', 'GET /health']
+  });
+});
+
+// ✅ RUTA CATCH-ALL PARA CUALQUIER OTRA RUTA POST
+app.post('*', (req, res) => {
+  console.log('🔄 POST recibido en ruta no definida:', req.originalUrl);
+  console.log('Body recibido:', JSON.stringify(req.body, null, 2));
+  
+  res.status(200).json({
+    success: true,
+    message: 'Webhook received in alternative route',
+    timestamp: new Date().toISOString(),
+    path: req.originalUrl
+  });
+});
+
 // Configuración del servidor
 const startServer = () => {
   const port = process.env.PORT || 3000;
@@ -82,8 +114,9 @@ const startServer = () => {
   app.listen(port, '0.0.0.0', () => {
     console.log(`🚀 Servidor ejecutándose en puerto ${port}`);
     console.log(`✅ URL base: https://tu-dominio.com/`);
-    console.log(`✅ El servidor capturará TODAS las rutas`);
-    console.log(`🔍 Revisa los logs para ver qué ruta específica está llamando Meta`);
+    console.log(`✅ Webhook configurado en: /`);
+    console.log(`✅ Health check en: /health`);
+    console.log(`🔍 El servidor capturará TODAS las rutas`);
   });
 };
 
