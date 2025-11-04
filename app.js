@@ -1,4 +1,8 @@
 const express = require('express');
+const crypto = require('crypto');
+const https = require('https');
+const fs = require('fs');
+
 const app = express();
 
 // Middleware
@@ -7,6 +11,7 @@ app.use(express.json());
 // Configuración
 const port = process.env.PORT || 3000;
 const verifyToken = process.env.VERIFY_TOKEN;
+const encryptionKey = process.env.ENCRYPTION_KEY || 'default_encryption_key_32_chars!!';
 
 // ✅ MIDDLEWARE DE LOG
 app.use((req, res, next) => {
@@ -18,19 +23,52 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ FUNCIÓN PARA ENVIAR RESPUESTAS EN BASE64
-function sendBase64Response(res, data) {
+// ✅ FUNCIÓN PARA ENCRIPTAR Y CODIFICAR EN BASE64
+function encryptAndEncode(data) {
   try {
-    // Convertir el objeto a string JSON
+    // Preparar clave de 32 bytes para AES-256
+    const key = crypto.createHash('sha256').update(encryptionKey).digest();
+    
+    // Generar IV aleatorio
+    const iv = crypto.randomBytes(16);
+    
+    // Crear cipher
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    
+    // Convertir datos a string JSON
     const jsonString = JSON.stringify(data);
-    // Codificar a Base64
-    const base64Response = Buffer.from(jsonString).toString('base64');
-    console.log('📤 Enviando respuesta Base64:', base64Response);
-    res.status(200).send(base64Response);
+    
+    // Encriptar
+    let encrypted = cipher.update(jsonString, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    // Combinar IV + datos encriptados
+    const combined = iv.toString('hex') + ':' + encrypted;
+    
+    // Codificar en Base64
+    const base64Result = Buffer.from(combined).toString('base64');
+    
+    console.log('🔐 Encriptación completada');
+    console.log('   - Original:', jsonString.length, 'caracteres');
+    console.log('   - Encriptado:', base64Result.length, 'caracteres Base64');
+    
+    return base64Result;
   } catch (error) {
-    console.error('Error codificando respuesta Base64:', error);
-    // Fallback: enviar respuesta normal
-    res.status(200).json(data);
+    console.error('❌ Error en encriptación:', error);
+    throw error;
+  }
+}
+
+// ✅ FUNCIÓN PARA ENVIAR RESPUESTA ENCRIPTADA
+function sendEncryptedResponse(res, data) {
+  try {
+    const encryptedBase64 = encryptAndEncode(data);
+    console.log('📤 Enviando respuesta encriptada Base64');
+    res.status(200).send(encryptedBase64);
+  } catch (error) {
+    console.error('Error enviando respuesta encriptada:', error);
+    // Fallback simple
+    res.status(200).send('error');
   }
 }
 
@@ -42,11 +80,6 @@ app.get('/', (req, res) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  console.log('Parámetros:');
-  console.log('- hub.mode:', mode);
-  console.log('- hub.verify_token:', token ? 'PRESENTE' : 'AUSENTE');
-  console.log('- hub.challenge:', challenge);
-
   // Verificación oficial de webhook
   if (mode === 'subscribe' && token === verifyToken) {
     console.log('✅ VERIFICACIÓN EXITOSA');
@@ -55,26 +88,26 @@ app.get('/', (req, res) => {
 
   // Si es una prueba sin parámetros
   if (!mode && !token) {
-    console.log('🟡 PRUEBA DETECTADA - Respondiendo con Base64');
+    console.log('🟡 PRUEBA DETECTADA - Respondiendo con encriptación');
     const responseData = {
       status: 'success',
       message: 'Webhook endpoint is ready',
-      verified: true,
+      encrypted: true,
       timestamp: new Date().toISOString()
     };
-    return sendBase64Response(res, responseData);
+    return sendEncryptedResponse(res, responseData);
   }
 
   // Verificación fallida
   console.log('❌ VERIFICACIÓN FALLIDA');
   const errorResponse = {
     error: 'Verification failed',
-    received: { mode, token }
+    received: { mode, token: token ? 'PRESENT' : 'MISSING' }
   };
-  sendBase64Response(res, errorResponse);
+  sendEncryptedResponse(res, errorResponse);
 });
 
-// ✅ RUTA PRINCIPAL - POST (Para eventos de Flow)
+// ✅ RUTA PRINCIPAL - POST
 app.post('/', (req, res) => {
   console.log('🟢 POST en / - Evento de Meta Flow');
   
@@ -82,71 +115,67 @@ app.post('/', (req, res) => {
     console.log('📦 Body recibido:', JSON.stringify(req.body, null, 2));
   }
 
-  // Respuesta en Base64 para Meta Flows
+  // Respuesta encriptada para Meta Flows
   const responseData = {
     success: true,
-    status: "success",
-    messages: ["Webhook processed successfully"],
-    data: {
-      processed: true,
-      timestamp: new Date().toISOString()
-    }
-  };
-
-  console.log('📤 Respuesta JSON:', responseData);
-  sendBase64Response(res, responseData);
-});
-
-// ✅ RUTA ALTERNATIVA /webhook - GET
-app.get('/webhook', (req, res) => {
-  console.log('🔵 GET en /webhook');
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-
-  if (mode === 'subscribe' && token === verifyToken) {
-    console.log('✅ VERIFICACIÓN EXITOSA en /webhook');
-    return res.status(200).send(challenge);
-  }
-
-  const responseData = {
-    status: 'active',
-    message: 'Alternative webhook endpoint',
-    path: '/webhook'
-  };
-  sendBase64Response(res, responseData);
-});
-
-// ✅ RUTA ALTERNATIVA /webhook - POST
-app.post('/webhook', (req, res) => {
-  console.log('🟢 POST en /webhook');
-  
-  const responseData = {
-    success: true,
-    status: "success",
-    message: "Event received successfully",
+    status: "success", 
+    message: "Webhook processed successfully",
     timestamp: new Date().toISOString()
   };
 
-  console.log('📤 Respuesta para /webhook:', responseData);
-  sendBase64Response(res, responseData);
+  console.log('📤 Enviando respuesta encriptada...');
+  sendEncryptedResponse(res, responseData);
 });
 
-// ✅ HEALTH CHECK (sin Base64 para fácil verificación)
+// ✅ HEALTH CHECK
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
     webhook_configured: true,
     verify_token_set: !!verifyToken,
-    base64_responses: true,
+    encryption_enabled: true,
     timestamp: new Date().toISOString()
   });
 });
 
+// ✅ CONFIGURACIÓN DEL SERVIDOR
+const startServer = () => {
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+    // En producción, usar HTTP normal
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Servidor en producción - Puerto ${port}`);
+      console.log(`✅ Webhook: https://tu-dominio.com/`);
+    });
+  } else {
+    // En desarrollo, usar HTTPS con los certificados corregidos
+    try {
+      const privateKey = process.env.PRIVATE_KEY;
+      const certificate = process.env.CERTIFICATE;
+
+      if (!privateKey || !certificate) {
+        throw new Error('PRIVATE_KEY y CERTIFICATE requeridos');
+      }
+
+      const credentials = {
+        key: privateKey,
+        cert: certificate,
+        rejectUnauthorized: false
+      };
+
+      const httpsServer = https.createServer(credentials, app);
+      httpsServer.listen(port, () => {
+        console.log(`🔒 Servidor HTTPS desarrollo - Puerto ${port}`);
+        console.log(`✅ Webhook: https://localhost:${port}/`);
+      });
+    } catch (error) {
+      console.error('Error HTTPS:', error.message);
+      console.log('🔄 Iniciando servidor HTTP como fallback...');
+      app.listen(port, () => {
+        console.log(`🚀 Servidor HTTP - Puerto ${port}`);
+      });
+    }
+  }
+};
+
 // ✅ INICIAR SERVIDOR
-app.listen(port, '0.0.0.0', () => {
-  console.log(`🚀 Servidor ejecutándose en puerto ${port}`);
-  console.log(`✅ Todas las respuestas se envían en Base64`);
-  console.log(`✅ Health check: http://localhost:${port}/health`);
-  console.log(`✅ Webhook: https://tu-dominio.com/`);
-});
+startServer();
