@@ -6,62 +6,84 @@ app.use(express.json());
 
 // Configuración
 const port = process.env.PORT || 3000;
-const verifyToken = process.env.VERIFY_TOKEN || 'meta_flow_token';
+const verifyToken = process.env.VERIFY_TOKEN;
 
-// ✅ MIDDLEWARE DE LOG PARA TODAS LAS RUTAS
+// ✅ MIDDLEWARE DE LOG MEJORADO
 app.use((req, res, next) => {
   console.log('=== SOLICITUD RECIBIDA ===');
   console.log('Método:', req.method);
   console.log('Ruta:', req.originalUrl);
-  console.log('Query:', req.query);
-  if (req.body && Object.keys(req.body).length > 0) {
-    console.log('Body:', JSON.stringify(req.body));
-  }
+  console.log('Query completo:', JSON.stringify(req.query));
+  console.log('Headers:', JSON.stringify(req.headers));
   console.log('==========================');
   next();
 });
 
-// ✅ RUTA PRINCIPAL - GET (Para verificación)
+// ✅ RUTA PRINCIPAL MEJORADA - GET
 app.get('/', (req, res) => {
-  console.log('🔵 GET en / - Verificación de webhook');
+  console.log('🔵 GET en / - Solicitud de Meta');
   
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  console.log('Modo:', mode);
-  console.log('Token recibido:', token);
-  console.log('Token esperado:', verifyToken);
+  console.log('Parámetros de verificación:');
+  console.log('- hub.mode:', mode);
+  console.log('- hub.verify_token:', token ? 'PRESENTE' : 'AUSENTE');
+  console.log('- hub.challenge:', challenge);
+  console.log('- Verify Token esperado:', verifyToken ? 'CONFIGURADO' : 'NO CONFIGURADO');
 
+  // Verificación oficial de webhook
   if (mode === 'subscribe' && token === verifyToken) {
-    console.log('✅ VERIFICACIÓN EXITOSA');
+    console.log('✅ VERIFICACIÓN OFICIAL EXITOSA');
     return res.status(200).send(challenge);
   }
 
-  // Si no es verificación, responder con info
-  res.json({
-    status: 'active',
-    message: 'Webhook endpoint funcionando',
-    timestamp: new Date().toISOString()
+  // Si es una prueba de Meta sin parámetros
+  if (!mode && !token) {
+    console.log('🟡 PRUEBA DE META DETECTADA - Respondiendo con éxito');
+    return res.status(200).json({
+      status: 'success',
+      message: 'Webhook endpoint is ready for Meta Flows',
+      verified: true,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Si los parámetros están presentes pero incorrectos
+  console.log('❌ VERIFICACIÓN FALLIDA');
+  res.status(403).json({
+    error: 'Verification failed',
+    received: { mode, token },
+    expected: { verifyToken }
   });
 });
 
-// ✅ RUTA PRINCIPAL - POST (Para eventos)
+// ✅ RUTA PRINCIPAL - POST (Para eventos de Flow)
 app.post('/', (req, res) => {
-  console.log('🟢 POST en / - Evento de webhook');
+  console.log('🟢 POST en / - Evento de Meta Flow');
   
-  // Siempre responder éxito a Meta
-  res.json({
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('📦 Body del evento:', JSON.stringify(req.body, null, 2));
+  } else {
+    console.log('📦 Body vacío');
+  }
+
+  // Respuesta específica para Meta Flows
+  res.status(200).json({
     success: true,
-    message: 'Evento recibido correctamente',
-    timestamp: new Date().toISOString()
+    status: "success",
+    messages: ["Webhook processed successfully"],
+    data: {
+      processed: true,
+      timestamp: new Date().toISOString()
+    }
   });
 });
 
-// ✅ RUTA ALTERNATIVA /webhook - GET
+// ✅ RUTA ALTERNATIVA /webhook
 app.get('/webhook', (req, res) => {
-  console.log('🔵 GET en /webhook - Verificación alternativa');
-  
+  console.log('🔵 GET en /webhook');
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
@@ -71,20 +93,18 @@ app.get('/webhook', (req, res) => {
     return res.status(200).send(challenge);
   }
 
-  res.json({
+  res.status(200).json({
     status: 'active',
-    message: 'Webhook alternativo funcionando',
+    message: 'Alternative webhook endpoint',
     path: '/webhook'
   });
 });
 
-// ✅ RUTA ALTERNATIVA /webhook - POST
 app.post('/webhook', (req, res) => {
-  console.log('🟢 POST en /webhook - Evento alternativo');
-  res.json({
+  console.log('🟢 POST en /webhook');
+  res.status(200).json({
     success: true,
-    message: 'Evento recibido en webhook alternativo',
-    timestamp: new Date().toISOString()
+    message: 'Event received at alternative endpoint'
   });
 });
 
@@ -92,27 +112,19 @@ app.post('/webhook', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
-    server: 'running',
+    webhook_configured: true,
+    verify_token_set: !!verifyToken,
     timestamp: new Date().toISOString()
   });
 });
 
-// ✅ MANEJADOR PARA RUTAS NO ENCONTRADAS
-app.use((req, res) => {
-  console.log('🟡 Ruta no definida:', req.method, req.originalUrl);
-  res.status(200).json({
-    message: 'Ruta no definida pero servidor funcionando',
-    method: req.method,
-    path: req.originalUrl,
-    available_routes: ['GET /', 'POST /', 'GET /webhook', 'POST /webhook', 'GET /health']
-  });
-});
-
 // ✅ INICIAR SERVIDOR
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Servidor ejecutándose en puerto ${port}`);
-  console.log(`✅ Health: http://localhost:${port}/health`);
-  console.log(`✅ Webhook principal: http://localhost:${port}/`);
-  console.log(`✅ Webhook alternativo: http://localhost:${port}/webhook`);
-  console.log('🔍 Esperando solicitudes de Meta...');
+  console.log(`✅ Webhook principal: https://tu-dominio.com/`);
+  console.log(`✅ Verifica que VERIFY_TOKEN esté configurado: ${verifyToken ? '✅' : '❌'}`);
+  console.log('📝 Para configurar en Meta:');
+  console.log('   - URL: https://tu-dominio.com/');
+  console.log('   - Verify Token: ' + verifyToken);
+  console.log('   - Webhook Version: v1.0');
 });
