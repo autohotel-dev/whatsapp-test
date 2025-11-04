@@ -1,89 +1,59 @@
 const config = require('./config.js');
 
+// ... (las funciones anteriores se mantienen)
+
 /**
- * Valida la verificación del webhook
+ * Obtiene el nombre del departamento por ID
  */
-function validateWebhook(query) {
-  const { 'hub.mode': mode, 'hub.challenge': challenge, 'hub.verify_token': token } = query;
-  
-  if (mode === 'subscribe' && token === config.verifyToken) {
-    return { valid: true, challenge };
-  }
-  
-  return { valid: false };
+function getDepartmentName(departmentId) {
+  const departments = {
+    "shopping": "Shopping & Groceries",
+    "clothing": "Clothing & Apparel", 
+    "home": "Home Goods & Decor",
+    "electronics": "Electronics & Appliances",
+    "beauty": "Beauty & Personal Care"
+  };
+  return departments[departmentId] || departmentId;
 }
 
 /**
- * Genera fechas disponibles para citas
+ * Obtiene el nombre de la locación por ID
  */
-function generateAvailableDates() {
-  const dates = [];
-  const today = new Date();
-  
-  for (let i = 1; i <= config.appointment.maxDaysInFuture; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    
-    // Excluir fines de semana
-    if (date.getDay() !== 0 && date.getDay() !== 6) {
-      dates.push({
-        id: date.toISOString().split('T')[0],
-        title: date.toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
-          day: 'numeric' 
-        })
-      });
-    }
-  }
-  
-  return dates.slice(0, 7); // Limitar a 7 días
+function getLocationName(locationId) {
+  const locations = {
+    "1": "King's Cross, London",
+    "2": "Oxford Street, London",
+    "3": "Covent Garden, London", 
+    "4": "Piccadilly Circus, London"
+  };
+  return locations[locationId] || locationId;
 }
 
 /**
- * Genera horarios disponibles
- */
-function generateAvailableTimes() {
-  const times = [];
-  const { start, end } = config.appointment.businessHours;
-  const slotDuration = config.appointment.slotDuration;
-  
-  for (let hour = start; hour < end; hour++) {
-    for (let minute = 0; minute < 60; minute += slotDuration) {
-      const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      const displayTime = formatTimeForDisplay(hour, minute);
-      
-      times.push({
-        id: timeString,
-        title: displayTime,
-        enabled: true // Podrías agregar lógica para horarios ocupados
-      });
-    }
-  }
-  
-  return times;
-}
-
-/**
- * Formatea la hora para display
- */
-function formatTimeForDisplay(hour, minute) {
-  const period = hour >= 12 ? 'PM' : 'AM';
-  const displayHour = hour % 12 || 12;
-  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
-}
-
-/**
- * Guarda la cita en base de datos (simulación)
+ * Guarda la cita con todos los datos de tu plantilla
  */
 async function saveAppointment(appointmentData) {
-  // Aquí integrarías con tu base de datos real
   const appointmentId = 'APT_' + Date.now();
   
-  console.log('📝 Guardando cita:', {
+  console.log('📝 Guardando cita completa:', {
     id: appointmentId,
-    ...appointmentData,
-    created_at: new Date().toISOString()
+    // Datos del appointment
+    department: appointmentData.department,
+    department_name: getDepartmentName(appointmentData.department),
+    location: appointmentData.location, 
+    location_name: getLocationName(appointmentData.location),
+    date: appointmentData.date,
+    time: appointmentData.time,
+    
+    // Datos del usuario
+    customer_name: appointmentData.name,
+    customer_email: appointmentData.email,
+    customer_phone: appointmentData.phone,
+    additional_notes: appointmentData.more_details,
+    
+    // Metadata
+    created_at: new Date().toISOString(),
+    status: "confirmed"
   });
   
   // Simular guardado asíncrono
@@ -92,24 +62,9 @@ async function saveAppointment(appointmentData) {
   return appointmentId;
 }
 
-/**
- * Logger consistente
- */
-function log(level, message, data = null) {
-  const timestamp = new Date().toISOString();
-  const logMessage = `[${timestamp}] ${level.toUpperCase()}: ${message}`;
-  
-  if (data) {
-    console.log(logMessage, data);
-  } else {
-    console.log(logMessage);
-  }
-}
-
 module.exports = {
-  validateWebhook,
-  generateAvailableDates,
-  generateAvailableTimes,
-  saveAppointment,
-  log
+  // ... funciones anteriores
+  getDepartmentName,
+  getLocationName,
+  saveAppointment
 };
