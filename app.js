@@ -10,14 +10,15 @@ app.use(express.json());
 // ✅ WEBHOOK PARA META
 app.post('/webhook', async (req, res) => {
   console.log('🟢 POST /webhook - Request recibido');
-  
+  console.log('📦 Body completo:', JSON.stringify(req.body, null, 2)); // ← AGREGAR ESTA LÍNEA
+
   try {
     // Verificar si es un Flow request
     if (req.body.encrypted_flow_data && req.body.encrypted_aes_key) {
       console.log('🔐 Flow request detectado - Procesando reserva');
-      
+
       const { encrypted_flow_data, encrypted_aes_key, initial_vector } = req.body;
-      
+
       if (!encrypted_flow_data || !encrypted_aes_key || !initial_vector) {
         return res.status(421).send('MISSING_REQUIRED_FIELDS');
       }
@@ -31,26 +32,26 @@ app.post('/webhook', async (req, res) => {
 
       const encryptedResponse = encryptResponse(screenResponse, aesKeyBuffer, initialVectorBuffer);
       res.status(200).send(encryptedResponse);
-      
+
     } else {
       // Es un mensaje regular - Procesar con el chatbot
       console.log('💬 Mensaje regular detectado');
-      
+
       const entry = req.body.entry?.[0];
       const changes = entry?.changes?.[0];
       const message = changes?.value?.messages?.[0];
-      
+
       if (message && message.type === 'text') {
         const userPhone = message.from;
         const messageText = message.text.body;
-        
+
         // Procesar con el chatbot de hotel
         await hotelChatbot.handleMessage(userPhone, messageText);
       }
-      
+
       res.status(200).send('EVENT_RECEIVED');
     }
-    
+
   } catch (error) {
     console.error('💥 Error en webhook:', error.message);
     res.status(500).send('INTERNAL_SERVER_ERROR');
