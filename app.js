@@ -11,200 +11,220 @@ const privateKey = process.env.PRIVATE_KEY;
 // ✅ MIDDLEWARE DE LOG
 app.use((req, res, next) => {
   console.log('🔍 SOLICITUD RECIBIDA:', req.method, req.originalUrl);
-  if (req.body && Object.keys(req.body).length > 0) {
-    console.log('📦 Body recibido');
-  }
   next();
 });
 
-// ✅ DESENCRIPTAR CLAVE AES
-function decryptAesKey(encryptedAesKeyBase64) {
+// ✅ DESENCRIPTAR REQUEST (igual que el ejemplo de Meta)
+function decryptRequest(body, privatePem) {
+  const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
+
   try {
-    const encryptedAesKey = Buffer.from(encryptedAesKeyBase64, 'base64');
-    const decrypted = crypto.privateDecrypt(
+    // 1. Desencriptar clave AES con RSA
+    const decryptedAesKey = crypto.privateDecrypt(
       {
-        key: privateKey,
+        key: privatePem,
         padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-        oaepHash: 'sha256'
+        oaepHash: "sha256",
       },
-      encryptedAesKey
+      Buffer.from(encrypted_aes_key, "base64")
     );
-    console.log('✅ Clave AES desencriptada -', decrypted.length, 'bytes');
-    return decrypted;
+
+    // 2. Desencriptar flow data con AES-GCM
+    const flowDataBuffer = Buffer.from(encrypted_flow_data, "base64");
+    const initialVectorBuffer = Buffer.from(initial_vector, "base64");
+
+    const TAG_LENGTH = 16;
+    const encrypted_flow_data_body = flowDataBuffer.subarray(0, -TAG_LENGTH);
+    const encrypted_flow_data_tag = flowDataBuffer.subarray(-TAG_LENGTH);
+
+    const decipher = crypto.createDecipheriv(
+      "aes-128-gcm",
+      decryptedAesKey,
+      initialVectorBuffer
+    );
+    decipher.setAuthTag(encrypted_flow_data_tag);
+
+    const decryptedJSONString = Buffer.concat([
+      decipher.update(encrypted_flow_data_body),
+      decipher.final(),
+    ]).toString("utf-8");
+
+    console.log('✅ Request desencriptado correctamente');
+    return {
+      decryptedBody: JSON.parse(decryptedJSONString),
+      aesKeyBuffer: decryptedAesKey,
+      initialVectorBuffer,
+    };
+
   } catch (error) {
-    console.error('❌ Error desencriptando clave AES:', error.message);
+    console.error('❌ Error desencriptando:', error.message);
     throw error;
   }
 }
 
-// ✅ DESENCRIPTAR FLOW DATA (según documentación de Meta)
-function decryptFlowData(encryptedFlowData, aesKeyBuffer, ivBase64) {
-  try {
-    const iv = Buffer.from(ivBase64, 'base64');
-    const encryptedData = Buffer.from(encryptedFlowData, 'base64');
-    
-    console.log('🔐 Desencriptando flow data...');
-    console.log('   - IV:', iv.toString('hex'));
-    console.log('   - Datos encriptados:', encryptedData.length, 'bytes');
-    
-    const decipher = crypto.createDecipheriv('aes-128-cbc', aesKeyBuffer, iv);
-    
-    let decrypted = decipher.update(encryptedData);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    
-    // Los datos pueden estar en formato protobuf o binario de Meta
-    // Para la verificación, asumimos que es JSON válido
-    try {
-      const decryptedString = decrypted.toString('utf8');
-      console.log('✅ Flow data (texto):', decryptedString);
-      return JSON.parse(decryptedString);
-    } catch (jsonError) {
-      // Si no es JSON, es probable que sea el formato binario de Meta
-      console.log('📦 Flow data en formato binario, procesando...');
-      return processMetaFlowData(decrypted);
+// ✅ ENCRIPTAR RESPONSE (igual que el ejemplo de Meta)
+function encryptResponse(response, aesKeyBuffer, initialVectorBuffer) {
+  // Flip initial vector (como en el ejemplo oficial)
+  const flipped_iv = [];
+  for (const pair of initialVectorBuffer.entries()) {
+    flipped_iv.push(~pair[1]);
+  }
+
+  // Encriptar response data con AES-GCM
+  const cipher = crypto.createCipheriv(
+    "aes-128-gcm",
+    aesKeyBuffer,
+    Buffer.from(flipped_iv)
+  );
+  
+  const encrypted = Buffer.concat([
+    cipher.update(JSON.stringify(response), "utf-8"),
+    cipher.final(),
+    cipher.getAuthTag(),
+  ]).toString("base64");
+
+  console.log('✅ Response encriptado correctamente');
+  return encrypted;
+}
+
+// ✅ LÓGICA DEL FLOW (adaptada a tu caso)
+function processFlowLogic(decryptedBody) {
+  const { screen, data, version, action, flow_token } = decryptedBody;
+  
+  console.log('🔄 Procesando flow data:', { action, screen, version });
+
+  // Health check
+  if (action === "ping") {
+    return {
+      data: {
+        status: "active",
+      },
+    };
+  }
+
+  // Manejar error del cliente
+  if (data?.error) {
+    console.warn("Error del cliente:", data);
+    return {
+      data: {
+        acknowledged: true,
+      },
+    };
+  }
+
+  // Request inicial cuando se abre el flow
+  if (action === "INIT") {
+    return {
+      screen: "WELCOME_SCREEN",
+      data: {
+        welcome_message: "¡Bienvenido!",
+        instructions: "Selecciona una opción para continuar",
+        options: ["Opción 1", "Opción 2", "Opción 3"],
+        timestamp: new Date().toISOString()
+      },
+    };
+  }
+
+  // Intercambio de datos
+  if (action === "data_exchange") {
+    switch (screen) {
+      case "WELCOME_SCREEN":
+        // Procesar selección del usuario
+        const selectedOption = data?.selected_option;
+        
+        if (!selectedOption) {
+          return {
+            screen: "WELCOME_SCREEN",
+            data: {
+              error_message: "Por favor selecciona una opción",
+              options: ["Opción 1", "Opción 2", "Opción 3"],
+              timestamp: new Date().toISOString()
+            }
+          };
+        }
+
+        return {
+          screen: "DETAILS_SCREEN",
+          data: {
+            selected_option: selectedOption,
+            message: `Has seleccionado: ${selectedOption}`,
+            input_fields: ["nombre", "email"],
+            timestamp: new Date().toISOString()
+          },
+        };
+
+      case "DETAILS_SCREEN":
+        // Finalizar el flow
+        return {
+          screen: "SUCCESS",
+          data: {
+            extension_message_response: {
+              params: {
+                flow_token: flow_token,
+                result: "Proceso completado exitosamente",
+                user_data: data,
+                timestamp: new Date().toISOString()
+              },
+            },
+          },
+        };
+
+      default:
+        console.error("Screen no manejado:", screen);
+        return {
+          screen: "WELCOME_SCREEN",
+          data: {
+            error_message: "Screen no reconocido",
+            timestamp: new Date().toISOString()
+          }
+        };
     }
-    
-  } catch (error) {
-    console.error('❌ Error desencriptando flow data:', error.message);
-    throw new Error('DECRYPTION_FAILED');
   }
-}
 
-// ✅ PROCESAR DATOS BINARIOS DE META (simulación)
-function processMetaFlowData(dataBuffer) {
-  console.log('🔧 Procesando datos binarios de Meta...');
-  
-  // Simulamos la estructura que Meta espera según su documentación
-  // En producción, aquí deserializarías el protobuf real
-  
-  return {
-    version: "4.0",
-    flow_token: `flow_${Date.now()}`,
-    screen: "INITIAL_SCREEN",
-    data: {
-      action: "flow_started",
-      timestamp: new Date().toISOString()
-    }
-  };
-}
-
-// ✅ PROCESAR LA LÓGICA DEL FLOW (según documentación)
-function processFlowLogic(flowData) {
-  console.log('🔄 Procesando lógica del flow...');
-  
-  // Según la documentación, estos son los casos:
-  // 1. User opens the flow
-  // 2. User submits the screen  
-  // 3. User presses back button
-  // 4. User changes component value
-  // 5. Health check from WhatsApp
-  
-  const { screen, data, version } = flowData;
-  
-  // Lógica básica según el screen
-  switch (screen) {
-    case 'INITIAL_SCREEN':
-      return {
-        screen: "WELCOME_SCREEN",
-        data: {
-          welcome_message: "¡Bienvenido al flow!",
-          timestamp: new Date().toISOString()
-        }
-      };
-      
-    case 'WELCOME_SCREEN':
-      return {
-        screen: "MAIN_MENU", 
-        data: {
-          options: ["Opción 1", "Opción 2", "Opción 3"],
-          timestamp: new Date().toISOString()
-        }
-      };
-      
-    default:
-      return {
-        screen: "WELCOME_SCREEN",
-        data: {
-          message: "Screen no reconocido, redirigiendo al inicio",
-          timestamp: new Date().toISOString()
-        }
-      };
+  // Action BACK
+  if (action === "BACK") {
+    return {
+      screen: "WELCOME_SCREEN",
+      data: {
+        welcome_message: "Has regresado al inicio",
+        options: ["Opción 1", "Opción 2", "Opción 3"],
+        timestamp: new Date().toISOString()
+      },
+    };
   }
+
+  console.error("Action no manejado:", action);
+  throw new Error(`Action no manejado: ${action}`);
 }
 
-// ✅ ENCRIPTAR RESPUESTA (según documentación)
-function encryptResponse(data, aesKeyBuffer) {
-  try {
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-128-cbc', aesKeyBuffer, iv);
-    
-    const jsonString = JSON.stringify(data);
-    console.log('📤 Respuesta JSON a encriptar:', jsonString);
-    
-    let encrypted = cipher.update(jsonString, 'utf8');
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    
-    const combined = Buffer.concat([iv, encrypted]);
-    const base64Result = combined.toString('base64');
-    
-    console.log('✅ Respuesta encriptada -', base64Result.length, 'caracteres Base64');
-    return base64Result;
-    
-  } catch (error) {
-    console.error('❌ Error encriptando respuesta:', error);
-    throw error;
-  }
-}
-
-// ✅ RUTA PRINCIPAL PARA FLOWS
+// ✅ RUTA PRINCIPAL
 app.post('/webhook', (req, res) => {
   console.log('🟢 POST /webhook - Flow request recibido');
   
   try {
     const { encrypted_flow_data, encrypted_aes_key, initial_vector } = req.body;
     
-    // Validar campos requeridos según documentación
     if (!encrypted_flow_data || !encrypted_aes_key || !initial_vector) {
       console.log('❌ Faltan campos requeridos');
       return res.status(421).send('MISSING_REQUIRED_FIELDS');
     }
-    
-    console.log('📦 Parámetros recibidos:');
+
+    console.log('📦 Parámetros recibidos');
     console.log('   - encrypted_flow_data:', encrypted_flow_data.substring(0, 50) + '...');
     console.log('   - encrypted_aes_key:', encrypted_aes_key.substring(0, 50) + '...');
     console.log('   - initial_vector:', initial_vector);
+
+    // 1. Desencriptar request
+    const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptRequest(req.body, privateKey);
     
-    // 1. Desencriptar clave AES
-    const aesKeyBuffer = decryptAesKey(encrypted_aes_key);
-    
-    // 2. Desencriptar flow data
-    let flowData;
-    try {
-      flowData = decryptFlowData(encrypted_flow_data, aesKeyBuffer, initial_vector);
-    } catch (decryptError) {
-      console.error('❌ No se pudo desencriptar:', decryptError.message);
-      return res.status(421).send('DECRYPTION_FAILED');
-    }
-    
-    console.log('📦 Flow data recibido:', flowData);
-    
-    // 3. Procesar lógica del negocio
-    const processedResult = processFlowLogic(flowData);
-    
-    // 4. Construir respuesta según documentación de Meta
-    const responseData = {
-      success: true,
-      data: {
-        flow_token: flowData.flow_token || `flow_${Date.now()}`,
-        screen: processedResult.screen,
-        data: processedResult.data
-      }
-    };
-    
-    console.log('🎯 Respuesta a enviar:', responseData);
-    
-    // 5. Encriptar respuesta
-    const encryptedResponse = encryptResponse(responseData, aesKeyBuffer);
+    console.log('📦 Flow data desencriptado:', decryptedBody);
+
+    // 2. Procesar lógica del flow
+    const screenResponse = processFlowLogic(decryptedBody);
+    console.log('🎯 Response a enviar:', screenResponse);
+
+    // 3. Encriptar y enviar response
+    const encryptedResponse = encryptResponse(screenResponse, aesKeyBuffer, initialVectorBuffer);
     
     console.log('📤 ENVIANDO RESPUESTA ENCRIPTADA');
     res.status(200).send(encryptedResponse);
@@ -212,8 +232,7 @@ app.post('/webhook', (req, res) => {
   } catch (error) {
     console.error('💥 Error crítico:', error.message);
     
-    // Según documentación: 421 para errores de desencriptación
-    if (error.message === 'DECRYPTION_FAILED') {
+    if (error.message.includes('decrypt')) {
       return res.status(421).send('DECRYPTION_FAILED');
     }
     
@@ -250,10 +269,10 @@ app.get('/health', (req, res) => {
 
 app.listen(port, '0.0.0.0', () => {
   console.log('🚀 ==================================');
-  console.log('🚀 META FLOWS WEBHOOK - PRODUCCIÓN');
+  console.log('🚀 META FLOWS WEBHOOK - CORREGIDO');
   console.log('🚀 ==================================');
   console.log(`✅ Servidor ejecutándose en puerto ${port}`);
   console.log(`✅ Webhook: /webhook`);
-  console.log(`✅ Health: /health`);
+  console.log(`✅ Usando AES-GCM (oficial de Meta)`);
   console.log('🚀 ==================================');
 });
