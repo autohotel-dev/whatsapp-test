@@ -2,7 +2,7 @@ const express = require('express');
 const { decryptRequest } = require('./decrypt.js');
 const { encryptResponse } = require('./encrypt.js');
 const { processFlowLogic } = require('./flow.js');
-const hotelChatbot = require('./auto-responder.js');
+const hotelChatbot = require('./autoreply.js');
 
 const app = express();
 app.use(express.json());
