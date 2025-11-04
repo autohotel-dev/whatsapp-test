@@ -167,6 +167,24 @@ Puedo ayudarte con:
     }
   }
 
+  // ✅ DETECTAR SI DEBEMOS RESPONDER A MENSAJE POR DEFECTO
+  shouldRespondToDefault(message) {
+    if (!message || message.trim().length === 0) return false;
+
+    // Ignorar mensajes muy cortos que podrían ser typos
+    if (message.length < 2) return false;
+
+    // Ignorar mensajes que son solo emojis o símbolos
+    const onlySymbols = /^[^\w\s]+$/.test(message);
+    if (onlySymbols) return false;
+
+    // Ignorar comandos comunes de sistemas
+    const systemCommands = ['/start', '/help', '/menu', 'start', 'help', 'menu'];
+    if (systemCommands.includes(message)) return true; // Estos SÍ respondemos
+
+    return true;
+  }
+
   detectIntent(message) {
     const patterns = {
       reservar: [
