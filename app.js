@@ -141,9 +141,11 @@ app.post('/webhook', (req, res) => {
       status: "success",
       data: {
         flow_token: `flow_${Date.now()}`,
-        processed: true,
-        received_data: flowData,
-        timestamp: new Date().toISOString()
+        screen: "WELCOME_SCREEN",
+        data: {
+          message: "Flow procesado exitosamente",
+          timestamp: new Date().toISOString()
+        }
       }
     };
 
