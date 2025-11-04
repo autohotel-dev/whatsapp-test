@@ -2,70 +2,70 @@ const express = require('express');
 const { decryptRequest } = require('./decrypt.js');
 const { encryptResponse } = require('./encrypt.js');
 const { processFlowLogic } = require('./flow.js');
-const { validateWebhook } = require('./helpers.js');
-const config = require('./config.js');
+const hotelChatbot = require('./auto-responder.js');
 
 const app = express();
 app.use(express.json());
 
-// ✅ MIDDLEWARE DE LOG
-app.use((req, res, next) => {
-  console.log('🔍 SOLICITUD RECIBIDA:', req.method, req.originalUrl);
-  next();
-});
-
-// ✅ RUTA PRINCIPAL PARA FLOWS
+// ✅ WEBHOOK PARA META
 app.post('/webhook', async (req, res) => {
-  console.log('🟢 POST /webhook - Flow request recibido');
+  console.log('🟢 POST /webhook - Request recibido');
   
   try {
-    const { encrypted_flow_data, encrypted_aes_key, initial_vector } = req.body;
-    
-    // Validar campos requeridos
-    if (!encrypted_flow_data || !encrypted_aes_key || !initial_vector) {
-      console.log('❌ Faltan campos requeridos');
-      return res.status(421).send('MISSING_REQUIRED_FIELDS');
+    // Verificar si es un Flow request
+    if (req.body.encrypted_flow_data && req.body.encrypted_aes_key) {
+      console.log('🔐 Flow request detectado - Procesando reserva');
+      
+      const { encrypted_flow_data, encrypted_aes_key, initial_vector } = req.body;
+      
+      if (!encrypted_flow_data || !encrypted_aes_key || !initial_vector) {
+        return res.status(421).send('MISSING_REQUIRED_FIELDS');
+      }
+
+      // Procesar Flow de reserva
+      const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptRequest(req.body);
+      console.log('📦 Flow data desencriptado:', decryptedBody);
+
+      const screenResponse = await processFlowLogic(decryptedBody);
+      console.log('🎯 Response a enviar:', screenResponse);
+
+      const encryptedResponse = encryptResponse(screenResponse, aesKeyBuffer, initialVectorBuffer);
+      res.status(200).send(encryptedResponse);
+      
+    } else {
+      // Es un mensaje regular - Procesar con el chatbot
+      console.log('💬 Mensaje regular detectado');
+      
+      const entry = req.body.entry?.[0];
+      const changes = entry?.changes?.[0];
+      const message = changes?.value?.messages?.[0];
+      
+      if (message && message.type === 'text') {
+        const userPhone = message.from;
+        const messageText = message.text.body;
+        
+        // Procesar con el chatbot de hotel
+        await hotelChatbot.handleMessage(userPhone, messageText);
+      }
+      
+      res.status(200).send('EVENT_RECEIVED');
     }
-
-    console.log('📦 Parámetros recibidos');
-    console.log('   - encrypted_flow_data:', encrypted_flow_data.substring(0, 50) + '...');
-    console.log('   - encrypted_aes_key:', encrypted_aes_key.substring(0, 50) + '...');
-    console.log('   - initial_vector:', initial_vector);
-
-    // 1. Desencriptar request
-    const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptRequest(req.body);
-    
-    console.log('📦 Flow data desencriptado:', decryptedBody);
-
-    // 2. Procesar lógica del flow
-    const screenResponse = await processFlowLogic(decryptedBody);
-    console.log('🎯 Response a enviar:', screenResponse);
-
-    // 3. Encriptar y enviar response
-    const encryptedResponse = encryptResponse(screenResponse, aesKeyBuffer, initialVectorBuffer);
-    
-    console.log('📤 ENVIANDO RESPUESTA ENCRIPTADA');
-    res.status(200).send(encryptedResponse);
     
   } catch (error) {
-    console.error('💥 Error crítico:', error.message);
-    
-    if (error.message.includes('decrypt')) {
-      return res.status(421).send('DECRYPTION_FAILED');
-    }
-    
+    console.error('💥 Error en webhook:', error.message);
     res.status(500).send('INTERNAL_SERVER_ERROR');
   }
 });
 
-// ✅ VERIFICACIÓN DEL WEBHOOK
+// ✅ VERIFICACIÓN DEL WEBHOOK (mantener igual)
 app.get('/webhook', (req, res) => {
-  console.log('🔵 GET /webhook - Verificación');
-  
-  const validation = validateWebhook(req.query);
-  if (validation.valid) {
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
     console.log('✅ VERIFICACIÓN EXITOSA');
-    return res.status(200).send(validation.challenge);
+    return res.status(200).send(challenge);
   }
 
   console.log('❌ Verificación fallida');
@@ -76,21 +76,16 @@ app.get('/webhook', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
-    service: 'Meta Flows Webhook',
-    version: config.version,
+    service: 'Hotel Chatbot + Reservations',
     timestamp: new Date().toISOString()
   });
 });
 
-// ✅ INICIAR SERVIDOR
-app.listen(config.port, '0.0.0.0', () => {
-  console.log('🚀 ==================================');
-  console.log('🚀 META FLOWS WEBHOOK - MODULAR');
-  console.log('🚀 ==================================');
-  console.log(`✅ Servidor ejecutándose en puerto ${config.port}`);
-  console.log(`✅ Webhook: /webhook`);
-  console.log(`✅ Health: /health`);
-  console.log('🚀 ==================================');
+app.listen(process.env.PORT || 3000, '0.0.0.0', () => {
+  console.log('🏨 ==================================');
+  console.log('🏨 HOTEL CHATBOT - RESERVAS & INFO');
+  console.log('🏨 ==================================');
+  console.log('✅ Servidor listo para recibir mensajes');
+  console.log('✅ Flow activado con: "reservar habitación"');
+  console.log('🏨 ==================================');
 });
-
-module.exports = app;
