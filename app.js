@@ -7,13 +7,30 @@ const hotelChatbot = require('./autoreply.js');
 const app = express();
 app.use(express.json());
 
-// ✅ WEBHOOK PARA META
+// ✅ MEMORIA PARA EVITAR DUPLICADOS (en producción usa Redis)
+const messageCache = new Map();
+const CACHE_TTL = 30000; // 30 segundos
+
+// ✅ LIMPIAR CACHE CADA MINUTO
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of messageCache.entries()) {
+    if (now - timestamp > CACHE_TTL) {
+      messageCache.delete(key);
+    }
+  }
+}, 60000);
+
+// ✅ WEBHOOK PARA META - CON FILTRO DE DUPLICADOS
 app.post('/webhook', async (req, res) => {
   console.log('🟢 POST /webhook - Request recibido');
-  console.log('📦 Body completo:', JSON.stringify(req.body, null, 2)); // ← AGREGAR ESTA LÍNEA
 
   try {
-    // Verificar si es un Flow request
+    const entry = req.body.entry?.[0];
+    const changes = entry?.changes?.[0];
+    const value = changes?.value;
+
+    // 1. SI ES UN FLOW REQUEST
     if (req.body.encrypted_flow_data && req.body.encrypted_aes_key) {
       console.log('🔐 Flow request detectado - Procesando reserva');
 
@@ -23,34 +40,53 @@ app.post('/webhook', async (req, res) => {
         return res.status(421).send('MISSING_REQUIRED_FIELDS');
       }
 
-      // Procesar Flow de reserva
       const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptRequest(req.body);
       console.log('📦 Flow data desencriptado:', decryptedBody);
 
       const screenResponse = await processFlowLogic(decryptedBody);
-      console.log('🎯 Response a enviar:', screenResponse);
-
       const encryptedResponse = encryptResponse(screenResponse, aesKeyBuffer, initialVectorBuffer);
-      res.status(200).send(encryptedResponse);
 
-    } else {
-      // Es un mensaje regular - Procesar con el chatbot
-      console.log('💬 Mensaje regular detectado');
+      return res.status(200).send(encryptedResponse);
+    }
 
-      const entry = req.body.entry?.[0];
-      const changes = entry?.changes?.[0];
-      const message = changes?.value?.messages?.[0];
+    // 2. SI ES UN MENSAJE DE TEXTO
+    const message = value?.messages?.[0];
+    if (message && message.type === 'text') {
+      const userPhone = message.from;
+      const messageId = message.id;
+      const messageText = message.text.body;
 
-      if (message && message.type === 'text') {
-        const userPhone = message.from;
-        const messageText = message.text.body;
-
-        // Procesar con el chatbot de hotel
-        await hotelChatbot.handleMessage(userPhone, messageText);
+      // ✅ EVITAR DUPLICADOS - Verificar si ya procesamos este message_id
+      if (messageCache.has(messageId)) {
+        console.log(`⏭️  Mensaje duplicado ${messageId} - Ignorando`);
+        return res.status(200).send('EVENT_RECEIVED');
       }
 
-      res.status(200).send('EVENT_RECEIVED');
+      // ✅ AGREGAR A CACHE
+      messageCache.set(messageId, Date.now());
+      console.log(`💬 Nuevo mensaje de ${userPhone}: "${messageText}"`);
+
+      // ✅ PROCESAR CON CHATBOT
+      await hotelChatbot.handleMessage(userPhone, messageText);
+
+      return res.status(200).send('EVENT_RECEIVED');
     }
+
+    // 3. SI ES UNA ENTREGA O LECTURA (message_deliveries, message_reads)
+    if (value?.message_deliveries || value?.message_reads) {
+      console.log('📨 Evento de entrega/lectura - Ignorando');
+      return res.status(200).send('EVENT_RECEIVED');
+    }
+
+    // 4. SI ES OTRO TIPO DE EVENTO
+    if (value?.statuses) {
+      console.log('📊 Evento de estado:', value.statuses[0]?.status);
+      return res.status(200).send('EVENT_RECEIVED');
+    }
+
+    // 5. EVENTO NO MANEJADO
+    console.log('❓ Evento no manejado:', Object.keys(value || {}));
+    res.status(200).send('EVENT_RECEIVED');
 
   } catch (error) {
     console.error('💥 Error en webhook:', error.message);
