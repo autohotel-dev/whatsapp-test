@@ -1,28 +1,36 @@
-import crypto from 'crypto';
+const crypto = require('crypto');
 
-// ✅ ENCRIPTAR RESPONSE (igual que el ejemplo de Meta)
+/**
+ * Encripta la respuesta para Meta Flows
+ */
 function encryptResponse(response, aesKeyBuffer, initialVectorBuffer) {
-  // Flip initial vector (como en el ejemplo oficial)
-  const flipped_iv = [];
-  for (const pair of initialVectorBuffer.entries()) {
-    flipped_iv.push(~pair[1]);
+  try {
+    // Flip initial vector (como en el ejemplo oficial de Meta)
+    const flipped_iv = Buffer.from(initialVectorBuffer.map(byte => ~byte));
+
+    // Encriptar response data con AES-GCM
+    const cipher = crypto.createCipheriv(
+      "aes-128-gcm",
+      aesKeyBuffer,
+      flipped_iv
+    );
+    
+    const responseString = JSON.stringify(response);
+    const encrypted = Buffer.concat([
+      cipher.update(responseString, "utf-8"),
+      cipher.final(),
+      cipher.getAuthTag(),
+    ]).toString("base64");
+
+    console.log('✅ Response encriptado correctamente');
+    return encrypted;
+
+  } catch (error) {
+    console.error('❌ Error en encryptResponse:', error.message);
+    throw new Error('ENCRYPTION_FAILED: ' + error.message);
   }
-
-  // Encriptar response data con AES-GCM
-  const cipher = crypto.createCipheriv(
-    "aes-128-gcm",
-    aesKeyBuffer,
-    Buffer.from(flipped_iv)
-  );
-
-  const encrypted = Buffer.concat([
-    cipher.update(JSON.stringify(response), "utf-8"),
-    cipher.final(),
-    cipher.getAuthTag(),
-  ]).toString("base64");
-
-  console.log('✅ Response encriptado correctamente');
-  return encrypted;
 }
 
-export default encryptResponse;
+module.exports = {
+  encryptResponse
+};

@@ -1,8 +1,9 @@
-import { generateAvailableDates } from "./helpers";
-import { generateAvailableTimes } from "./helpers";
-import { saveAppointment } from "./helpers";
+const { generateAvailableDates, generateAvailableTimes, saveAppointment } = require('./helpers.js');
 
-export function processFlowLogic(decryptedBody) {
+/**
+ * Procesa la lógica principal del flow de citas
+ */
+async function processFlowLogic(decryptedBody) {
   const { screen, data, version, action, flow_token } = decryptedBody;
   
   console.log('🔄 Procesando flow:', { action, screen });
@@ -12,7 +13,7 @@ export function processFlowLogic(decryptedBody) {
     return { data: { status: "active" } };
   }
 
-  // Manejar errores
+  // Manejar errores del cliente
   if (data?.error) {
     console.warn("Error del cliente:", data);
     return { data: { acknowledged: true } };
@@ -26,12 +27,15 @@ export function processFlowLogic(decryptedBody) {
         department: [
           { id: "shopping", title: "🛒 Shopping & Groceries" },
           { id: "beauty", title: "💄 Beauty & Personal Care" },
-          { id: "electronics", title: "📱 Electronics & Appliances" }
+          { id: "electronics", title: "📱 Electronics & Appliances" },
+          { id: "clothing", title: "👕 Clothing & Apparel" },
+          { id: "home", title: "🏠 Home Goods & Decor" }
         ],
         location: [
-          { id: "1", title: "📍 King's Cross, London" },
-          { id: "2", title: "📍 Oxford Street, London" },
-          { id: "3", title: "📍 Covent Garden, London" }
+          { id: "kings-cross", title: "📍 King's Cross, London" },
+          { id: "oxford-street", title: "📍 Oxford Street, London" },
+          { id: "covent-garden", title: "📍 Covent Garden, London" },
+          { id: "piccadilly", title: "📍 Piccadilly Circus, London" }
         ],
         date: generateAvailableDates(),
         time: generateAvailableTimes()
@@ -39,30 +43,51 @@ export function processFlowLogic(decryptedBody) {
     };
   }
 
-  // Data exchange desde SUMMARY
+  // Data exchange desde SUMMARY (confirmación final)
   if (action === "data_exchange" && screen === "SUMMARY") {
     if (data.action === "confirm_appointment") {
-      // Guardar appointment en tu base de datos
-      const appointmentId = saveAppointment(data);
-      
-      return {
-        screen: "SUCCESS",
-        data: {
-          extension_message_response: {
-            params: {
-              flow_token: flow_token,
-              appointment_id: appointmentId,
-              status: "confirmed",
-              message: "Your appointment has been confirmed!",
-              timestamp: new Date().toISOString()
+      try {
+        const appointmentId = await saveAppointment(data);
+        
+        return {
+          screen: "SUCCESS",
+          data: {
+            extension_message_response: {
+              params: {
+                flow_token: flow_token,
+                appointment_id: appointmentId,
+                status: "confirmed",
+                message: "✅ Your appointment has been confirmed!",
+                customer_name: data.name,
+                appointment_date: data.date,
+                appointment_time: data.time,
+                location: data.location,
+                timestamp: new Date().toISOString()
+              }
             }
           }
-        }
-      };
+        };
+      } catch (error) {
+        console.error('Error guardando cita:', error);
+        return {
+          screen: "SUMMARY",
+          data: {
+            error_message: "❌ Error confirming appointment. Please try again.",
+            department: data.department,
+            location: data.location,
+            date: data.date,
+            time: data.time,
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            notes: data.notes
+          }
+        };
+      }
     }
   }
 
-  // Navegación normal
+  // Navegación entre pantallas
   if (action === "data_exchange") {
     switch (screen) {
       case "APPOINTMENT":
@@ -95,8 +120,16 @@ export function processFlowLogic(decryptedBody) {
 
   // Action BACK
   if (action === "BACK") {
-    return { screen: "APPOINTMENT", data: {} };
+    return { 
+      screen: "APPOINTMENT", 
+      data: {} 
+    };
   }
 
-  throw new Error(`Action no manejado: ${action}`);
+  console.error('Action no manejado:', action, 'en screen:', screen);
+  throw new Error(`UNHANDLED_ACTION: ${action} on screen ${screen}`);
 }
+
+module.exports = {
+  processFlowLogic
+};

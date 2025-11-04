@@ -1,14 +1,17 @@
-import crypto from 'crypto';
+const crypto = require('crypto');
+const config = require('./config.js');
 
-// ✅ DESENCRIPTAR REQUEST (igual que el ejemplo de Meta)
-function decryptRequest(body, privatePem) {
+/**
+ * Desencripta el request de Meta Flows
+ */
+function decryptRequest(body) {
   const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;
 
   try {
     // 1. Desencriptar clave AES con RSA
     const decryptedAesKey = crypto.privateDecrypt(
       {
-        key: privatePem,
+        key: config.privateKey,
         padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
         oaepHash: "sha256",
       },
@@ -36,6 +39,7 @@ function decryptRequest(body, privatePem) {
     ]).toString("utf-8");
 
     console.log('✅ Request desencriptado correctamente');
+    
     return {
       decryptedBody: JSON.parse(decryptedJSONString),
       aesKeyBuffer: decryptedAesKey,
@@ -43,9 +47,11 @@ function decryptRequest(body, privatePem) {
     };
 
   } catch (error) {
-    console.error('❌ Error desencriptando:', error.message);
-    throw error;
+    console.error('❌ Error en decryptRequest:', error.message);
+    throw new Error('DECRYPTION_FAILED: ' + error.message);
   }
 }
 
-export default decryptRequest;
+module.exports = {
+  decryptRequest
+};
