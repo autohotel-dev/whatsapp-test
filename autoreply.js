@@ -97,16 +97,32 @@ Puedo ayudarte con:
 ¿En qué te puedo ayudar? 👇`
       }
     };
+
+    // ✅ RATE LIMITING - Evitar spam
+    this.userLastMessage = new Map();
+    this.MIN_TIME_BETWEEN_MESSAGES = 2000; // 2 segundos mínimo entre mensajes
   }
 
   async handleMessage(userPhone, messageText) {
     const cleanMessage = messageText.toLowerCase().trim();
-    
+
+    // ✅ VERIFICAR RATE LIMITING
+    const now = Date.now();
+    const lastMessageTime = this.userLastMessage.get(userPhone);
+
+    if (lastMessageTime && (now - lastMessageTime) < this.MIN_TIME_BETWEEN_MESSAGES) {
+      console.log(`⏰ Rate limiting para ${userPhone} - Mensaje muy rápido`);
+      return; // Ignorar mensajes muy rápidos
+    }
+
+    // ✅ ACTUALIZAR ÚLTIMO MENSAJE
+    this.userLastMessage.set(userPhone, now);
+
     console.log(`💬 Mensaje de ${userPhone}: "${cleanMessage}"`);
 
     // Detectar intención del usuario
     const intent = this.detectIntent(cleanMessage);
-    
+
     try {
       switch (intent) {
         case 'reservar':
@@ -138,12 +154,16 @@ Puedo ayudarte con:
           break;
 
         default:
-          await sendTextMessage(userPhone, this.responses.default.message);
+          // ✅ EVITAR RESPONDER A MENSAJES MUY CORTOS O VACÍOS
+          if (this.shouldRespondToDefault(cleanMessage)) {
+            await sendTextMessage(userPhone, this.responses.default.message);
+          } else {
+            console.log(`🔇 Ignorando mensaje corto/vacío: "${cleanMessage}"`);
+          }
           break;
       }
     } catch (error) {
       console.error('❌ Error enviando respuesta:', error);
-      await sendTextMessage(userPhone, '⚠️ Lo siento, hubo un error. Por favor intenta de nuevo.');
     }
   }
 
@@ -187,7 +207,7 @@ Puedo ayudarte con:
 
   async sendInfoResponse(userPhone, type) {
     const response = this.responses[type];
-    
+
     if (response.image) {
       // Enviar imagen + texto
       await sendImageMessage(userPhone, response.image, response.message);
