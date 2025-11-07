@@ -130,19 +130,56 @@ async function handleReservaScreen(data) {
   const hora = Array.isArray(HORAS_DATA) ? HORAS_DATA : [];
   const numero_personas = Array.isArray(PERSONAS_DATA) ? PERSONAS_DATA : [];
 
-  // Estructura del flow
+  // Estructura del flow con la estructura exacta esperada
   const response = {
     "version": "7.2",
     "data_api_version": "3.0",
     "screen": "RESERVA",
     "data": {
-      "tipo_habitacion": tipo_habitacion,
-      "fecha": fechas,
-      "is_fecha_enabled": true,
-      "hora": hora,
-      "is_hora_enabled": true,
-      "numero_personas": numero_personas,
-      "is_numero_personas_enabled": true
+      "tipo_habitacion": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "title": { "type": "string" }
+          }
+        },
+        "__example__": tipo_habitacion
+      },
+      "fecha": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "title": { "type": "string" }
+          }
+        },
+        "__example__": fechas
+      },
+      "hora": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "title": { "type": "string" }
+          }
+        },
+        "__example__": hora
+      },
+      "numero_personas": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "title": { "type": "string" }
+          }
+        },
+        "__example__": numero_personas
+      }
     }
   };
 
