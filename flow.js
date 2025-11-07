@@ -132,6 +132,7 @@ async function handleReservaScreen(data) {
 
   // Estructura del flow con el formato exacto esperado
   const response = {
+    "version": "3.0",  // Añadido según la documentación
     "screen": "RESERVA",
     "data": {
       "tipo_habitacion": tipo_habitacion,
