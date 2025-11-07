@@ -77,8 +77,7 @@ class HotelChatbot {
 "habitaciones" para ver los tipos de habitaciones
 "servicios" para ver los servicios del hotel
 "horarios" para ver los horarios de operación
-"ubicacion" para ver la ubicación del hotel
-`
+"ubicacion" para ver la ubicación del hotel`
       },
 
       horarios: {
@@ -105,7 +104,6 @@ class HotelChatbot {
 
       // Respuesta para reservas
       reservar: {
-        isFlow: true,
         message: `🎉 ¡Excelente! Te ayudo a reservar tu habitación.
 
 Vamos a necesitar:
@@ -141,8 +139,8 @@ Puedo ayudarte con:
 • ⭐ *"servicios"* - Servicios del hotel
 • 🕒 *"horarios"* - Horarios de operación
 • 📍 *"ubicación"* - Nuestra dirección y contacto
-• 🎉 *"reservar habitación"* - Hacer una reserva
-• 🎉 *"servicios exclusivos"* - Experiencias personalizadas
+• 🎉 *"reservar"* - Hacer una reserva
+• 💫 *"servicios exclusivos"* - Experiencias personalizadas
 
 ¿En qué te puedo ayudar? 👇`
       }
@@ -174,6 +172,7 @@ Puedo ayudarte con:
     const intent = this.detectIntent(cleanMessage);
 
     try {
+      // ✅ SWITCH CASE CORREGIDO
       switch (intent) {
         case 'reservar':
           console.log(`🎯 Activando flow de reserva para ${userPhone}`);
@@ -195,8 +194,8 @@ Puedo ayudarte con:
           await sendTextMessage(userPhone, this.responses.servicios.message);
           break;
 
-        case 'servicios exclusivos':
-          await sendTextMessage(userPhone, this.responses.servicios_exclusivos.message);
+        case 'servicios_exclusivos': // ✅ CORREGIDO: servicios_exclusivos en lugar de servicios exclusivos
+          await sendTextMessage(userPhone, this.responses.servicios_compania.message);
           break;
 
         case 'horarios':
@@ -218,6 +217,12 @@ Puedo ayudarte con:
       }
     } catch (error) {
       console.error('❌ Error enviando respuesta:', error);
+      // Enviar mensaje de error al usuario
+      try {
+        await sendTextMessage(userPhone, '⚠️ Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.');
+      } catch (fallbackError) {
+        console.error('❌ Error incluso enviando mensaje de fallback:', fallbackError);
+      }
     }
   }
 
@@ -232,9 +237,13 @@ Puedo ayudarte con:
     const onlySymbols = /^[^\w\s]+$/.test(message);
     if (onlySymbols) return false;
 
-    // Ignorar comandos comunes de sistemas
-    const systemCommands = ['/start', '/help', '/menu', 'start', 'help', 'menu'];
-    if (systemCommands.includes(message)) return true; // Estos SÍ respondemos
+    // Comandos comunes que SÍ respondemos
+    const systemCommands = [
+      '/start', '/help', '/menu', 'start', 'help', 'menu',
+      'hola', 'buenos dias', 'buenas tardes', 'buenas noches',
+      'hello', 'hi', 'ayuda'
+    ];
+    if (systemCommands.includes(message)) return true;
 
     return true;
   }
@@ -242,34 +251,40 @@ Puedo ayudarte con:
   detectIntent(message) {
     const patterns = {
       reservar: [
-        'reservar habitación', 'reservar habitacion', 'hacer reserva', 'quiero reservar',
-        'reservar ahora', 'agendar habitación', 'reservar cuarto', 'booking',
-        'reservación', 'reservar una habitación', 'quiero una habitación', 'reservar', 'reserva'
+        'reservar', 'reserva', 'reservación', 'reservacion', 'hacer reserva', 
+        'quiero reservar', 'reservar ahora', 'agendar', 'booking', 'quiero una habitación',
+        'necesito una habitación', 'disponibilidad', 'reservar habitación',
+        'reservar cuarto', 'hacer reservación'
       ],
       habitaciones: [
-        'habitaciones', 'cuartos', 'tipos de habitación', 'que habitaciones tienen',
-        'opciones de habitación', 'tipos de cuarto', 'habitaciones disponibles', 'habitacion'
+        'habitaciones', 'habitación', 'habitacion', 'cuartos', 'cuarto', 
+        'tipos de habitación', 'que habitaciones tienen', 'opciones de habitación',
+        'tipos de cuarto', 'habitaciones disponibles', 'suites'
       ],
       precios: [
-        'precios', 'tarifas', 'costos', 'cuanto cuesta', 'precio por noche',
-        'cuales son los precios', 'tarifa', 'costo', 'precio'
+        'precios', 'precio', 'tarifas', 'tarifa', 'costos', 'costo',
+        'cuanto cuesta', 'precio por noche', 'cuales son los precios',
+        'cuanto vale', 'valor'
       ],
       servicios: [
-        'servicios', 'amenidades', 'que servicios tienen', 'facilidades',
-        'que incluye', 'servicios del hotel', 'servicio'
+        'servicios', 'servicio', 'amenidades', 'que servicios tienen', 
+        'facilidades', 'que incluye', 'servicios del hotel', 'comodidades'
       ],
       horarios: [
-        'horarios', 'check in', 'check out', 'check-in', 'check-out',
-        'a que hora es el check in', 'horario', 'que hora cierran', 'hora', 'esta abierto', 'abre'
+        'horarios', 'horario', 'check in', 'check out', 'check-in', 'check-out',
+        'a que hora es el check in', 'que hora cierran', 'hora', 'esta abierto', 
+        'abre', 'cierra', 'tiempos'
       ],
       ubicacion: [
         'ubicación', 'ubicacion', 'dirección', 'direccion', 'donde están',
-        'localización', 'como llegar', 'contacto', 'teléfono', 'ubicacion', 'direcciones', 'donde esta'
+        'localización', 'localizacion', 'como llegar', 'contacto', 'teléfono', 
+        'telefono', 'ubicacion', 'direcciones', 'donde esta', 'mapa'
       ],
       servicios_exclusivos: [
         // Básicos y discretos
         'compañía', 'compania', 'acompañamiento', 'acompanamiento',
         'servicios exclusivos', 'servicios premium', 'servicios especiales',
+        'experiencias personalizadas', 'servicios personalizados',
 
         // Términos comunes en el ambiente
         'escorts', 'escort', 'escort service',
@@ -315,12 +330,28 @@ Puedo ayudarte con:
   async sendInfoResponse(userPhone, type) {
     const response = this.responses[type];
 
-    if (response.image) {
-      // Enviar imagen + texto
-      await sendImageMessage(userPhone, response.image, response.message);
-    } else {
-      // Enviar solo texto
+    try {
+      if (response.image) {
+        // Enviar imagen + texto
+        await sendImageMessage(userPhone, response.image, response.message);
+      } else {
+        // Enviar solo texto
+        await sendTextMessage(userPhone, response.message);
+      }
+    } catch (error) {
+      console.error(`❌ Error enviando ${type}:`, error);
+      // Fallback: enviar solo texto si la imagen falla
       await sendTextMessage(userPhone, response.message);
+    }
+  }
+
+  // ✅ MÉTODO PARA ENVIAR MENSAJES DE TEXTO (para usar desde app.js)
+  async sendTextMessage(userPhone, message) {
+    try {
+      await sendTextMessage(userPhone, message);
+    } catch (error) {
+      console.error('❌ Error enviando mensaje de texto:', error);
+      throw error;
     }
   }
 }
