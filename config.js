@@ -1,7 +1,10 @@
+// config.js
+require('dotenv').config();
+
 const config = {
   port: process.env.PORT || 3000,
-  verifyToken: process.env.VERIFY_TOKEN,
-  privateKey: process.env.PRIVATE_KEY,
+  verifyToken: process.env.VERIFY_TOKEN || 'hotel_luxor_2024_token',
+  privateKey: process.env.PRIVATE_KEY, // ← Esta es la importante
   version: '1.0.0',
   
   // Configuración del flow
@@ -21,14 +24,15 @@ const config = {
   }
 };
 
-// Validar configuración requerida
-if (!config.privateKey) {
-  console.error('❌ PRIVATE_KEY no configurada');
-  process.exit(1);
-}
+// Validar configuración
+console.log('🔧 Configuración cargada:');
+console.log('   - Puerto:', config.port);
+console.log('   - Verify Token:', config.verifyToken ? '✓ Configurado' : '✗ No configurado');
+console.log('   - Private Key:', config.privateKey ? '✓ Configurada' : '✗ NO CONFIGURADA - LOS FLOWS NO FUNCIONARÁN');
 
-if (!config.verifyToken) {
-  console.warn('⚠️  VERIFY_TOKEN no configurado - Verificación deshabilitada');
+if (!config.privateKey) {
+  console.error('❌ ERROR CRÍTICO: PRIVATE_KEY no configurada en variables de entorno');
+  console.error('💡 Agrega PRIVATE_KEY=tu_private_key_en_base64 en tu archivo .env');
 }
 
 module.exports = config;
