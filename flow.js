@@ -125,19 +125,23 @@ async function handleReservaScreen(data) {
     title: date.title
   }));
 
-  // Estructura del flow esperada por WhatsApp
+  // Asegurarse de que los datos tengan el formato correcto
+  const tipo_habitacion = Array.isArray(HABITACIONES_DATA) ? HABITACIONES_DATA : [];
+  const hora = Array.isArray(HORAS_DATA) ? HORAS_DATA : [];
+  const numero_personas = Array.isArray(PERSONAS_DATA) ? PERSONAS_DATA : [];
+
+  // Estructura del flow
   const response = {
     "version": "7.2",
     "data_api_version": "3.0",
     "screen": "RESERVA",
     "data": {
-      // Asegúrate de que HABITACIONES_DATA tenga la misma estructura que en el template
-      "tipo_habitacion": HABITACIONES_DATA,
+      "tipo_habitacion": tipo_habitacion,
       "fecha": fechas,
       "is_fecha_enabled": true,
-      "hora": HORAS_DATA,
+      "hora": hora,
       "is_hora_enabled": true,
-      "numero_personas": PERSONAS_DATA,
+      "numero_personas": numero_personas,
       "is_numero_personas_enabled": true
     }
   };
