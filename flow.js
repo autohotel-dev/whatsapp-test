@@ -128,12 +128,21 @@ async function handleReservaScreen(data) {
     "data_api_version": "3.0",
     "screen": "RESERVA",
     "data": {
-      "tipo_habitacion": HABITACIONES_DATA,
+      "tipo_habitacion": HABITACIONES_DATA.map(item => ({
+        id: item.id,
+        title: item.title
+      })),
       "fecha": fechas,
       "is_fecha_enabled": true,
-      "hora": HORAS_DATA,
+      "hora": HORAS_DATA.map(item => ({
+        id: item.id,
+        title: item.title
+      })),
       "is_hora_enabled": true,
-      "numero_personas": PERSONAS_DATA,
+      "numero_personas": PERSONAS_DATA.map(item => ({
+        id: item.id,
+        title: item.title
+  })),
       "is_numero_personas_enabled": true
     },
     "routing_model": {
