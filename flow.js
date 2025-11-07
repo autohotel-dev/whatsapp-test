@@ -1,27 +1,27 @@
-// flow.js - Versión Corregida
+// flow.js - Versión completamente corregida
 const { sendTextMessage } = require('./message-sender.js');
 
 // ✅ DATOS REALES DE HABITACIONES
 const HABITACIONES_DATA = [
   {
-    id: "master_suite_junior",
-    title: "🏨 Master Suite Junior - $520 MXN"
+    "id": "master_suite_junior",
+    "title": "🏨 Master Suite Junior - $520 MXN"
   },
   {
-    id: "master_suite", 
-    title: "🛌 Master Suite - $600 MXN"
+    "id": "master_suite", 
+    "title": "🛌 Master Suite - $600 MXN"
   },
   {
-    id: "master_suite_jacuzzi",
-    title: "🛁 Master Suite con Jacuzzi - $900 MXN"
+    "id": "master_suite_jacuzzi",
+    "title": "🛁 Master Suite con Jacuzzi - $900 MXN"
   },
   {
-    id: "master_suite_jacuzzi_sauna",
-    title: "♨️ Master Suite con Jacuzzi y Sauna - $1240 MXN"
+    "id": "master_suite_jacuzzi_sauna",
+    "title": "♨️ Master Suite con Jacuzzi y Sauna - $1240 MXN"
   },
   {
-    id: "master_suite_alberca",
-    title: "🏊 Master Suite con Alberca - $1990 MXN"
+    "id": "master_suite_alberca",
+    "title": "🏊 Master Suite con Alberca - $1990 MXN"
   }
 ];
 
@@ -42,7 +42,10 @@ function generarFechasReales() {
       year: 'numeric'
     });
     
-    fechas.push({ id, title });
+    fechas.push({ 
+      "id": id,
+      "title": title
+    });
   }
   
   return fechas;
@@ -50,31 +53,31 @@ function generarFechasReales() {
 
 // ✅ HORAS DISPONIBLES
 const HORAS_DATA = [
-  { id: "14:00", title: "14:00 - Check-in estándar" },
-  { id: "15:00", title: "15:00" },
-  { id: "16:00", title: "16:00" },
-  { id: "17:00", title: "17:00" },
-  { id: "18:00", title: "18:00" },
-  { id: "19:00", title: "19:00" },
-  { id: "20:00", title: "20:00" },
-  { id: "21:00", title: "21:00" },
-  { id: "22:00", title: "22:00" },
-  { id: "23:00", title: "23:00" },
-  { id: "00:00", title: "00:00 - Check-in nocturno" }
+  { "id": "14:00", "title": "14:00 - Check-in estándar" },
+  { "id": "15:00", "title": "15:00" },
+  { "id": "16:00", "title": "16:00" },
+  { "id": "17:00", "title": "17:00" },
+  { "id": "18:00", "title": "18:00" },
+  { "id": "19:00", "title": "19:00" },
+  { "id": "20:00", "title": "20:00" },
+  { "id": "21:00", "title": "21:00" },
+  { "id": "22:00", "title": "22:00" },
+  { "id": "23:00", "title": "23:00" },
+  { "id": "00:00", "title": "00:00 - Check-in nocturno" }
 ];
 
 // ✅ OPCIONES DE PERSONAS
 const PERSONAS_DATA = [
-  { id: "1", title: "1 persona" },
-  { id: "2", title: "2 personas" },
-  { id: "3", title: "3 personas" },
-  { id: "4", title: "4 personas" },
-  { id: "5", title: "5 personas" },
-  { id: "6", title: "6 personas" },
-  { id: "7", title: "7 personas" },
-  { id: "8", title: "8 personas" },
-  { id: "9", title: "9 personas" },
-  { id: "10", title: "10 personas" }
+  { "id": "1", "title": "1 persona" },
+  { "id": "2", "title": "2 personas" },
+  { "id": "3", "title": "3 personas" },
+  { "id": "4", "title": "4 personas" },
+  { "id": "5", "title": "5 personas" },
+  { "id": "6", "title": "6 personas" },
+  { "id": "7", "title": "7 personas" },
+  { "id": "8", "title": "8 personas" },
+  { "id": "9", "title": "9 personas" },
+  { "id": "10", "title": "10 personas" }
 ];
 
 // ✅ PRECIOS POR HABITACIÓN
@@ -87,9 +90,9 @@ const PRECIOS_HABITACIONES = {
 };
 
 async function processFlowLogic(decryptedBody) {
-  console.log('🔧 Procesando flow logic:', JSON.stringify(decryptedBody, null, 2));
+  console.log('🔧 Procesando flow logic - Pantalla:', decryptedBody.screen);
   
-  const { screen, action, form_response } = decryptedBody;
+  const { screen, action, data, form_response } = decryptedBody;
   
   try {
     switch (screen) {
@@ -103,7 +106,7 @@ async function processFlowLogic(decryptedBody) {
         return await handleResumenScreen(decryptedBody);
         
       default:
-        console.log('❌ Pantalla no reconocida:', screen);
+        console.log('❌ Pantalla no reconocida, redirigiendo a RESERVA');
         return await handleReservaScreen(decryptedBody);
     }
   } catch (error) {
@@ -112,54 +115,64 @@ async function processFlowLogic(decryptedBody) {
   }
 }
 
-// ✅ MANEJAR PANTALLA DE RESERVA - ENVIAR DATOS REALES
+// ✅ MANEJAR PANTALLA DE RESERVA
 async function handleReservaScreen(data) {
   const { action, form_response } = data;
   
-  console.log('📋 Enviando datos a pantalla RESERVA');
+  console.log('📋 Cargando pantalla RESERVA con datos reales');
   
   // SIEMPRE enviar los datos reales cuando se carga la pantalla
-  const responseData = {
-    screen: "RESERVA",
-    data: {
-      tipo_habitacion: HABITACIONES_DATA,
-      fecha: generarFechasReales(),
-      is_fecha_enabled: true,
-      hora: HORAS_DATA,
-      is_hora_enabled: true,
-      numero_personas: PERSONAS_DATA,
-      is_numero_personas_enabled: true
+  const response = {
+    "screen": "RESERVA",
+    "data": {
+      "tipo_habitacion": HABITACIONES_DATA,
+      "fecha": generarFechasReales(),
+      "is_fecha_enabled": true,
+      "hora": HORAS_DATA,
+      "is_hora_enabled": true,
+      "numero_personas": PERSONAS_DATA,
+      "is_numero_personas_enabled": true
     }
   };
   
-  console.log('📤 Datos enviados:', JSON.stringify(responseData, null, 2));
+  console.log('📤 Enviando datos a RESERVA:', {
+    habitaciones: HABITACIONES_DATA.length,
+    fechas: response.data.fecha.length,
+    horas: HORAS_DATA.length,
+    personas: PERSONAS_DATA.length
+  });
   
   // Si hay un formulario enviado, validar y pasar a detalles
   if (form_response) {
     const { tipo_habitacion, fecha, hora, numero_personas } = form_response;
     
-    console.log('📝 Formulario recibido:', { tipo_habitacion, fecha, hora, numero_personas });
+    console.log('📝 Formulario recibido en RESERVA:', { 
+      tipo_habitacion, 
+      fecha, 
+      hora, 
+      numero_personas 
+    });
     
     // Validar que todos los campos estén completos
     if (!tipo_habitacion || !fecha || !hora || !numero_personas) {
-      console.log('❌ Faltan campos en el formulario');
-      return responseData; // Volver a reserva con datos
+      console.log('❌ Faltan campos en el formulario de RESERVA');
+      return response; // Volver a reserva con datos
     }
     
     console.log('✅ Todos los campos completos, pasando a DETALLES');
     
     return {
-      screen: "DETALLES",
-      data: {
-        tipo_habitacion,
-        fecha,
-        hora,
-        numero_personas
+      "screen": "DETALLES",
+      "data": {
+        "tipo_habitacion": tipo_habitacion,
+        "fecha": fecha,
+        "hora": hora,
+        "numero_personas": numero_personas
       }
     };
   }
   
-  return responseData;
+  return response;
 }
 
 // ✅ MANEJAR PANTALLA DE DETALLES
@@ -171,37 +184,41 @@ async function handleDetallesScreen(data) {
   if (form_response) {
     const { nombre, email, telefono, comentarios } = form_response;
     
-    console.log('📝 Datos personales recibidos:', { nombre, email, telefono });
+    console.log('📝 Datos personales recibidos:', { 
+      nombre: nombre ? '✓' : '✗', 
+      email: email ? '✓' : '✗', 
+      telefono: telefono ? '✓' : '✗' 
+    });
     
     // Validar campos requeridos
     if (!nombre || !email || !telefono) {
       console.log('❌ Faltan campos obligatorios en datos personales');
       return { 
-        screen: "DETALLES",
-        data: screenData 
+        "screen": "DETALLES",
+        "data": screenData 
       };
     }
     
     // Combinar datos de reserva y detalles
     const datosCompletos = {
       ...screenData,
-      nombre,
-      email,
-      telefono,
-      comentarios: comentarios || ''
+      "nombre": nombre,
+      "email": email,
+      "telefono": telefono,
+      "comentarios": comentarios || ''
     };
     
     console.log('✅ Datos completos, pasando a RESUMEN');
     
     return {
-      screen: "RESUMEN",
-      data: await generarDatosResumen(datosCompletos)
+      "screen": "RESUMEN",
+      "data": await generarDatosResumen(datosCompletos)
     };
   }
   
   return {
-    screen: "DETALLES",
-    data: screenData
+    "screen": "DETALLES",
+    "data": screenData
   };
 }
 
@@ -225,29 +242,29 @@ async function handleResumenScreen(data) {
       console.log('✅ Reserva confirmada y notificaciones enviadas');
       
       return {
-        screen: "RESUMEN",
-        data: {
+        "screen": "RESUMEN",
+        "data": {
           ...screenData,
-          mensaje_exito: "✅ ¡Reserva confirmada! Te hemos enviado los detalles por WhatsApp."
+          "mensaje_exito": "✅ ¡Reserva confirmada! Te hemos enviado los detalles por WhatsApp."
         },
-        terminal: true
+        "terminal": true
       };
       
     } catch (error) {
       console.error('❌ Error confirmando reserva:', error);
       return { 
-        screen: "RESUMEN",
-        data: {
+        "screen": "RESUMEN",
+        "data": {
           ...screenData,
-          mensaje_error: "⚠️ Error al confirmar la reserva. Por favor contacta al hotel directamente."
+          "mensaje_error": "⚠️ Error al confirmar la reserva. Por favor contacta al hotel directamente."
         }
       };
     }
   }
   
   return {
-    screen: "RESUMEN",
-    data: screenData
+    "screen": "RESUMEN",
+    "data": screenData
   };
 }
 
@@ -272,18 +289,18 @@ async function generarDatosResumen(datos) {
   
   const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación no especificada";
   
-  const textoReserva = `${habitacionNombre}\\n📅 Fecha: ${fechaFormateada}\\n🕓 Hora: ${datos.hora}\\n👥 Personas: ${datos.numero_personas} personas`;
+  const textoReserva = `${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: ${datos.numero_personas} personas`;
   
-  const textoDetalles = `👤 Nombre: ${datos.nombre}\\n📧 Email: ${datos.email}\\n📞 Teléfono: ${datos.telefono}${datos.comentarios ? `\\n💬 Comentarios: ${datos.comentarios}` : ''}`;
+  const textoDetalles = `👤 Nombre: ${datos.nombre}\n📧 Email: ${datos.email}\n📞 Teléfono: ${datos.telefono}${datos.comentarios ? `\n💬 Comentarios: ${datos.comentarios}` : ''}`;
   
-  const precioTotal = `💰 Precio total: $${precio} MXN\\n\\n📍 Ubicación: Auto Hotel Luxor\\nAv. Prol. Boulevard Bernardo Quintana, 1000B\\nQuerétaro, México`;
+  const precioTotal = `💰 Precio total: $${precio} MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México`;
   
-  console.log('📊 Resumen generado:', { textoReserva, textoDetalles, precioTotal });
+  console.log('📊 Resumen generado para pantalla');
   
   return {
-    reserva: textoReserva,
-    detalles: textoDetalles,
-    precio_total: precioTotal,
+    "reserva": textoReserva,
+    "detalles": textoDetalles,
+    "precio_total": precioTotal,
     ...datos
   };
 }
