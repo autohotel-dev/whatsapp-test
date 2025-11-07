@@ -30,24 +30,21 @@ function encryptResponse(responseData, aesKeyBuffer, initialVectorBuffer) {
     const finalEncryptedData = Buffer.concat([encryptedData, authTag]).toString("base64");
 
     console.log('✅ Response encriptado correctamente');
-    console.log('📊 Tamaños:', {
-      encryptedData: finalEncryptedData.length,
-      iv: flipped_iv.length,
-      authTag: authTag.length
-    });
     
+    // ✅ RETORNAR OBJETO CON LA ESTRUCTURA CORRECTA
     return {
       encrypted_flow_data: finalEncryptedData,
-      initial_vector: flipped_iv.toString('base64')
+      initial_vector: initialVectorBuffer.toString('base64') // ⚠️ IMPORTANTE: usar el IV original, no el flipped
     };
 
   } catch (error) {
     console.error('❌ Error en encryptResponse:', error.message);
     
-    // Fallback para testing
+    // Fallback para testing - SIN encriptación
     console.log('🔄 Usando fallback sin encriptación para testing');
+    const responseString = JSON.stringify(responseData);
     return {
-      encrypted_flow_data: Buffer.from(JSON.stringify(responseData)).toString('base64'),
+      encrypted_flow_data: Buffer.from(responseString).toString('base64'),
       initial_vector: initialVectorBuffer.toString('base64')
     };
   }
