@@ -1,7 +1,7 @@
-// flow.js - Versión corregida según documentación oficial
+// flow.js - Versión con health check corregido
 const { sendTextMessage } = require('./message-sender.js');
 
-// ✅ DATOS PARA LOS DROPDOWNS
+// ✅ DATOS PARA LOS DROPDOWNS (mantener igual)
 const HABITACIONES_DATA = [
   {"id": "master_suite_junior", "title": "🏨 Master Suite Junior - $520 MXN"},
   {"id": "master_suite", "title": "🛌 Master Suite - $600 MXN"},
@@ -72,8 +72,13 @@ async function processFlowLogic(decryptedBody) {
         return await handleDataExchangeAction(decryptedBody);
         
       case 'ping':
-        // Health check de Meta
-        return { data: { acknowledged: true } };
+        // ✅ HEALTH CHECK CORREGIDO - según documentación
+        console.log('🏥 Health check recibido - retornando status: active');
+        return { 
+          data: { 
+            status: "active" 
+          } 
+        };
         
       default:
         console.log('❌ Acción no reconocida:', action);
@@ -285,13 +290,106 @@ async function generarDatosResumen(datos) {
   };
 }
 
-// ✅ ENVIAR NOTIFICACIONES (mantener igual)
+// ✅ ENVIAR NOTIFICACIONES
 async function enviarNotificacionReserva(datos) {
-  // ... mismo código que antes
+  try {
+    const precios = {
+      "master_suite_junior": 520,
+      "master_suite": 600,
+      "master_suite_jacuzzi": 900,
+      "master_suite_jacuzzi_sauna": 1240,
+      "master_suite_alberca": 1990
+    };
+
+    const nombresHabitaciones = {
+      "master_suite_junior": "Master Suite Junior",
+      "master_suite": "Master Suite",
+      "master_suite_jacuzzi": "Master Suite con Jacuzzi",
+      "master_suite_jacuzzi_sauna": "Master Suite con Jacuzzi y Sauna",
+      "master_suite_alberca": "Master Suite con Alberca"
+    };
+
+    const precio = precios[datos.tipo_habitacion] || 0;
+    const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación";
+
+    const mensajeHotel = `🏨 **NUEVA RESERVA - Auto Hotel Luxor** 🏨
+
+📋 **Detalles de la Reserva:**
+• Habitación: ${habitacionNombre}
+• Fecha: ${datos.fecha}
+• Hora: ${datos.hora}
+• Personas: ${datos.numero_personas}
+
+👤 **Datos del Cliente:**
+• Nombre: ${datos.nombre}
+• Email: ${datos.email}
+• Teléfono: ${datos.telefono}
+${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
+
+💰 **Total: $${precio} MXN**
+
+⏰ _Reserva recibida: ${new Date().toLocaleString('es-MX')}_`;
+
+    const telefonoHotel = process.env.HOTEL_NOTIFICATION_PHONE || '5214422103292';
+    console.log('📤 Enviando notificación al hotel:', telefonoHotel);
+    await sendTextMessage(telefonoHotel, mensajeHotel);
+    
+  } catch (error) {
+    console.error('❌ Error enviando notificación al hotel:', error);
+    throw error;
+  }
 }
 
+// ✅ ENVIAR CONFIRMACIÓN AL CLIENTE  
 async function enviarConfirmacionCliente(datos) {
-  // ... mismo código que antes
+  try {
+    const precios = {
+      "master_suite_junior": 520,
+      "master_suite": 600,
+      "master_suite_jacuzzi": 900,
+      "master_suite_jacuzzi_sauna": 1240,
+      "master_suite_alberca": 1990
+    };
+
+    const nombresHabitaciones = {
+      "master_suite_junior": "🏨 Master Suite Junior",
+      "master_suite": "🛌 Master Suite",
+      "master_suite_jacuzzi": "🛁 Master Suite con Jacuzzi",
+      "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna",
+      "master_suite_alberca": "🏊 Master Suite con Alberca"
+    };
+
+    const precio = precios[datos.tipo_habitacion] || 0;
+    const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación";
+
+    const mensajeCliente = `✅ **¡Reserva Confirmada! - Auto Hotel Luxor** 🏨
+
+Gracias ${datos.nombre}, tu reserva ha sido confirmada:
+
+📋 **Detalles de tu Reserva:**
+• ${habitacionNombre} - $${precio} MXN
+• Fecha: ${datos.fecha}  
+• Hora de check-in: ${datos.hora}
+• Número de personas: ${datos.numero_personas}
+
+💰 **Total a pagar: $${precio} MXN**
+
+📍 **Ubicación:**
+Auto Hotel Luxor
+Av. Prol. Boulevard Bernardo Quintana, 1000B
+Querétaro, México
+
+📞 **Contacto: 442 210 3292**
+
+_¡Te esperamos! Recuerda traer identificación oficial._`;
+
+    console.log('📤 Enviando confirmación al cliente:', datos.telefono);
+    await sendTextMessage(datos.telefono, mensajeCliente);
+    
+  } catch (error) {
+    console.error('❌ Error enviando confirmación al cliente:', error);
+    throw error;
+  }
 }
 
 module.exports = { processFlowLogic };
