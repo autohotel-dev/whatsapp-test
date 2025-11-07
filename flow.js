@@ -116,62 +116,48 @@ async function processFlowLogic(decryptedBody) {
 }
 
 // ✅ MANEJAR PANTALLA DE RESERVA
+// flow.js - Versión que SIEMPRE envía datos
 async function handleReservaScreen(data) {
-  const { action, form_response } = data;
+  console.log('🔄 ENVIANDO DATOS REALES A FLOW');
   
-  console.log('📋 Cargando pantalla RESERVA con datos reales');
-  
-  // SIEMPRE enviar los datos reales cuando se carga la pantalla
+  // DATOS ESTÁTICOS que se enviarán al flow
   const response = {
     "screen": "RESERVA",
     "data": {
-      "tipo_habitacion": HABITACIONES_DATA,
-      "fecha": generarFechasReales(),
+      "tipo_habitacion": [
+        {"id": "master_suite_junior", "title": "🏨 Master Suite Junior - $520 MXN"},
+        {"id": "master_suite", "title": "🛌 Master Suite - $600 MXN"},
+        {"id": "master_suite_jacuzzi", "title": "🛁 Master Suite con Jacuzzi - $900 MXN"},
+        {"id": "master_suite_jacuzzi_sauna", "title": "♨️ Master Suite con Jacuzzi y Sauna - $1240 MXN"},
+        {"id": "master_suite_alberca", "title": "🏊 Master Suite con Alberca - $1990 MXN"}
+      ],
+      "fecha": [
+        {"id": "2024-12-10", "title": "Mar 10 Dic 2024"},
+        {"id": "2024-12-11", "title": "Mié 11 Dic 2024"},
+        {"id": "2024-12-12", "title": "Jue 12 Dic 2024"},
+        {"id": "2024-12-13", "title": "Vie 13 Dic 2024"},
+        {"id": "2024-12-14", "title": "Sáb 14 Dic 2024"}
+      ],
       "is_fecha_enabled": true,
-      "hora": HORAS_DATA,
+      "hora": [
+        {"id": "14:00", "title": "14:00 - Check-in estándar"},
+        {"id": "15:00", "title": "15:00"},
+        {"id": "16:00", "title": "16:00"},
+        {"id": "17:00", "title": "17:00"},
+        {"id": "18:00", "title": "18:00"}
+      ],
       "is_hora_enabled": true,
-      "numero_personas": PERSONAS_DATA,
+      "numero_personas": [
+        {"id": "1", "title": "1 persona"},
+        {"id": "2", "title": "2 personas"},
+        {"id": "3", "title": "3 personas"},
+        {"id": "4", "title": "4 personas"}
+      ],
       "is_numero_personas_enabled": true
     }
   };
-  
-  console.log('📤 Enviando datos a RESERVA:', {
-    habitaciones: HABITACIONES_DATA.length,
-    fechas: response.data.fecha.length,
-    horas: HORAS_DATA.length,
-    personas: PERSONAS_DATA.length
-  });
-  
-  // Si hay un formulario enviado, validar y pasar a detalles
-  if (form_response) {
-    const { tipo_habitacion, fecha, hora, numero_personas } = form_response;
-    
-    console.log('📝 Formulario recibido en RESERVA:', { 
-      tipo_habitacion, 
-      fecha, 
-      hora, 
-      numero_personas 
-    });
-    
-    // Validar que todos los campos estén completos
-    if (!tipo_habitacion || !fecha || !hora || !numero_personas) {
-      console.log('❌ Faltan campos en el formulario de RESERVA');
-      return response; // Volver a reserva con datos
-    }
-    
-    console.log('✅ Todos los campos completos, pasando a DETALLES');
-    
-    return {
-      "screen": "DETALLES",
-      "data": {
-        "tipo_habitacion": tipo_habitacion,
-        "fecha": fecha,
-        "hora": hora,
-        "numero_personas": numero_personas
-      }
-    };
-  }
-  
+
+  console.log('✅ Datos enviados al flow');
   return response;
 }
 
