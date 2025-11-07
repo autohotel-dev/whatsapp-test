@@ -10,8 +10,8 @@ class HotelChatbot {
 • 🏨 **Master Suite Junior** - Habitación de torre (Hotel)
 • 🛌 **Master Suite** - Habitación sencilla
 • 🛁 **Master Suite con Jaccuzzi** - Habitación sencilla con jaccuzzi 
-• ♨️ **Master SUite con Jaccuzzi y Sauna** - Habitación con jaccuzzi y sauna
-• 🏊 **Master SUite con Alberca** - Habitación con alberca
+• ♨️ **Master Suite con Jaccuzzi y Sauna** - Habitación con jaccuzzi y sauna
+• 🏊 **Master Suite con Alberca** - Habitación con alberca
 
 ¿Te gustaría conocer los precios o hacer una reserva?`,
         image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
@@ -20,11 +20,30 @@ class HotelChatbot {
       precios: {
         message: `💰 **Tarifas por horas y/o noche:**
 
-• Master Suite Junior: $520 MXN
-• Master Suite: $600 MXN  
-• Master Suite con Jaccuzzi: $900 MXN
-• Master SUite con Jaccuzzi y Sauna: $1240 MXN
-• Master SUite con Alberca: $1990 MXN
+• Master Suite Junior: $520 MXN para 2 👥 personas 
+  - 🕒 Hora extra $180 MXN 
+  - 👤 Persona extra $110 MXN 
+  - 👥 Máximo 4 personas
+
+• Master Suite: $600 MXN para 2 👥 personas 
+  - 🕒 Hora extra $200 MXN 
+  - 👤 Persona extra $120 MXN 
+  - 👥 Máximo 4 personas
+
+• Master Suite con Jaccuzzi: $900 MXN para 2 👥 personas 
+  - 🕒 Hora extra $300 MXN 
+  - 👤 Persona extra $210 MXN 
+  - 👥 Máximo 4 personas
+
+• Master Suite con Jaccuzzi y Sauna: $1240 MXN para 2 👥 personas 
+  - 🕒 Hora extra $300 MXN 
+  - 👤 Persona extra $260 MXN 
+  - 👥 Máximo 4 personas
+
+• Master Suite con Alberca: $1990 MXN para 2 👥 personas 
+  - 🕒 Hora extra $380 MXN 
+  - 👤 Persona extra $260 MXN 
+  - 👥 Máximo 10 personas
 
 *Incluye internet gratis, amenidades, servicio de habitación y servicio de comida*`,
         image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg'
@@ -42,13 +61,21 @@ class HotelChatbot {
 • 🐾 Servicio de taxis
 • 👶 Amenidades
 
-¿En qué más puedo ayudarte?`
+¿En qué más puedo ayudarte?
+
+"reservar" para hacer una reserva
+"precios" para ver los precios
+"habitaciones" para ver los tipos de habitaciones
+"servicios" para ver los servicios del hotel
+"horarios" para ver los horarios de operación
+"ubicacion" para ver la ubicación del hotel
+`
       },
 
       horarios: {
         message: `🕒 **Horarios:**
 
-
+• Servicio de habitación: 24 horas los 7 días de la semana y los 365 días del año 
 • Servicio de desayunos a la carta: 8:00 - 12:00
 • Servicio de comida a la carta: 14:00 - 20:00
 • Servicio de cenas a la carta: 22:00 - 6:00`
@@ -94,7 +121,15 @@ Puedo ayudarte con:
 • 📍 *"ubicación"* - Nuestra dirección y contacto
 • 🎉 *"reservar habitación"* - Hacer una reserva
 
-¿En qué te puedo ayudar? 👇`
+¿En qué te puedo ayudar? 👇
+
+"reservar" para hacer una reserva
+"precios" para ver los precios
+"habitaciones" para ver los tipos de habitaciones
+"servicios" para ver los servicios del hotel
+"horarios" para ver los horarios de operación
+"ubicacion" para ver la ubicación del hotel
+`
       }
     };
 
