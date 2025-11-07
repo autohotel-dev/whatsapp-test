@@ -25,14 +25,14 @@ setInterval(() => {
 // ✅ FUNCIÓN PARA DETECTAR INTENCIÓN DE RESERVA (CORREGIDA)
 function isReservationIntent(message) {
   const reservationKeywords = [
-    'reservar', 'reserva', 'reservación', 'reservacion', 
-    'hacer reserva', 'quiero reservar', 'reservar ahora', 
+    'reservar', 'reserva', 'reservación', 'reservacion',
+    'hacer reserva', 'quiero reservar', 'reservar ahora',
     'agendar', 'booking', 'quiero una habitación',
     'necesito una habitación', 'disponibilidad', 'reservar habitación',
     'reservar cuarto', 'hacer reservación'
   ];
-  
-  return reservationKeywords.some(keyword => 
+
+  return reservationKeywords.some(keyword =>
     message.includes(keyword)
   );
 }
@@ -48,21 +48,28 @@ app.post('/webhook', async (req, res) => {
 
     // 1. SI ES UN FLOW REQUEST (RESPUESTA DEL FLOW)
     if (req.body.encrypted_flow_data && req.body.encrypted_aes_key) {
-      console.log('🔐 Flow response detectado - Procesando datos de reserva');
+      console.log('🔐 ===== FLOW REQUEST DETECTADO =====');
+      console.log('📦 Raw body recibido');
+      console.log('   - encrypted_flow_data:', req.body.encrypted_flow_data ? `Present (${req.body.encrypted_flow_data.length} chars)` : 'Missing');
+      console.log('   - encrypted_aes_key:', req.body.encrypted_aes_key ? `Present (${req.body.encrypted_aes_key.length} chars)` : 'Missing');
+      console.log('   - initial_vector:', req.body.initial_vector ? `Present (${req.body.initial_vector.length} chars)` : 'Missing');
 
-      const { encrypted_flow_data, encrypted_aes_key, initial_vector } = req.body;
+      try {
+        const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptRequest(req.body);
+        console.log('🎯 Body desencriptado:', JSON.stringify(decryptedBody, null, 2));
 
-      if (!encrypted_flow_data || !encrypted_aes_key || !initial_vector) {
-        return res.status(421).send('MISSING_REQUIRED_FIELDS');
+        const screenResponse = await processFlowLogic(decryptedBody);
+        console.log('📤 Response a enviar:', JSON.stringify(screenResponse, null, 2));
+
+        const encryptedResponse = encryptResponse(screenResponse, aesKeyBuffer, initialVectorBuffer);
+        console.log('🔒 Response encriptado:', encryptedResponse);
+
+        return res.status(200).send(encryptedResponse);
+
+      } catch (error) {
+        console.error('💥 Error procesando flow request:', error);
+        return res.status(500).send('FLOW_PROCESSING_ERROR');
       }
-
-      const { decryptedBody, aesKeyBuffer, initialVectorBuffer } = decryptRequest(req.body);
-      console.log('📦 Flow data desencriptado:', JSON.stringify(decryptedBody, null, 2));
-
-      const screenResponse = await processFlowLogic(decryptedBody);
-      const encryptedResponse = encryptResponse(screenResponse, aesKeyBuffer, initialVectorBuffer);
-
-      return res.status(200).send(encryptedResponse);
     }
 
     // 2. SI ES UN MENSAJE DE TEXTO (INICIO DE CONVERSACIÓN)
@@ -84,16 +91,16 @@ app.post('/webhook', async (req, res) => {
 
       // ✅ DETECTAR SI ES UNA RESERVA PARA ENVIAR FLOW
       const cleanMessage = messageText.toLowerCase().trim();
-      
+
       if (isReservationIntent(cleanMessage)) { // ✅ CORREGIDO: usar la función directamente
         console.log(`🎯 Usuario ${userPhone} quiere reservar - Enviando flow`);
-        
+
         try {
           // Enviar mensaje de confirmación primero
-          await hotelChatbot.sendTextMessage(userPhone, 
+          await hotelChatbot.sendTextMessage(userPhone,
             `🎉 ¡Excelente! Te ayudo a reservar tu habitación.\n\nVamos a necesitar:\n1. 🏨 Tipo de habitación\n2. 📅 Fecha de reservación\n3. 👥 Número de personas\n4. 📝 Tus datos de contacto\n\n*Presiona el botón "Comenzar Reserva" para continuar*`
           );
-          
+
           // Enviar el flow después de un breve delay
           setTimeout(async () => {
             try {
@@ -107,7 +114,7 @@ app.post('/webhook', async (req, res) => {
               );
             }
           }, 1000);
-          
+
         } catch (error) {
           console.error(`❌ Error procesando reserva para ${userPhone}:`, error);
           await hotelChatbot.sendTextMessage(userPhone,
@@ -126,7 +133,7 @@ app.post('/webhook', async (req, res) => {
     if (message && message.type === 'interactive') {
       const userPhone = message.from;
       const messageId = message.id;
-      
+
       // ✅ EVITAR DUPLICADOS
       if (messageCache.has(messageId)) {
         console.log(`⏭️  Mensaje interactivo duplicado ${messageId} - Ignorando`);
@@ -134,7 +141,7 @@ app.post('/webhook', async (req, res) => {
       }
 
       messageCache.set(messageId, Date.now());
-      
+
       const interactiveType = message.interactive.type;
       console.log(`🔘 Mensaje interactivo de ${userPhone}: ${interactiveType}`);
 
@@ -203,7 +210,7 @@ app.post('/test-flow/:phone', async (req, res) => {
   try {
     const phone = req.params.phone;
     console.log(`🧪 Test manual de flow para: ${phone}`);
-    
+
     await sendFlowMessage(phone);
     res.json({ success: true, message: 'Flow enviado para testing' });
   } catch (error) {
@@ -215,7 +222,7 @@ app.post('/test-flow/:phone', async (req, res) => {
 // ✅ MANEJO DE ERRORES GLOBAL
 app.use((error, req, res, next) => {
   console.error('💥 Error global no manejado:', error);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal Server Error',
     message: 'Algo salió mal en el servidor'
   });
