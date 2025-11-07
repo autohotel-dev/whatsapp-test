@@ -119,73 +119,28 @@ async function processFlowLogic(decryptedBody) {
 async function handleReservaScreen(data) {
   console.log('🔄 ENVIANDO DATOS REALES A FLOW');
   
-  // Generar fechas para los próximos 5 días
-  const fechas = generarFechasReales().slice(0, 5);
+  // Generar fechas para los próximos 10 días
+  const fechas = generarFechasReales().slice(0, 10);
   
   // Estructura del flow esperada por WhatsApp
   const response = {
-    "version": "3.0",
+    "version": "7.2",
+    "data_api_version": "3.0",
     "screen": "RESERVA",
     "data": {
-      "screens": [
-        {
-          "id": "RESERVA",
-          "title": "🏨 Reserva tu habitación",
-          "components": [
-            {
-              "type": "dropdown",
-              "id": "tipo_habitacion",
-              "label": "Tipo de habitación",
-              "required": true,
-              "options": HABITACIONES_DATA.map(hab => ({
-                id: hab.id,
-                title: hab.title,
-                description: ""
-              }))
-            },
-            {
-              "type": "dropdown",
-              "id": "fecha",
-              "label": "Fecha de reserva",
-              "required": true,
-              "options": fechas.map(f => ({
-                id: f.id,
-                title: f.title,
-                description: ""
-              }))
-            },
-            {
-              "type": "dropdown",
-              "id": "hora",
-              "label": "Hora de check-in",
-              "required": true,
-              "options": HORAS_DATA.map(h => ({
-                id: h.id,
-                title: h.title,
-                description: ""
-              }))
-            },
-            {
-              "type": "dropdown",
-              "id": "numero_personas",
-              "label": "Número de personas",
-              "required": true,
-              "options": PERSONAS_DATA.map(p => ({
-                id: p.id,
-                title: p.title,
-                description: ""
-              }))
-            }
-          ],
-          "footer": "Selecciona las opciones de tu reserva"
-        }
-      ]
+      "tipo_habitacion": HABITACIONES_DATA,
+      "fecha": fechas,
+      "is_fecha_enabled": true,
+      "hora": HORAS_DATA,
+      "is_hora_enabled": true,
+      "numero_personas": PERSONAS_DATA,
+      "is_numero_personas_enabled": true
     },
-    "actions": {
-      "on_submit": {
-        "action": "NEXT",
-        "next_screen_id": "DETALLES"
-      }
+    "routing_model": {
+      "RESERVA": ["DETALLES"],
+      "DETALLES": ["RESUMEN"],
+      "RESUMEN": ["TERMINOS"],
+      "TERMINOS": []
     }
   };
 
