@@ -8,7 +8,7 @@ const HABITACIONES_DATA = [
     "title": "🏨 Master Suite Junior - $520 MXN"
   },
   {
-    "id": "master_suite", 
+    "id": "master_suite",
     "title": "🛌 Master Suite - $600 MXN"
   },
   {
@@ -29,25 +29,25 @@ const HABITACIONES_DATA = [
 function generarFechasReales() {
   const fechas = [];
   const hoy = new Date();
-  
+
   for (let i = 1; i <= 15; i++) {
     const fecha = new Date();
     fecha.setDate(hoy.getDate() + i);
-    
+
     const id = fecha.toISOString().split('T')[0];
-    const title = fecha.toLocaleDateString('es-MX', { 
+    const title = fecha.toLocaleDateString('es-MX', {
       weekday: 'short',
       day: '2-digit',
       month: 'short',
       year: 'numeric'
     });
-    
-    fechas.push({ 
+
+    fechas.push({
       "id": id,
       "title": title
     });
   }
-  
+
   return fechas;
 }
 
@@ -91,20 +91,20 @@ const PRECIOS_HABITACIONES = {
 
 async function processFlowLogic(decryptedBody) {
   console.log('🔧 Procesando flow logic - Pantalla:', decryptedBody.screen);
-  
+
   const { screen, action, data, form_response } = decryptedBody;
-  
+
   try {
     switch (screen) {
       case 'RESERVA':
         return await handleReservaScreen(decryptedBody);
-        
+
       case 'DETALLES':
         return await handleDetallesScreen(decryptedBody);
-        
+
       case 'RESUMEN':
         return await handleResumenScreen(decryptedBody);
-        
+
       default:
         console.log('❌ Pantalla no reconocida, redirigiendo a RESERVA');
         return await handleReservaScreen(decryptedBody);
@@ -118,38 +118,27 @@ async function processFlowLogic(decryptedBody) {
 // ✅ MANEJAR PANTALLA DE RESERVA
 async function handleReservaScreen(data) {
   console.log('🔄 ENVIANDO DATOS REALES A FLOW');
-  
+
   // Generar fechas para los próximos 10 días
-  const fechas = generarFechasReales().slice(0, 10);
-  
+  const fechas = generarFechasReales().slice(0, 10).map(date => ({
+    id: date.id,
+    title: date.title
+  }));
+
   // Estructura del flow esperada por WhatsApp
   const response = {
     "version": "7.2",
     "data_api_version": "3.0",
     "screen": "RESERVA",
     "data": {
-      "tipo_habitacion": HABITACIONES_DATA.map(item => ({
-        id: item.id,
-        title: item.title
-      })),
+      // Asegúrate de que HABITACIONES_DATA tenga la misma estructura que en el template
+      "tipo_habitacion": HABITACIONES_DATA,
       "fecha": fechas,
       "is_fecha_enabled": true,
-      "hora": HORAS_DATA.map(item => ({
-        id: item.id,
-        title: item.title
-      })),
+      "hora": HORAS_DATA,
       "is_hora_enabled": true,
-      "numero_personas": PERSONAS_DATA.map(item => ({
-        id: item.id,
-        title: item.title
-  })),
+      "numero_personas": PERSONAS_DATA,
       "is_numero_personas_enabled": true
-    },
-    "routing_model": {
-      "RESERVA": ["DETALLES"],
-      "DETALLES": ["RESUMEN"],
-      "RESUMEN": ["TERMINOS"],
-      "TERMINOS": []
     }
   };
 
@@ -160,27 +149,27 @@ async function handleReservaScreen(data) {
 // ✅ MANEJAR PANTALLA DE DETALLES
 async function handleDetallesScreen(data) {
   const { data: screenData, form_response } = data;
-  
+
   console.log('📋 Procesando pantalla DETALLES');
-  
+
   if (form_response) {
     const { nombre, email, telefono, comentarios } = form_response;
-    
-    console.log('📝 Datos personales recibidos:', { 
-      nombre: nombre ? '✓' : '✗', 
-      email: email ? '✓' : '✗', 
-      telefono: telefono ? '✓' : '✗' 
+
+    console.log('📝 Datos personales recibidos:', {
+      nombre: nombre ? '✓' : '✗',
+      email: email ? '✓' : '✗',
+      telefono: telefono ? '✓' : '✗'
     });
-    
+
     // Validar campos requeridos
     if (!nombre || !email || !telefono) {
       console.log('❌ Faltan campos obligatorios en datos personales');
-      return { 
+      return {
         "screen": "DETALLES",
-        "data": screenData 
+        "data": screenData
       };
     }
-    
+
     // Combinar datos de reserva y detalles
     const datosCompletos = {
       ...screenData,
@@ -189,15 +178,15 @@ async function handleDetallesScreen(data) {
       "telefono": telefono,
       "comentarios": comentarios || ''
     };
-    
+
     console.log('✅ Datos completos, pasando a RESUMEN');
-    
+
     return {
       "screen": "RESUMEN",
       "data": await generarDatosResumen(datosCompletos)
     };
   }
-  
+
   return {
     "screen": "DETALLES",
     "data": screenData
@@ -207,22 +196,22 @@ async function handleDetallesScreen(data) {
 // ✅ MANEJAR PANTALLA DE RESUMEN
 async function handleResumenScreen(data) {
   const { data: screenData, form_response } = data;
-  
+
   console.log('📋 Procesando pantalla RESUMEN');
-  
+
   // Si confirmó la reserva
   if (form_response && form_response.estado === 'confirmada') {
     try {
       console.log('✅ Confirmando reserva...');
-      
+
       // ✅ ENVIAR NOTIFICACIÓN POR WHATSAPP AL HOTEL
       await enviarNotificacionReserva(screenData);
-      
+
       // ✅ ENVIAR CONFIRMACIÓN AL CLIENTE
       await enviarConfirmacionCliente(screenData);
-      
+
       console.log('✅ Reserva confirmada y notificaciones enviadas');
-      
+
       return {
         "screen": "RESUMEN",
         "data": {
@@ -231,10 +220,10 @@ async function handleResumenScreen(data) {
         },
         "terminal": true
       };
-      
+
     } catch (error) {
       console.error('❌ Error confirmando reserva:', error);
-      return { 
+      return {
         "screen": "RESUMEN",
         "data": {
           ...screenData,
@@ -243,7 +232,7 @@ async function handleResumenScreen(data) {
       };
     }
   }
-  
+
   return {
     "screen": "RESUMEN",
     "data": screenData
@@ -260,25 +249,25 @@ async function generarDatosResumen(datos) {
     month: 'short',
     year: 'numeric'
   });
-  
+
   const nombresHabitaciones = {
     "master_suite_junior": "🏨 Master Suite Junior",
-    "master_suite": "🛌 Master Suite", 
+    "master_suite": "🛌 Master Suite",
     "master_suite_jacuzzi": "🛁 Master Suite con Jacuzzi",
     "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna",
     "master_suite_alberca": "🏊 Master Suite con Alberca"
   };
-  
+
   const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación no especificada";
-  
+
   const textoReserva = `${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: ${datos.numero_personas} personas`;
-  
+
   const textoDetalles = `👤 Nombre: ${datos.nombre}\n📧 Email: ${datos.email}\n📞 Teléfono: ${datos.telefono}${datos.comentarios ? `\n💬 Comentarios: ${datos.comentarios}` : ''}`;
-  
+
   const precioTotal = `💰 Precio total: $${precio} MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México`;
-  
+
   console.log('📊 Resumen generado para pantalla');
-  
+
   return {
     "reserva": textoReserva,
     "detalles": textoDetalles,
@@ -294,13 +283,13 @@ async function enviarNotificacionReserva(datos) {
     const nombresHabitaciones = {
       "master_suite_junior": "Master Suite Junior",
       "master_suite": "Master Suite",
-      "master_suite_jacuzzi": "Master Suite con Jacuzzi", 
+      "master_suite_jacuzzi": "Master Suite con Jacuzzi",
       "master_suite_jacuzzi_sauna": "Master Suite con Jacuzzi y Sauna",
       "master_suite_alberca": "Master Suite con Alberca"
     };
-    
+
     const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación no especificada";
-    
+
     const mensajeHotel = `🏨 **NUEVA RESERVA - Auto Hotel Luxor** 🏨
 
 📋 **Detalles de la Reserva:**
@@ -323,7 +312,7 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
     const telefonoHotel = process.env.HOTEL_NOTIFICATION_PHONE || '5214422103292';
     console.log('📤 Enviando notificación al hotel:', telefonoHotel);
     await sendTextMessage(telefonoHotel, mensajeHotel);
-    
+
   } catch (error) {
     console.error('❌ Error enviando notificación al hotel:', error);
     throw error;
@@ -338,12 +327,12 @@ async function enviarConfirmacionCliente(datos) {
       "master_suite_junior": "🏨 Master Suite Junior",
       "master_suite": "🛌 Master Suite",
       "master_suite_jacuzzi": "🛁 Master Suite con Jacuzzi",
-      "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna", 
+      "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna",
       "master_suite_alberca": "🏊 Master Suite con Alberca"
     };
-    
+
     const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación no especificada";
-    
+
     const mensajeCliente = `✅ **¡Reserva Confirmada! - Auto Hotel Luxor** 🏨
 
 Gracias ${datos.nombre}, tu reserva ha sido confirmada:
@@ -367,7 +356,7 @@ _¡Te esperamos! Recuerda traer identificación oficial._`;
 
     console.log('📤 Enviando confirmación al cliente:', datos.telefono);
     await sendTextMessage(datos.telefono, mensajeCliente);
-    
+
   } catch (error) {
     console.error('❌ Error enviando confirmación al cliente:', error);
     throw error;
