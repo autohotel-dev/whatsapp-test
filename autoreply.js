@@ -7,11 +7,20 @@ class HotelChatbot {
       habitaciones: {
         message: `🏨 **Tipos de Habitaciones Disponibles:**
 
-• 🏨 **Master Suite Junior** - Habitación de torre (Hotel)
-• 🛌 **Master Suite** - Habitación sencilla
-• 🛁 **Master Suite con Jaccuzzi** - Habitación sencilla con jaccuzzi 
-• ♨️ **Master Suite con Jaccuzzi y Sauna** - Habitación con jaccuzzi y sauna
-• 🏊 **Master Suite con Alberca** - Habitación con alberca
+• 🏨 **Master Suite Junior** 
+  - Habitación de torre (Hotel)
+
+• 🛌 **Master Suite** 
+  - Habitación sencilla
+
+• 🛁 **Master Suite con Jaccuzzi** 
+  - Habitación sencilla con jaccuzzi 
+
+• ♨️ **Master Suite con Jaccuzzi y Sauna** 
+  - Habitación con jaccuzzi y sauna
+
+• 🏊 **Master Suite con Alberca** 
+  - Habitación con alberca
 
 ¿Te gustaría conocer los precios o hacer una reserva?`,
         image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
@@ -108,9 +117,22 @@ Vamos a necesitar:
 *Presiona el botón "Reservar Ahora" para comenzar*`
       },
 
+      servicios_compania: {
+        message: `💫 **Servicios Exclusivos**
+
+Para información sobre nuestros servicios premium y experiencias personalizadas, te invitamos a:
+
+📞 **Contactar directamente a recepción: 442 210 3292**
+📍 **Solicitar información en nuestro mostrador**
+
+Nuestro equipo te atenderá de manera discreta y profesional para proporcionarte todos los detalles sobre las opciones disponibles.
+
+*Atención confidencial y personalizada*`
+      },
+
       // Respuesta por defecto
       default: {
-        message: `🏨 ¡Bienvenido a Auto Hotel Luxor! 🌊
+        message: `🔺 ¡Bienvenido a Auto Hotel Luxor! 🔺
 
 Puedo ayudarte con:
 
@@ -120,16 +142,9 @@ Puedo ayudarte con:
 • 🕒 *"horarios"* - Horarios de operación
 • 📍 *"ubicación"* - Nuestra dirección y contacto
 • 🎉 *"reservar habitación"* - Hacer una reserva
+• 🎉 *"servicios exclusivos"* - Experiencias personalizadas
 
-¿En qué te puedo ayudar? 👇
-
-"reservar" para hacer una reserva
-"precios" para ver los precios
-"habitaciones" para ver los tipos de habitaciones
-"servicios" para ver los servicios del hotel
-"horarios" para ver los horarios de operación
-"ubicacion" para ver la ubicación del hotel
-`
+¿En qué te puedo ayudar? 👇`
       }
     };
 
@@ -178,6 +193,10 @@ Puedo ayudarte con:
 
         case 'servicios':
           await sendTextMessage(userPhone, this.responses.servicios.message);
+          break;
+
+        case 'servicios exclusivos':
+          await sendTextMessage(userPhone, this.responses.servicios_exclusivos.message);
           break;
 
         case 'horarios':
@@ -246,6 +265,41 @@ Puedo ayudarte con:
       ubicacion: [
         'ubicación', 'ubicacion', 'dirección', 'direccion', 'donde están',
         'localización', 'como llegar', 'contacto', 'teléfono', 'ubicacion', 'direcciones', 'donde esta'
+      ],
+      servicios_exclusivos: [
+        // Básicos y discretos
+        'compañía', 'compania', 'acompañamiento', 'acompanamiento',
+        'servicios exclusivos', 'servicios premium', 'servicios especiales',
+
+        // Términos comunes en el ambiente
+        'escorts', 'escort', 'escort service',
+        'damas de compañía', 'damas de compania',
+        'acompañantes', 'acompanantes',
+
+        // Servicios específicos
+        'compañía nocturna', 'compania nocturna',
+        'servicios nocturnos', 'servicios de noche',
+        'compañía por horas', 'compania por horas',
+
+        // Términos en inglés
+        'call girls', 'call girl', 'companion',
+        'adult services', 'adult entertainment',
+
+        // Términos de entretenimiento
+        'entretenimiento', 'entretenimiento adulto',
+        'servicios para adultos', 'servicios discretos',
+
+        // Para eventos
+        'compañía para eventos', 'compania para eventos',
+        'acompañamiento para cenas', 'acompanamiento para cenas',
+
+        // Términos locales comunes
+        'servicio privado', 'atención personal',
+        'servicios confidenciales', 'servicios reservados',
+
+        // Palabras relacionadas
+        'masajes', 'spa', 'relajación', 'compania femenina',
+        'compania masculina', 'modelos', 'edecanes'
       ]
     };
 
