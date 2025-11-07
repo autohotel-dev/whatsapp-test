@@ -1,183 +1,239 @@
-const { generateAvailableDates, generateAvailableTimes, saveReservation } = require('./helpers.js');
+// flow.js - Versión Simplificada
+const { sendTextMessage } = require('./message-sender.js');
+
+// ✅ PRECIOS POR HABITACIÓN (para cálculos)
+const PRECIOS_HABITACIONES = {
+  "master_suite_junior": 520,
+  "master_suite": 600,
+  "master_suite_jacuzzi": 900,
+  "master_suite_jacuzzi_sauna": 1240,
+  "master_suite_alberca": 1990
+};
 
 async function processFlowLogic(decryptedBody) {
-  const { screen, data, version, action, flow_token } = decryptedBody;
+  console.log('🔧 Procesando flow logic:', JSON.stringify(decryptedBody, null, 2));
   
-  console.log('🏨 Procesando flow de reserva:', { action, screen });
-
-  if (action === "ping") {
-    return { data: { status: "active" } };
+  const { screen, action, form_response } = decryptedBody;
+  
+  try {
+    switch (screen) {
+      case 'RESERVA':
+        return await handleReservaScreen(decryptedBody);
+        
+      case 'DETALLES':
+        return await handleDetallesScreen(decryptedBody);
+        
+      case 'RESUMEN':
+        return await handleResumenScreen(decryptedBody);
+        
+      default:
+        console.log('❌ Pantalla no reconocida:', screen);
+        return { screen: "RESERVA" }; // Volver a reserva
+    }
+  } catch (error) {
+    console.error('💥 Error en processFlowLogic:', error);
+    return { screen: "RESERVA" }; // Volver a reserva en caso de error
   }
+}
 
-  if (data?.error) {
-    return { data: { acknowledged: true } };
-  }
-
-  // INIT - Pantalla de selección de habitación
-  if (action === "INIT") {
-    return {
-      screen: "ROOM_SELECTION",
-      data: {
-        room_types: [
-          { 
-            id: "suite", 
-            title: "💎 Suite Ejecutiva", 
-            description: "50m², vista al mar, jacuzzi",
-            price: "$250/noche"
-          },
-          { 
-            id: "deluxe", 
-            title: "🌊 Habitación Deluxe", 
-            description: "35m², balcón, vista al océano",
-            price: "$180/noche"
-          },
-          { 
-            id: "standard", 
-            title: "🌴 Habitación Estándar", 
-            description: "25m², cama king size",
-            price: "$120/noche"
-          },
-          { 
-            id: "family", 
-            title: "👨‍👩‍👧‍👦 Familiar", 
-            description: "40m², 2 camas queen, área de estar",
-            price: "$200/noche"
-          }
-        ],
-        date: generateAvailableDates(),
-        guest_options: [
-          { id: "1", title: "1 Adulto" },
-          { id: "2", title: "2 Adultos" },
-          { id: "3", title: "3 Adultos" },
-          { id: "4", title: "4 Adultos" },
-          { id: "family", title: "Familia (2 adultos + 2 niños)" }
-        ]
-      }
-    };
-  }
-
-  // Procesar selección de habitación
-  if (action === "data_exchange" && screen === "ROOM_SELECTION") {
-    return {
-      screen: "DATES_SELECTION",
-      data: {
-        selected_room: data.room_type,
-        room_title: getRoomTitle(data.room_type),
-        date: generateAvailableDates(),
-        min_nights: 1,
-        max_nights: 30
-      }
-    };
-  }
-
-  // Procesar selección de fechas
-  if (action === "data_exchange" && screen === "DATES_SELECTION") {
-    return {
-      screen: "GUEST_DETAILS",
-      data: {
-        selected_room: data.selected_room,
-        room_title: data.room_title,
-        check_in: data.check_in_date,
-        check_out: data.check_out_date,
-        nights: calculateNights(data.check_in_date, data.check_out_date),
-        total_price: calculateTotalPrice(data.selected_room, data.check_in_date, data.check_out_date)
-      }
-    };
-  }
-
-  // Procesar detalles de huésped
-  if (action === "data_exchange" && screen === "GUEST_DETAILS") {
-    const reservationSummary = createReservationSummary(data);
+// ✅ MANEJAR PANTALLA DE RESERVA
+async function handleReservaScreen(data) {
+  // El flow maneja los datos estáticos, solo necesitamos validar
+  const { form_response } = data;
+  
+  if (form_response) {
+    const { tipo_habitacion, fecha, hora, numero_personas } = form_response;
+    
+    // Validar que todos los campos estén completos
+    if (!tipo_habitacion || !fecha || !hora || !numero_personas) {
+      return { screen: "RESERVA" }; // Volver a reserva si faltan datos
+    }
     
     return {
-      screen: "CONFIRMATION",
+      screen: "DETALLES",
       data: {
-        reservation_summary: reservationSummary,
-        ...data
+        tipo_habitacion,
+        fecha,
+        hora,
+        numero_personas
       }
     };
   }
+  
+  return { screen: "RESERVA" };
+}
 
-  // Confirmar reserva
-  if (action === "data_exchange" && screen === "CONFIRMATION") {
+// ✅ MANEJAR PANTALLA DE DETALLES
+async function handleDetallesScreen(data) {
+  const { data: screenData, form_response } = data;
+  
+  if (form_response) {
+    const { nombre, email, telefono, comentarios } = form_response;
+    
+    // Validar campos requeridos
+    if (!nombre || !email || !telefono) {
+      return { 
+        screen: "DETALLES",
+        data: screenData 
+      };
+    }
+    
+    // Combinar datos de reserva y detalles
+    const datosCompletos = {
+      ...screenData,
+      nombre,
+      email,
+      telefono,
+      comentarios: comentarios || ''
+    };
+    
+    return {
+      screen: "RESUMEN",
+      data: await generarDatosResumen(datosCompletos)
+    };
+  }
+  
+  return {
+    screen: "DETALLES",
+    data: screenData
+  };
+}
+
+// ✅ MANEJAR PANTALLA DE RESUMEN
+async function handleResumenScreen(data) {
+  const { data: screenData, form_response } = data;
+  
+  // Si confirmó la reserva
+  if (form_response && form_response.estado === 'confirmada') {
     try {
-      const reservationId = await saveReservation(data);
+      // ✅ ENVIAR NOTIFICACIÓN POR WHATSAPP AL HOTEL
+      await enviarNotificacionReserva(screenData);
+      
+      // ✅ ENVIAR CONFIRMACIÓN AL CLIENTE
+      await enviarConfirmacionCliente(screenData);
       
       return {
-        screen: "SUCCESS",
+        screen: "RESUMEN",
         data: {
-          extension_message_response: {
-            params: {
-              flow_token: flow_token,
-              reservation_id: reservationId,
-              status: "confirmed",
-              message: "🎉 ¡Reserva Confirmada!",
-              summary: `Habitación ${getRoomTitle(data.selected_room)} del ${data.check_in_date} al ${data.check_out_date} para ${data.guest_name}`,
-              contact_email: data.guest_email,
-              total_amount: data.total_price,
-              timestamp: new Date().toISOString()
-            }
-          }
-        }
+          ...screenData,
+          mensaje_exito: "✅ ¡Reserva confirmada! Te hemos enviado los detalles por WhatsApp."
+        },
+        terminal: true
       };
+      
     } catch (error) {
-      return {
-        screen: "CONFIRMATION",
-        data: {
-          error_message: "❌ Error confirmando reserva. Por favor intenta de nuevo.",
-          ...data
-        }
+      console.error('Error confirmando reserva:', error);
+      return { 
+        screen: "RESUMEN",
+        data: screenData 
       };
     }
   }
-
-  return { screen: "ROOM_SELECTION", data: {} };
-}
-
-// Funciones helper para el flow de hotel
-function getRoomTitle(roomId) {
-  const rooms = {
-    "suite": "Suite Ejecutiva",
-    "deluxe": "Habitación Deluxe", 
-    "standard": "Habitación Estándar",
-    "family": "Habitación Familiar"
+  
+  return {
+    screen: "RESUMEN",
+    data: screenData
   };
-  return rooms[roomId] || roomId;
 }
 
-function calculateNights(checkIn, checkOut) {
-  const start = new Date(checkIn);
-  const end = new Date(checkOut);
-  return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-}
-
-function calculateTotalPrice(roomType, checkIn, checkOut) {
-  const prices = {
-    "suite": 250,
-    "deluxe": 180, 
-    "standard": 120,
-    "family": 200
+// ✅ GENERAR DATOS PARA EL RESUMEN
+async function generarDatosResumen(datos) {
+  const precio = PRECIOS_HABITACIONES[datos.tipo_habitacion] || 0;
+  const fechaObj = new Date(datos.fecha);
+  const fechaFormateada = fechaObj.toLocaleDateString('es-MX', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+  
+  const nombresHabitaciones = {
+    "master_suite_junior": "🏨 Master Suite Junior",
+    "master_suite": "🛌 Master Suite", 
+    "master_suite_jacuzzi": "🛁 Master Suite con Jacuzzi",
+    "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna",
+    "master_suite_alberca": "🏊 Master Suite con Alberca"
   };
   
-  const nights = calculateNights(checkIn, checkOut);
-  const pricePerNight = prices[roomType] || 150;
+  const textoReserva = `${nombresHabitaciones[datos.tipo_habitacion]}\\n📅 Fecha: ${fechaFormateada}\\n🕓 Hora: ${datos.hora}\\n👥 Personas: ${datos.numero_personas} personas`;
   
-  return `$${pricePerNight * nights} USD`;
+  const textoDetalles = `👤 Nombre: ${datos.nombre}\\n📧 Email: ${datos.email}\\n📞 Teléfono: ${datos.telefono}${datos.comentarios ? `\\n💬 Comentarios: ${datos.comentarios}` : ''}`;
+  
+  return {
+    reserva: textoReserva,
+    detalles: textoDetalles,
+    precio_total: `💰 Precio total: $${precio} MXN\\n\\n📍 Ubicación: Auto Hotel Luxor\\nAv. Prol. Boulevard Bernardo Quintana, 1000B\\nQuerétaro, México`,
+    ...datos
+  };
 }
 
-function createReservationSummary(data) {
-  return `🏨 **Resumen de Reserva:**
+// ✅ ENVIAR NOTIFICACIÓN AL HOTEL
+async function enviarNotificacionReserva(datos) {
+  const precio = PRECIOS_HABITACIONES[datos.tipo_habitacion] || 0;
+  const nombresHabitaciones = {
+    "master_suite_junior": "Master Suite Junior",
+    "master_suite": "Master Suite",
+    "master_suite_jacuzzi": "Master Suite con Jacuzzi", 
+    "master_suite_jacuzzi_sauna": "Master Suite con Jacuzzi y Sauna",
+    "master_suite_alberca": "Master Suite con Alberca"
+  };
+  
+  const mensajeHotel = `🏨 **NUEVA RESERVA - Auto Hotel Luxor** 🏨
 
-• Habitación: ${getRoomTitle(data.selected_room)}
-• Check-in: ${data.check_in_date}
-• Check-out: ${data.check_out_date} 
-• Huéspedes: ${data.guest_count} personas
-• Total: ${data.total_price}
+📋 **Detalles de la Reserva:**
+• Habitación: ${nombresHabitaciones[datos.tipo_habitacion]}
+• Fecha: ${datos.fecha}
+• Hora: ${datos.hora}
+• Personas: ${datos.numero_personas}
 
-**Datos del Huésped:**
-Nombre: ${data.guest_name}
-Email: ${data.guest_email}
-Teléfono: ${data.guest_phone}`;
+👤 **Datos del Cliente:**
+• Nombre: ${datos.nombre}
+• Email: ${datos.email}
+• Teléfono: ${datos.telefono}
+${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
+
+💰 **Total: $${precio} MXN**
+
+⏰ _Reserva recibida: ${new Date().toLocaleString('es-MX')}_`;
+
+  // Enviar al número del hotel
+  const telefonoHotel = process.env.HOTEL_NOTIFICATION_PHONE || '5214422103292';
+  await sendTextMessage(telefonoHotel, mensajeHotel);
+}
+
+// ✅ ENVIAR CONFIRMACIÓN AL CLIENTE  
+async function enviarConfirmacionCliente(datos) {
+  const precio = PRECIOS_HABITACIONES[datos.tipo_habitacion] || 0;
+  const nombresHabitaciones = {
+    "master_suite_junior": "🏨 Master Suite Junior",
+    "master_suite": "🛌 Master Suite",
+    "master_suite_jacuzzi": "🛁 Master Suite con Jacuzzi",
+    "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna", 
+    "master_suite_alberca": "🏊 Master Suite con Alberca"
+  };
+  
+  const mensajeCliente = `✅ **¡Reserva Confirmada! - Auto Hotel Luxor** 🏨
+
+Gracias ${datos.nombre}, tu reserva ha sido confirmada:
+
+📋 **Detalles de tu Reserva:**
+• ${nombresHabitaciones[datos.tipo_habitacion]} - $${precio} MXN
+• Fecha: ${datos.fecha}  
+• Hora de check-in: ${datos.hora}
+• Número de personas: ${datos.numero_personas}
+
+💰 **Total a pagar: $${precio} MXN**
+
+📍 **Ubicación:**
+Auto Hotel Luxor
+Av. Prol. Boulevard Bernardo Quintana, 1000B
+Querétaro, México
+
+📞 **Contacto: 442 210 3292**
+
+_¡Te esperamos! Recuerda traer identificación oficial._`;
+
+  await sendTextMessage(datos.telefono, mensajeCliente);
 }
 
 module.exports = { processFlowLogic };
