@@ -7,38 +7,40 @@ class HotelChatbot {
       habitaciones: {
         message: `🏨 **Tipos de Habitaciones Disponibles:**
 
-• 💎 **Suite Ejecutiva** - 50m², vista al mar, jacuzzi
-• 🌊 **Habitación Deluxe** - 35m², balcón, vista al océano  
-• 🌴 **Habitación Estándar** - 25m², cama king size
-• 👨‍👩‍👧‍👦 **Familiar** - 40m², 2 camas queen, área de estar
+• 🏨 **Master Suite Junior** - Habitación de torre (Hotel)
+• 🛌 **Master Suite** - Habitación sencilla
+• 🛁 **Master Suite con Jaccuzzi** - Habitación sencilla con jaccuzzi 
+• ♨️ **Master SUite con Jaccuzzi y Sauna** - Habitación con jaccuzzi y sauna
+• 🏊 **Master SUite con Alberca** - Habitación con alberca
 
 ¿Te gustaría conocer los precios o hacer una reserva?`,
-        image: 'https://ejemplo.com/habitaciones.jpg'
+        image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
       },
 
       precios: {
-        message: `💰 **Tarifas por Noche:**
+        message: `💰 **Tarifas por horas y/o noche:**
 
-• Suite Ejecutiva: $250 USD
-• Habitación Deluxe: $180 USD  
-• Habitación Estándar: $120 USD
-• Familiar: $200 USD
+• Master Suite Junior: $520 MXN
+• Master Suite: $600 MXN  
+• Master Suite con Jaccuzzi: $900 MXN
+• Master SUite con Jaccuzzi y Sauna: $1240 MXN
+• Master SUite con Alberca: $1990 MXN
 
-*Incluye desayuno buffet e internet gratis*`,
-        image: 'https://ejemplo.com/precios.jpg'
+*Incluye internet gratis, amenidades, servicio de habitación y servicio de comida*`,
+        image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg'
       },
 
       servicios: {
         message: `⭐ **Servicios del Hotel:**
 
-• 🏊 Piscina infinita
-• 🍽️ 3 restaurantes
-• 🧘 Spa y wellness center
-• 🏋️ Gimnasio 24/7
+• 🏊 Alberca
+• 🍽️ Servicio de comida y bebida (Servicio de habitación)
+• 🧘 Sauna
+• 🏋️ Jaccuzzi
 • 📶 WiFi gratis
-• 🅿️ Estacionamiento
-• 🐾 Pet friendly
-• 👶 Guardería
+• 🅿️ Estacionamiento (Cochera)
+• 🐾 Servicio de taxis
+• 👶 Amenidades
 
 ¿En qué más puedo ayudarte?`
       },
@@ -46,23 +48,21 @@ class HotelChatbot {
       horarios: {
         message: `🕒 **Horarios:**
 
-• Check-in: 3:00 PM
-• Check-out: 12:00 PM
-• Desayuno: 6:30 AM - 11:00 AM
-• Piscina: 7:00 AM - 10:00 PM
-• Spa: 9:00 AM - 8:00 PM
-• Restaurante: 7:00 AM - 11:00 PM`
+
+• Servicio de desayunos a la carta: 8:00 - 12:00
+• Servicio de comida a la carta: 14:00 - 20:00
+• Servicio de cenas a la carta: 22:00 - 6:00`
       },
 
       ubicacion: {
         message: `📍 **Ubicación:**
 
-🏨 Hotel Paradise Beach Resort
-🌊 Avenida Costera 1234
-🏖️ Cancún, México
+🏨 Auto Hotel Luxor
+🌊 Av. Prol. Boulevard Bernardo Quintana, 1000B
+🏖️ Col. Ind. Benito Juárez, CP 76120, Querétaro, México
 
-📞 Teléfono: +52 998 123 4567
-🌐 Website: www.hotelparadise.com
+📞 Teléfono: +52 442 210 3292
+🌐 Website: https://autohoteluxor.com
 
 ¿Necesitas indicaciones para llegar?`
       },
@@ -74,8 +74,8 @@ class HotelChatbot {
 
 Vamos a necesitar:
 1. 🏨 Tipo de habitación
-2. 📅 Fechas de estadía  
-3. 👥 Número de huéspedes
+2. 📅 Fecha de reservación  
+3. 👥 Número de personas
 4. 📝 Tus datos de contacto
 
 *Presiona el botón "Reservar Ahora" para comenzar*`
@@ -83,12 +83,12 @@ Vamos a necesitar:
 
       // Respuesta por defecto
       default: {
-        message: `🏨 ¡Bienvenido al Hotel Paradise Beach Resort! 🌊
+        message: `🏨 ¡Bienvenido a Auto Hotel Luxor! 🌊
 
 Puedo ayudarte con:
 
 • 🏨 *"habitaciones"* - Ver tipos de habitaciones
-• 💰 *"precios"* - Conocer tarifas  
+• 💰 *"precios"* - Conocer precios  
 • ⭐ *"servicios"* - Servicios del hotel
 • 🕒 *"horarios"* - Horarios de operación
 • 📍 *"ubicación"* - Nuestra dirección y contacto
@@ -190,27 +190,27 @@ Puedo ayudarte con:
       reservar: [
         'reservar habitación', 'reservar habitacion', 'hacer reserva', 'quiero reservar',
         'reservar ahora', 'agendar habitación', 'reservar cuarto', 'booking',
-        'reservación', 'reservar una habitación', 'quiero una habitación'
+        'reservación', 'reservar una habitación', 'quiero una habitación', 'reservar', 'reserva'
       ],
       habitaciones: [
         'habitaciones', 'cuartos', 'tipos de habitación', 'que habitaciones tienen',
-        'opciones de habitación', 'tipos de cuarto', 'habitaciones disponibles'
+        'opciones de habitación', 'tipos de cuarto', 'habitaciones disponibles', 'habitacion'
       ],
       precios: [
         'precios', 'tarifas', 'costos', 'cuanto cuesta', 'precio por noche',
-        'cuales son los precios', 'tarifa', 'costo'
+        'cuales son los precios', 'tarifa', 'costo', 'precio'
       ],
       servicios: [
         'servicios', 'amenidades', 'que servicios tienen', 'facilidades',
-        'que incluye', 'servicios del hotel'
+        'que incluye', 'servicios del hotel', 'servicio'
       ],
       horarios: [
         'horarios', 'check in', 'check out', 'check-in', 'check-out',
-        'a que hora es el check in', 'horario', 'que hora cierran'
+        'a que hora es el check in', 'horario', 'que hora cierran', 'hora', 'esta abierto', 'abre'
       ],
       ubicacion: [
         'ubicación', 'ubicacion', 'dirección', 'direccion', 'donde están',
-        'localización', 'como llegar', 'contacto', 'teléfono'
+        'localización', 'como llegar', 'contacto', 'teléfono', 'ubicacion', 'direcciones', 'donde esta'
       ]
     };
 
