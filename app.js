@@ -3,7 +3,7 @@ const { decryptRequest } = require('./decrypt.js');
 const { encryptResponse } = require('./encrypt.js');
 const { processFlowLogic } = require('./flow.js');
 const hotelChatbot = require('./autoreply.js');
-const sendFlowMessage = require('./send-flow-message.js'); // ✅ AGREGADO
+const sendFlowMessage = require('./send-flow-message.js');
 
 const app = express();
 app.use(express.json());
@@ -21,6 +21,21 @@ setInterval(() => {
     }
   }
 }, 60000);
+
+// ✅ FUNCIÓN PARA DETECTAR INTENCIÓN DE RESERVA (CORREGIDA)
+function isReservationIntent(message) {
+  const reservationKeywords = [
+    'reservar', 'reserva', 'reservación', 'reservacion', 
+    'hacer reserva', 'quiero reservar', 'reservar ahora', 
+    'agendar', 'booking', 'quiero una habitación',
+    'necesito una habitación', 'disponibilidad', 'reservar habitación',
+    'reservar cuarto', 'hacer reservación'
+  ];
+  
+  return reservationKeywords.some(keyword => 
+    message.includes(keyword)
+  );
+}
 
 // ✅ WEBHOOK PARA META - CON FLOW INTEGRADO
 app.post('/webhook', async (req, res) => {
@@ -70,7 +85,7 @@ app.post('/webhook', async (req, res) => {
       // ✅ DETECTAR SI ES UNA RESERVA PARA ENVIAR FLOW
       const cleanMessage = messageText.toLowerCase().trim();
       
-      if (this.isReservationIntent(cleanMessage)) {
+      if (isReservationIntent(cleanMessage)) { // ✅ CORREGIDO: usar la función directamente
         console.log(`🎯 Usuario ${userPhone} quiere reservar - Enviando flow`);
         
         try {
@@ -149,21 +164,6 @@ app.post('/webhook', async (req, res) => {
     res.status(500).send('INTERNAL_SERVER_ERROR');
   }
 });
-
-// ✅ DETECTOR DE INTENCIÓN DE RESERVA
-app.prototype.isReservationIntent = function(message) {
-  const reservationKeywords = [
-    'reservar', 'reserva', 'reservación', 'reservacion', 
-    'hacer reserva', 'quiero reservar', 'reservar ahora', 
-    'agendar', 'booking', 'quiero una habitación',
-    'necesito una habitación', 'disponibilidad', 'reservar habitación',
-    'reservar cuarto', 'hacer reservación'
-  ];
-  
-  return reservationKeywords.some(keyword => 
-    message.includes(keyword)
-  );
-};
 
 // ✅ VERIFICACIÓN DEL WEBHOOK
 app.get('/webhook', (req, res) => {
