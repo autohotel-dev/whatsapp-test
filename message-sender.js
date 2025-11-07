@@ -64,7 +64,7 @@ class MessageSender {
             text: "🏨 Reserva tu Habitación"
           },
           body: {
-            text: "Completa los datos para reservar tu habitación en Hotel Paradise Beach Resort 🌊"
+            text: "Completa los datos para reservar tu habitación en Auto Hotel Luxor 🏨"
           },
           action: {
             name: "flow",
@@ -163,7 +163,7 @@ class MessageSender {
           type: "list",
           header: {
             type: "text",
-            text: "🏨 Hotel Paradise Beach Resort"
+            text: "🏨 Auto Hotel Luxor"
           },
           body: {
             text: text
