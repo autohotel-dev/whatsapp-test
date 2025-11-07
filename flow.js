@@ -130,15 +130,19 @@ async function handleReservaScreen(data) {
   const hora = Array.isArray(HORAS_DATA) ? HORAS_DATA : [];
   const numero_personas = Array.isArray(PERSONAS_DATA) ? PERSONAS_DATA : [];
 
-  // Estructura del flow con el formato esperado
+  // Estructura del flow con el formato exacto esperado
   const response = {
+    "action": "navigate",
     "data": {
-      "status": "active",
       "tipo_habitacion": tipo_habitacion,
       "fecha": fechas,
+      "is_fecha_enabled": true,
       "hora": hora,
-      "numero_personas": numero_personas
-    }
+      "is_hora_enabled": true,
+      "numero_personas": numero_personas,
+      "is_numero_personas_enabled": true
+    },
+    "screen": "RESERVA"
   };
 
   console.log('✅ Datos del flow preparados:', JSON.stringify(response, null, 2));
