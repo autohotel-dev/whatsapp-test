@@ -116,48 +116,80 @@ async function processFlowLogic(decryptedBody) {
 }
 
 // ✅ MANEJAR PANTALLA DE RESERVA
-// flow.js - Versión que SIEMPRE envía datos
 async function handleReservaScreen(data) {
   console.log('🔄 ENVIANDO DATOS REALES A FLOW');
   
-  // DATOS ESTÁTICOS que se enviarán al flow
+  // Generar fechas para los próximos 5 días
+  const fechas = generarFechasReales().slice(0, 5);
+  
+  // Estructura del flow esperada por WhatsApp
   const response = {
+    "version": "3.0",
     "screen": "RESERVA",
     "data": {
-      "tipo_habitacion": [
-        {"id": "master_suite_junior", "title": "🏨 Master Suite Junior - $520 MXN"},
-        {"id": "master_suite", "title": "🛌 Master Suite - $600 MXN"},
-        {"id": "master_suite_jacuzzi", "title": "🛁 Master Suite con Jacuzzi - $900 MXN"},
-        {"id": "master_suite_jacuzzi_sauna", "title": "♨️ Master Suite con Jacuzzi y Sauna - $1240 MXN"},
-        {"id": "master_suite_alberca", "title": "🏊 Master Suite con Alberca - $1990 MXN"}
-      ],
-      "fecha": [
-        {"id": "2024-12-10", "title": "Mar 10 Dic 2024"},
-        {"id": "2024-12-11", "title": "Mié 11 Dic 2024"},
-        {"id": "2024-12-12", "title": "Jue 12 Dic 2024"},
-        {"id": "2024-12-13", "title": "Vie 13 Dic 2024"},
-        {"id": "2024-12-14", "title": "Sáb 14 Dic 2024"}
-      ],
-      "is_fecha_enabled": true,
-      "hora": [
-        {"id": "14:00", "title": "14:00 - Check-in estándar"},
-        {"id": "15:00", "title": "15:00"},
-        {"id": "16:00", "title": "16:00"},
-        {"id": "17:00", "title": "17:00"},
-        {"id": "18:00", "title": "18:00"}
-      ],
-      "is_hora_enabled": true,
-      "numero_personas": [
-        {"id": "1", "title": "1 persona"},
-        {"id": "2", "title": "2 personas"},
-        {"id": "3", "title": "3 personas"},
-        {"id": "4", "title": "4 personas"}
-      ],
-      "is_numero_personas_enabled": true
+      "screens": [
+        {
+          "id": "RESERVA",
+          "title": "🏨 Reserva tu habitación",
+          "components": [
+            {
+              "type": "dropdown",
+              "id": "tipo_habitacion",
+              "label": "Tipo de habitación",
+              "required": true,
+              "options": HABITACIONES_DATA.map(hab => ({
+                id: hab.id,
+                title: hab.title,
+                description: ""
+              }))
+            },
+            {
+              "type": "dropdown",
+              "id": "fecha",
+              "label": "Fecha de reserva",
+              "required": true,
+              "options": fechas.map(f => ({
+                id: f.id,
+                title: f.title,
+                description: ""
+              }))
+            },
+            {
+              "type": "dropdown",
+              "id": "hora",
+              "label": "Hora de check-in",
+              "required": true,
+              "options": HORAS_DATA.map(h => ({
+                id: h.id,
+                title: h.title,
+                description: ""
+              }))
+            },
+            {
+              "type": "dropdown",
+              "id": "numero_personas",
+              "label": "Número de personas",
+              "required": true,
+              "options": PERSONAS_DATA.map(p => ({
+                id: p.id,
+                title: p.title,
+                description: ""
+              }))
+            }
+          ],
+          "footer": "Selecciona las opciones de tu reserva"
+        }
+      ]
+    },
+    "actions": {
+      "on_submit": {
+        "action": "NEXT",
+        "next_screen_id": "DETALLES"
+      }
     }
   };
 
-  console.log('✅ Datos enviados al flow');
+  console.log('✅ Datos del flow preparados:', JSON.stringify(response, null, 2));
   return response;
 }
 
