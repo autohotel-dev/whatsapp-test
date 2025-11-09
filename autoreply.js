@@ -22,7 +22,7 @@ class HotelChatbot {
 • 🏊 **Master Suite con Alberca** 
   - Habitación con alberca
 
-¿Te gustaría conocer los precios o hacer una reserva?`,
+Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nuevamente las opciones.`,
         image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
       },
 
@@ -75,7 +75,7 @@ class HotelChatbot {
 • 🚕 Servicio de taxis
 • 🧼 Amenidades
 
-Puedes escribir "menu" para ver nuevamente las opciones.`
+Escribe "menu" para ver nuevamente las opciones.`
       },
 
       horarios: {
@@ -91,7 +91,7 @@ Puedes escribir "menu" para ver nuevamente las opciones.`
 
 • Servicio de snacks de Lunes a Domingo de 22:00 - 4:00
 
-Puedes escribir "menu" para ver nuevamente las opciones.`
+Escribe "menu" para ver nuevamente las opciones.`
       },
 
       ubicacion: {
@@ -146,7 +146,7 @@ Nuestro equipo te atenderá de manera discreta y profesional para proporcionarte
       default: {
         message: `🔺 ¡Bienvenido a Auto Hotel Luxor!
 
-Puedo ayudarte con:
+Escribe:
 
 • 🏨 *"habitaciones"* - Ver tipos de habitaciones
 • 💰 *"precios"* - Conocer precios  
