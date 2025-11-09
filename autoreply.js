@@ -40,19 +40,19 @@ class HotelChatbot {
           break;
 
         case 'habitaciones':
-          await this.sendInfoResponse(userPhone, this.responses.habitaciones.message);
+          await this.sendInfoResponse(userPhone, 'habitaciones');
           break;
 
         case 'precios':
-          await this.sendInfoResponse(userPhone, this.responses.precios.message);
+          await this.sendInfoResponse(userPhone, 'precios');
           break;
 
         case 'paquetes':
-          await this.sendInfoResponse(userPhone, this.responses.paquetes.message);
+          await this.sendInfoResponse(userPhone, 'paquetes');
           break;
 
         case 'fotos':
-          await this.sendInfoResponse(userPhone, this.responses.fotos.message);
+          await this.sendInfoResponse(userPhone, 'fotos');
           break;
 
         case 'servicios':
