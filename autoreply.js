@@ -7,7 +7,7 @@ class HotelChatbot {
       habitaciones: {
         message: `🏨 **Tipos de Habitaciones Disponibles:**
 
-• 🏨 **Master Suite Junior** 
+• 🛏 **Master Suite Junior** 
   - Habitación de torre (Hotel)
 
 • 🛌 **Master Suite** 
@@ -30,28 +30,33 @@ class HotelChatbot {
         message: `💰 **Tarifas por horas y/o noche:**
 
 • Master Suite Junior: $520 MXN para 2 👥 personas 
-  - 🕒 Hora extra $180 MXN 
-  - 👤 Persona extra $110 MXN 
-  - 👥 Máximo 4 personas
+  - 🕒 Hora extra $110 MXN 
+  - 🕒 4 Horas extra $270 MXN 
+  - 👤 Persona extra $180 MXN 
+  - 👥 Máximo 3 personas
 
 • Master Suite: $600 MXN para 2 👥 personas 
-  - 🕒 Hora extra $200 MXN 
-  - 👤 Persona extra $120 MXN 
-  - 👥 Máximo 4 personas
+  - 🕒 Hora extra $120 MXN 
+  - 🕒 4 Horas extra $300 MXN 
+  - 👤 Persona extra $200 MXN 
+  - 👥 Máximo 3 personas
 
 • Master Suite con Jaccuzzi: $900 MXN para 2 👥 personas 
-  - 🕒 Hora extra $300 MXN 
-  - 👤 Persona extra $210 MXN 
+  - 🕒 Hora extra $210 MXN 
+  - 🕒 4 Horas extra $440 MXN 
+  - 👤 Persona extra $300 MXN 
   - 👥 Máximo 4 personas
 
 • Master Suite con Jaccuzzi y Sauna: $1240 MXN para 2 👥 personas 
-  - 🕒 Hora extra $300 MXN 
-  - 👤 Persona extra $260 MXN 
+  - 🕒 Hora extra $260 MXN 
+  - 🕒 4 Horas extra $600 MXN 
+  - 👤 Persona extra $300 MXN 
   - 👥 Máximo 4 personas
 
 • Master Suite con Alberca: $1990 MXN para 2 👥 personas 
-  - 🕒 Hora extra $380 MXN 
-  - 👤 Persona extra $260 MXN 
+  - 🕒 Hora extra $260 MXN 
+  - 🕒 4 Horas extra $1000 MXN 
+  - 👤 Persona extra $380 MXN 
   - 👥 Máximo 10 personas
 
 *Incluye internet gratis, amenidades, servicio de habitación y servicio de comida*`,
@@ -63,30 +68,30 @@ class HotelChatbot {
 
 • 🏊 Alberca
 • 🍽️ Servicio de comida y bebida (Servicio de habitación)
-• 🧘 Sauna
-• 🏋️ Jaccuzzi
+• ♨️ Sauna
+• 🛁 Jaccuzzi
 • 📶 WiFi gratis
 • 🅿️ Estacionamiento (Cochera)
-• 🐾 Servicio de taxis
-• 👶 Amenidades
+• 🚕 Servicio de taxis
+• 🧼 Amenidades
 
-¿En qué más puedo ayudarte?
-
-"reservar" para hacer una reserva
-"precios" para ver los precios
-"habitaciones" para ver los tipos de habitaciones
-"servicios" para ver los servicios del hotel
-"horarios" para ver los horarios de operación
-"ubicacion" para ver la ubicación del hotel`
+Puedes escribir "menu" para ver nuevamente las opciones.`
       },
 
       horarios: {
         message: `🕒 **Horarios:**
 
-• Servicio de habitación: 24 horas los 7 días de la semana y los 365 días del año 
-• Servicio de desayunos a la carta: 8:00 - 12:00
-• Servicio de comida a la carta: 14:00 - 20:00
-• Servicio de cenas a la carta: 22:00 - 6:00`
+• Domingo a partir de las 06:00 am a Viernes a las 06:00 am, estancia de 12 Horas.
+
+• Viernes a partir de las 06:00 am a Domingo a las 06:00 am, estancia de 8 Horas.
+
+• Servicio de desayunos: 8:00 - 12:00
+
+• Servicio de comida de Lunes a Sabado de 14:00 - 20:00 y Domingo de 14:00 - 19:00
+
+• Servicio de snacks de Lunes a Domingo de 22:00 - 4:00
+
+Puedes escribir "menu" para ver nuevamente las opciones.`
       },
 
       ubicacion: {
@@ -99,7 +104,16 @@ class HotelChatbot {
 📞 Teléfono: +52 442 210 3292
 🌐 Website: https://autohoteluxor.com
 
-¿Necesitas indicaciones para llegar?`
+¿Necesitas indicaciones para llegar?
+Da click en el botón "Ver en Google Maps"`,
+        buttons: [
+          {
+            type: 'url',
+            title: '📍 Ver en Google Maps',
+            url: 'https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6'
+          }
+        ]
+
       },
 
       // Respuesta para reservas
@@ -120,7 +134,7 @@ Vamos a necesitar:
 
 Para información sobre nuestros servicios premium y experiencias personalizadas, te invitamos a:
 
-📞 **Contactar directamente a recepción: 442 210 3292**
+📞 **Contactar directamente a recepción: 442 210 3292 o al 0 estando en su habitación**
 📍 **Solicitar información en nuestro mostrador**
 
 Nuestro equipo te atenderá de manera discreta y profesional para proporcionarte todos los detalles sobre las opciones disponibles.
@@ -139,8 +153,12 @@ Puedo ayudarte con:
 • ⭐ *"servicios"* - Servicios del hotel
 • 🕒 *"horarios"* - Horarios de operación
 • 📍 *"ubicación"* - Nuestra dirección y contacto
-• 🎉 *"reservar"* - Hacer una reserva
-• 💫 *"servicios exclusivos"* - Experiencias personalizadas
+• 🎉 *"reservar"* - Hacer una reserva de habitación decorada
+• 💫 *"exclusivos"* - Experiencias personalizadas
+
+  *📌 Política de Reservas:*
+  • 🎀 *Habitaciones Decoradas*: Se aceptan reservas previas con 2 dias de anticipación
+  • 🚪 *Habitaciones Estándar*: Se asignan por orden de llegada, sujetas a disponibilidad
 
 ¿En qué te puedo ayudar? 👇`
       }
@@ -194,7 +212,7 @@ Puedo ayudarte con:
           await sendTextMessage(userPhone, this.responses.servicios.message);
           break;
 
-        case 'servicios_exclusivos': // ✅ CORREGIDO: servicios_exclusivos en lugar de servicios exclusivos
+        case 'exclusivos':
           await sendTextMessage(userPhone, this.responses.servicios_compania.message);
           break;
 
@@ -251,13 +269,13 @@ Puedo ayudarte con:
   detectIntent(message) {
     const patterns = {
       reservar: [
-        'reservar', 'reserva', 'reservación', 'reservacion', 'hacer reserva', 
+        'reservar', 'reserva', 'reservación', 'reservacion', 'hacer reserva',
         'quiero reservar', 'reservar ahora', 'agendar', 'booking', 'quiero una habitación',
         'necesito una habitación', 'disponibilidad', 'reservar habitación',
         'reservar cuarto', 'hacer reservación'
       ],
       habitaciones: [
-        'habitaciones', 'habitación', 'habitacion', 'cuartos', 'cuarto', 
+        'habitaciones', 'habitación', 'habitacion', 'cuartos', 'cuarto',
         'tipos de habitación', 'que habitaciones tienen', 'opciones de habitación',
         'tipos de cuarto', 'habitaciones disponibles', 'suites'
       ],
@@ -267,20 +285,20 @@ Puedo ayudarte con:
         'cuanto vale', 'valor'
       ],
       servicios: [
-        'servicios', 'servicio', 'amenidades', 'que servicios tienen', 
+        'servicios', 'servicio', 'amenidades', 'que servicios tienen',
         'facilidades', 'que incluye', 'servicios del hotel', 'comodidades'
       ],
       horarios: [
         'horarios', 'horario', 'check in', 'check out', 'check-in', 'check-out',
-        'a que hora es el check in', 'que hora cierran', 'hora', 'esta abierto', 
+        'a que hora es el check in', 'que hora cierran', 'hora', 'esta abierto',
         'abre', 'cierra', 'tiempos'
       ],
       ubicacion: [
         'ubicación', 'ubicacion', 'dirección', 'direccion', 'donde están',
-        'localización', 'localizacion', 'como llegar', 'contacto', 'teléfono', 
+        'localización', 'localizacion', 'como llegar', 'contacto', 'teléfono',
         'telefono', 'ubicacion', 'direcciones', 'donde esta', 'mapa'
       ],
-      servicios_exclusivos: [
+      exclusivos: [
         // Básicos y discretos
         'compañía', 'compania', 'acompañamiento', 'acompanamiento',
         'servicios exclusivos', 'servicios premium', 'servicios especiales',
