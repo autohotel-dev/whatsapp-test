@@ -162,7 +162,8 @@ class HotelChatbot {
         'precio de paquetes', 'paquetes', 'paquetes disponibles',
       ],
       fotos: [
-        'fotos de habitaciones decoradas', 'fotos de ejemplos decorados', 'fotos de decoradas', 'ejemplos decoradas',
+        'fotos de habitaciones decoradas', 'fotos de ejemplos decorados', 'fotos de decoradas', 
+        'ejemplos decoradas', 'ver_fotos', 'ver fotos', 'fotos'
       ],
       servicios: [
         'servicios', 'servicio', 'amenidades', 'que servicios tienen',
