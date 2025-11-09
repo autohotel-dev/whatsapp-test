@@ -130,7 +130,6 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
     },
 
     paquetes: {
-        message: `⭐ **Paquetes Disponibles:**`,
         image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
         buttons: [
             {
@@ -156,7 +155,6 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
             'https://autohoteluxor.com/src/images/hab6.jpg',
             'https://autohoteluxor.com/src/images/hab7.jpg',
         ],
-        message: `Escribe "menu" para ver nuevamente las opciones.`,
         buttons: [
             {
                 type: 'reply',
