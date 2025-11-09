@@ -144,7 +144,7 @@ Nuestro equipo te atenderá de manera discreta y profesional para proporcionarte
 
       // Respuesta por defecto
       default: {
-        message: `🔺 ¡Bienvenido a Auto Hotel Luxor! 🔺
+        message: `🔺 ¡Bienvenido a Auto Hotel Luxor!
 
 Puedo ayudarte con:
 
