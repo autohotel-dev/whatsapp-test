@@ -65,9 +65,7 @@ Escribe la *palabra clave* de tu interés para más información.`
   - Habitación con jaccuzzi y sauna
 
 - 🏊 **Master Suite con Alberca** 
-  - Habitación con alberca
-
-Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nuevamente las opciones.`,
+  - Habitación con alberca`,
     buttons: [
       {
         type: 'reply',
