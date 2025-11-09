@@ -133,19 +133,29 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
         message: `⭐ **Paquetes Disponibles:**`,
         image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
         message: `Escribe "menu" para ver nuevamente las opciones.`,
-        button: 'Ver fotos de habitaciónes decoradas',
-        button: 'Reservar Ahora'
+        buttons: [
+            {
+                type: 'reply',
+                title: 'Ver fotos de habitaciones decoradas',
+                id: 'ver_fotos'
+            },
+            {
+                type: 'reply',
+                title: 'Reservar Ahora',
+                id: 'reservar_ahora'
+            }
+        ]
     },
     fotos: {
         message: `📸 **Fotos:**`,
         images: [
-            'https://autohoteluxor.com/src/images/hab1.jpg', 
-            'https://autohoteluxor.com/src/images/hab2.jpg', 
-            'https://autohoteluxor.com/src/images/hab3.jpg', 
-            'https://autohoteluxor.com/src/images/hab4.jpg', 
-            'https://autohoteluxor.com/src/images/hab5.jpg', 
-            'https://autohoteluxor.com/src/images/hab6.jpg', 
-            'https://autohoteluxor.com/src/images/hab7.jpg', 
+            'https://autohoteluxor.com/src/images/hab1.jpg',
+            'https://autohoteluxor.com/src/images/hab2.jpg',
+            'https://autohoteluxor.com/src/images/hab3.jpg',
+            'https://autohoteluxor.com/src/images/hab4.jpg',
+            'https://autohoteluxor.com/src/images/hab5.jpg',
+            'https://autohoteluxor.com/src/images/hab6.jpg',
+            'https://autohoteluxor.com/src/images/hab7.jpg',
         ],
         message: `Escribe "menu" para ver nuevamente las opciones.`,
         button: 'Reservar Ahora'
