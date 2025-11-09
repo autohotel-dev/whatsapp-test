@@ -26,7 +26,7 @@ class HotelChatbot {
     console.log(`💬 Mensaje de ${userPhone}: "${cleanMessage}"`);
 
     // Detectar intención del usuario
-    const intent = this.detectIntent(cleanMessage).toLowerCase();
+    const intent = this.detectIntent(cleanMessage);
 
     try {
       // ✅ SWITCH CASE CORREGIDO
