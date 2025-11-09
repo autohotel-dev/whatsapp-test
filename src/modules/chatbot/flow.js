@@ -95,9 +95,9 @@ async function processFlowLogic(decryptedBody) {
   const { screen, action, data, form_response } = decryptedBody;
 
   // ✅ MANEJAR VERIFICACIÓN DE ENDPOINT (Health Check de Meta)
-  // Solo responder con status: active si es PING, no si es init con pantalla
-  if (action?.name === 'ping') {
-    console.log('🏥 Health check detectado - Enviando respuesta de verificación');
+  // action puede ser un string "ping" o un objeto {name: "ping"}
+  if (action === 'ping' || action?.name === 'ping') {
+    console.log('🏥 Health check/ping detectado - Enviando respuesta de verificación');
     return {
       version: "3.0",
       data: {
@@ -107,7 +107,7 @@ async function processFlowLogic(decryptedBody) {
   }
   
   // Si tiene pantalla pero no action o action es 'init', es apertura del flow
-  if (screen && (!action || action.name === 'init')) {
+  if (screen && (!action || action === 'init' || action?.name === 'init')) {
     console.log('🎬 Apertura de flow detectada - Procesando pantalla:', screen);
   }
 
