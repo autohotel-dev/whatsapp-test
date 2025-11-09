@@ -95,8 +95,15 @@ class HotelChatbot {
           return this.sendInfoResponse(userPhone, 'default');
         case 'reservar':
           console.log(`🎯 Activando flow de reserva para ${userPhone}`);
-          await sendTextMessage(userPhone, this.responses.reservar.message);
-          await sendFlowMessage(userPhone);
+          try {
+            await sendTextMessage(userPhone, this.responses.reservar.message);
+            await this.delay(1000); // Pequeño delay antes del flow
+            await sendFlowMessage(userPhone);
+            console.log(`✅ Flow de reserva enviado a ${userPhone}`);
+          } catch (flowError) {
+            console.error(`❌ Error enviando flow a ${userPhone}:`, flowError.message);
+            await sendTextMessage(userPhone, '⚠️ Lo siento, hubo un problema al cargar el formulario. Por favor intenta: "quiero reservar una habitación"');
+          }
           break;
         case 'habitaciones':
         case 'precios':
@@ -112,8 +119,15 @@ class HotelChatbot {
           await this.sendInfoResponse(userPhone, 'fotos');
           break;
         case 'reservar_ahora':
-          await sendTextMessage(userPhone, this.responses.reservar.message);
-          await sendFlowMessage(userPhone);
+          try {
+            await sendTextMessage(userPhone, this.responses.reservar.message);
+            await this.delay(1000);
+            await sendFlowMessage(userPhone);
+            console.log(`✅ Flow de reserva enviado a ${userPhone}`);
+          } catch (flowError) {
+            console.error(`❌ Error enviando flow:`, flowError.message);
+            await sendTextMessage(userPhone, '⚠️ Error al cargar el formulario. Contacta recepción: 442 210 3292');
+          }
           break;
         default:
           // ✨ MEJORADO: Verificar confianza antes de responder
