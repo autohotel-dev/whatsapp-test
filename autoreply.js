@@ -272,15 +272,8 @@ class HotelChatbot {
     }
   }
 
-  // ✅ MÉTODO PARA ENVIAR MENSAJES DE TEXTO (para usar desde app.js)
-  async sendTextMessage(userPhone, message) {
-    try {
-      await sendTextMessage(userPhone, message);
-    } catch (error) {
-      console.error('❌ Error enviando mensaje de texto:', error);
-      throw error;
-    }
-  }
+  // El método sendTextMessage se ha eliminado porque ya existe una función global con el mismo nombre
+  // que está siendo importada al inicio del archivo
 }
 
 module.exports = new HotelChatbot();
