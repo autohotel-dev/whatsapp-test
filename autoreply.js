@@ -26,7 +26,7 @@ class HotelChatbot {
     console.log(`💬 Mensaje de ${userPhone}: "${cleanMessage}"`);
 
     // Detectar intención del usuario
-    const intent = this.detectIntent(cleanMessage);
+    const intent = this.detectIntent(cleanMessage).toLowerCase();
 
     try {
       // ✅ SWITCH CASE CORREGIDO
@@ -52,7 +52,7 @@ class HotelChatbot {
           break;
 
         case 'exclusivos':
-          await sendTextMessage(userPhone, this.responses.servicios_compania.message);
+          await sendTextMessage(userPhone, this.responses.exclusivos.message);
           break;
 
         case 'horarios':

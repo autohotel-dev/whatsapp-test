@@ -125,14 +125,8 @@ Escribe "menu" para ver nuevamente las opciones.`
 🌐 Website: https://autohoteluxor.com
 
 ¿Necesitas indicaciones para llegar?
-Da click en el botón "Ver en Google Maps"`,
-        buttons: [
-            {
-                type: 'url',
-                title: '📍 Ver en Google Maps',
-                url: 'https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6'
-            }
-        ]
+Da click en el enlace "Ver en Google Maps"
+https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
     },
 
     reservar: {
