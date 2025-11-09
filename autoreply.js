@@ -182,7 +182,7 @@ class HotelChatbot {
         'precio de paquetes', 'paquetes', 'paquetes disponibles',
       ],
       fotos: [
-        'fotos de habitaciones decoradas', 'fotos de ejemplos decorados', 'fotos de decoradas', 
+        'fotos de habitaciones decoradas', 'fotos de ejemplos decorados', 'fotos de decoradas',
         'ejemplos decoradas', 'ver_fotos', 'ver fotos', 'fotos'
       ],
       servicios: [
@@ -250,35 +250,74 @@ class HotelChatbot {
     const response = this.responses[responseKey];
     if (!response) {
       console.error(`No se encontró respuesta para la clave: ${responseKey}`);
-      return;
+      return sendTextMessage(userPhone, '⚠️ Error: información no disponible.');
     }
 
     try {
-      // 1. Enviar imagen individual si existe
+      console.log(`📤 Enviando respuesta para: ${responseKey}`);
+
+      // ✅ PASO 1: IMÁGENES (si existen)
       if (response.image) {
+        console.log(`🖼️ Enviando imagen individual: ${response.image}`);
         await sendImageMessage(userPhone, response.image, '');
-      } 
-      // O enviar múltiples imágenes si existen
+        await this.delay(1000); // Esperar 1 segundo
+      }
       else if (response.images && response.images.length > 0) {
-        for (const imageUrl of response.images) {
-          await sendImageMessage(userPhone, imageUrl, '');
-          await new Promise(resolve => setTimeout(resolve, 500));
+        console.log(`🖼️ Enviando ${response.images.length} imágenes`);
+        for (let i = 0; i < response.images.length; i++) {
+          console.log(`📸 Imagen ${i + 1}: ${response.images[i]}`);
+          await sendImageMessage(userPhone, response.images[i], '');
+          if (i < response.images.length - 1) {
+            await this.delay(800); // Esperar entre imágenes
+          }
         }
+        await this.delay(500); // Esperar después de todas las imágenes
       }
 
-      // 2. Enviar mensaje de texto si existe
+      // ✅ PASO 2: MENSAJE DE TEXTO (si existe)
       if (response.message) {
+        console.log(`💬 Enviando mensaje de texto`);
         await sendTextMessage(userPhone, response.message);
+        await this.delay(500); // Esperar después del texto
       }
 
-      // 3. Finalmente, enviar botones si existen
+      // ✅ PASO 3: BOTONES (si existen)
       if (response.buttons && response.buttons.length > 0) {
-        const buttonMessage = response.text || 'Selecciona una opción';
+        console.log(`🔘 Enviando ${response.buttons.length} botones`);
+        const buttonMessage = response.text || 'Selecciona una opción:';
         await sendButtonMessage(userPhone, buttonMessage, response.buttons);
       }
 
+      console.log(`✅ Respuesta ${responseKey} enviada completamente`);
+
     } catch (error) {
-      console.error(`Error al enviar respuesta para ${responseKey}:`, error);
+      console.error(`❌ Error enviando ${responseKey}:`, error);
+
+      // Fallback elegante
+      await this.sendFallbackResponse(userPhone, responseKey, error);
+    }
+  }
+
+  // ✅ FUNCIÓN AUXILIAR PARA DELAY
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // ✅ FALLBACK EN CASO DE ERROR
+  async sendFallbackResponse(userPhone, responseKey, error) {
+    try {
+      const fallbackMessages = {
+        'fotos': '📸 Aquí tienes nuestras fotos: [las imágenes no se pudieron cargar]',
+        'habitaciones': '🏨 Información de habitaciones: [error temporal]',
+        'precios': '💰 Nuestros precios: [no disponible temporalmente]',
+        'default': '⚠️ Lo siento, hubo un error. Por favor intenta de nuevo.'
+      };
+
+      const fallbackMessage = fallbackMessages[responseKey] || fallbackMessages['default'];
+      await sendTextMessage(userPhone, fallbackMessage);
+
+    } catch (fallbackError) {
+      console.error('💥 Error incluso en fallback:', fallbackError);
     }
   }
 

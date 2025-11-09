@@ -189,8 +189,8 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
   },
 
   paquetes: {
-    text: "🌟 *Paquetes de Decoración Especial* 🌟\n\n¡Descubre nuestras opciones de paquetes decorados para una experiencia única! ¿Qué te gustaría hacer?",
     image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
+    message: "🌟 *Paquetes de Decoración Especial* 🌟\n\n¡Descubre nuestras opciones de paquetes decorados para una experiencia única! ¿Qué te gustaría hacer?",
     buttons: [
       {
         type: 'reply',
