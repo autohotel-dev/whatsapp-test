@@ -18,6 +18,8 @@ class HotelChatbot {
         case 'reservar_ahora':
           await sendTextMessage(userPhone, this.responses.reservar.message);
           return sendFlowMessage(userPhone);
+        case 'menu':
+          return this.sendInfoResponse(userPhone, 'menu');
         default:
           console.log(`❌ Botón no reconocido: ${buttonId}`);
           return sendTextMessage(userPhone, 'Opción no reconocida. Por favor intenta de nuevo.');

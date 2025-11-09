@@ -132,7 +132,6 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
     paquetes: {
         message: `⭐ **Paquetes Disponibles:**`,
         image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
-        message: `Escribe "menu" para ver nuevamente las opciones.`,
         buttons: [
             {
                 type: 'reply',
@@ -158,7 +157,18 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
             'https://autohoteluxor.com/src/images/hab7.jpg',
         ],
         message: `Escribe "menu" para ver nuevamente las opciones.`,
-        button: 'Reservar Ahora'
+        buttons: [
+            {
+                type: 'reply',
+                title: 'Reservar',  // Shortened from "Reservar Ahora" to be consistent
+                id: 'reservar_ahora'
+            },
+            {
+                type: 'reply',
+                title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+                id: 'menu'
+            }
+        ]
     },
 
     reservar: {
