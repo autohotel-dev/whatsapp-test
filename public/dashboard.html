@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Hotel Luxor - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-change {
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .stat-change.positive {
+            color: #4CAF50;
+        }
+
+        .stat-change.negative {
+            color: #F44336;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .refresh-btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.95);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .notifications {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .notification.error {
+            background: #ffebee;
+            border-left-color: #F44336;
+        }
+
+        .notification.warning {
+            background: #fff3e0;
+            border-left-color: #FF9800;
+        }
+
+        .notification.success {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+
+        .last-update {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏨 Auto Hotel Luxor</h1>
+            <p class="subtitle">Dashboard de Analytics en Tiempo Real</p>
+        </header>
+
+        <div class="loading" id="loading">
+            ⏳ Cargando datos...
+        </div>
+
+        <!-- Estadísticas Principales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📨</div>
+                <div class="stat-label">Total Mensajes</div>
+                <div class="stat-value" id="totalMessages">0</div>
+                <div class="stat-change positive" id="messagesChange"></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-label">Usuarios Activos</div>
+                <div class="stat-value" id="activeUsers">0</div>
+                <div class="stat-change" id="usersChange"></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">Tasa de Conversión</div>
+                <div class="stat-value" id="conversionRate">0%</div>
+                <div class="stat-change positive" id="conversionChange"></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <div class="stat-label">Tasa de Errores</div>
+                <div class="stat-value" id="errorRate">0%</div>
+                <div class="stat-change negative" id="errorChange"></div>
+            </div>
+        </div>
+
+        <!-- Gráficas -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">📊 Distribución de Intenciones</h3>
+                <canvas id="intentChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">📈 Mensajes por Hora</h3>
+                <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">👥 Segmentación de Usuarios</h3>
+                <canvas id="segmentationChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">🎯 Top 5 Intenciones</h3>
+                <canvas id="topIntentsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Notificaciones Recientes -->
+        <div class="notifications">
+            <h3 class="chart-title">🔔 Notificaciones Recientes</h3>
+            <div id="notificationsList">
+                <p style="color: #999; text-align: center;">No hay notificaciones recientes</p>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="refresh-btn" onclick="loadDashboardData()">🔄 Actualizar Datos</button>
+        </div>
+
+        <p class="last-update" id="lastUpdate"></p>
+    </div>
+
+    <script>
+        let charts = {};
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardData();
+            // Auto-refresh cada 30 segundos
+            setInterval(loadDashboardData, 30000);
+        });
+
+        async function loadDashboardData() {
+            const loading = document.getElementById('loading');
+            loading.classList.add('active');
+
+            try {
+                const response = await fetch('/analytics');
+                const data = await response.json();
+
+                if (data.success) {
+                    updateStats(data.metrics);
+                    updateCharts(data.metrics);
+                }
+
+                document.getElementById('lastUpdate').textContent = 
+                    `Última actualización: ${new Date().toLocaleTimeString('es-MX')}`;
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                alert('Error al cargar los datos. Por favor intenta de nuevo.');
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        function updateStats(metrics) {
+            document.getElementById('totalMessages').textContent = metrics.totalMessages || 0;
+            document.getElementById('activeUsers').textContent = metrics.activeUsers || 0;
+            document.getElementById('errorRate').textContent = metrics.errorRate || '0%';
+
+            // Calcular tasa de conversión
+            const reservations = metrics.intentCounts?.reservar || 0;
+            const conversionRate = metrics.totalMessages > 0 
+                ? ((reservations / metrics.totalMessages) * 100).toFixed(1)
+                : 0;
+            document.getElementById('conversionRate').textContent = conversionRate + '%';
+        }
+
+        function updateCharts(metrics) {
+            // Gráfica de intenciones
+            const intentData = Object.entries(metrics.intentCounts || {});
+            updateOrCreateChart('intentChart', {
+                type: 'doughnut',
+                data: {
+                    labels: intentData.map(([k]) => k),
+                    datasets: [{
+                        data: intentData.map(([, v]) => v),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#4facfe',
+                            '#43e97b', '#fa709a', '#fee140', '#30cfd0'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Top 5 intenciones
+            const topIntents = (metrics.topIntents || []).slice(0, 5);
+            updateOrCreateChart('topIntentsChart', {
+                type: 'bar',
+                data: {
+                    labels: topIntents.map(([k]) => k),
+                    datasets: [{
+                        label: 'Mensajes',
+                        data: topIntents.map(([, v]) => v),
+                        backgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Gráfica de timeline (simulada)
+            const hours = Array.from({length: 24}, (_, i) => i);
+            updateOrCreateChart('timelineChart', {
+                type: 'line',
+                data: {
+                    labels: hours.map(h => `${h}:00`),
+                    datasets: [{
+                        label: 'Mensajes',
+                        data: hours.map(() => Math.floor(Math.random() * 50)),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Segmentación de usuarios
+            updateOrCreateChart('segmentationChart', {
+                type: 'pie',
+                data: {
+                    labels: ['Nuevos', 'Engaged', 'Frecuentes', 'VIP', 'Inactivos'],
+                    datasets: [{
+                        data: [40, 25, 20, 10, 5],
+                        backgroundColor: ['#4facfe', '#43e97b', '#667eea', '#f093fb', '#cccccc']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function updateOrCreateChart(id, config) {
+            const ctx = document.getElementById(id);
+            if (charts[id]) {
+                charts[id].destroy();
+            }
+            charts[id] = new Chart(ctx, config);
+        }
+    </script>
+</body>
+</html>

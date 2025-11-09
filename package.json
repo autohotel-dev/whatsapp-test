@@ -1,27 +1,43 @@
 {
-  "name": "whatsapp-webhook",
-  "version": "1.0.0",
-  "description": "Webhook server for WhatsApp Business API",
+  "name": "auto-hotel-luxor-chatbot",
+  "version": "3.0.0",
+  "description": "Advanced WhatsApp Chatbot for Auto Hotel Luxor with AI, Analytics, and Database Integration",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "node app.js",
-    "test": "node test-webhook.js",
-    "build": "echo 'Iniciando build...' && npm install && echo 'Build completado exitosamente'"
+    "dev": "nodemon app.js",
+    "test": "node test-improvements.js",
+    "analytics": "node analytics.js",
+    "build": "echo 'Iniciando build...' && npm install && echo 'Build completado exitosamente'",
+    "db:setup": "node scripts/setup-database.js",
+    "dashboard": "echo 'Dashboard disponible en http://localhost:3000/dashboard'"
   },
   "dependencies": {
     "axios": "^1.13.1",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "mongoose": "^8.0.0",
+    "nodemailer": "^6.9.0",
     "selfsigned": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "keywords": [
     "whatsapp",
-    "webhook",
-    "api"
-  ]
+    "chatbot",
+    "ai",
+    "nlp",
+    "analytics",
+    "hotel",
+    "reservations",
+    "mongodb",
+    "openai"
+  ],
+  "author": "Auto Hotel Luxor",
+  "license": "MIT"
 }

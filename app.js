@@ -1,13 +1,21 @@
 const express = require('express');
+const path = require('path');
 const { decryptRequest } = require('./decrypt.js');
 const { encryptResponse } = require('./encrypt.js');
 const { processFlowLogic } = require('./flow.js');
 const hotelChatbot = require('./autoreply.js');
 const sendFlowMessage = require('./send-flow-message.js');
 const analytics = require('./analytics.js');
+const { database } = require('./database.js');
+const aiNLP = require('./ai-nlp.js');
+const notificationSystem = require('./notifications.js');
+const uxEnhancer = require('./ux-enhancer.js');
 
 const app = express();
 app.use(express.json());
+
+// Servir archivos estáticos (dashboard)
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ✅ MEMORIA PARA EVITAR DUPLICADOS
 const messageCache = new Map();
@@ -280,6 +288,88 @@ app.get('/analytics/summary', (req, res) => {
   }
 });
 
+// ✨ NUEVO: DASHBOARD WEB
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// ✨ NUEVO: ESTADO DE MÓDULOS AVANZADOS
+app.get('/status', (req, res) => {
+  res.json({
+    success: true,
+    modules: {
+      database: database.isConnected(),
+      aiNLP: aiNLP.isEnabled(),
+      notifications: notificationSystem.getStatus(),
+      analytics: true
+    },
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
+});
+
+// ✨ NUEVO: AI NLP - Detectar intención con IA
+app.post('/ai/detect-intent', async (req, res) => {
+  try {
+    const { message, context } = req.body;
+    const result = await aiNLP.detectIntent(message, context);
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ✨ NUEVO: AI NLP - Corregir typos
+app.post('/ai/correct-typos', async (req, res) => {
+  try {
+    const { message } = req.body;
+    const corrected = await aiNLP.correctTypos(message);
+    res.json({ success: true, original: message, corrected });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ✨ NUEVO: Obtener perfil de usuario de BD
+app.get('/users/:phone', async (req, res) => {
+  try {
+    const profile = await database.getUserProfile(req.params.phone);
+    res.json({ success: true, profile });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ✨ NUEVO: Obtener conversaciones de usuario
+app.get('/conversations/:phone', async (req, res) => {
+  try {
+    const conversation = await database.getActiveConversation(req.params.phone);
+    res.json({ success: true, conversation });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ✨ NUEVO: Obtener reservaciones
+app.get('/reservations/:phone', async (req, res) => {
+  try {
+    const reservations = await database.getReservations(req.params.phone);
+    res.json({ success: true, reservations });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ✨ NUEVO: Notificaciones no leídas
+app.get('/notifications', async (req, res) => {
+  try {
+    const notifications = await database.getUnreadNotifications();
+    res.json({ success: true, notifications });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ✅ MANEJO DE ERRORES GLOBAL
 app.use((error, req, res, next) => {
   console.error('💥 Error global no manejado:', error);
@@ -291,31 +381,80 @@ app.use((error, req, res, next) => {
 
 // ✅ INICIAR SERVIDOR
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('🏨 ==========================================');
-  console.log('🏨 AUTO HOTEL LUXOR CHATBOT v2.1');
-  console.log('🏨 ==========================================');
-  console.log('✅ Servidor iniciado en puerto:', PORT);
-  console.log('');
-  console.log('📍 ENDPOINTS PRINCIPALES:');
-  console.log('  • POST /webhook - Webhook de WhatsApp');
-  console.log('  • GET  /webhook - Verificación de webhook');
-  console.log('  • GET  /health - Health check');
-  console.log('  • POST /test-flow/:phone - Test manual de flow');
-  console.log('');
-  console.log('📊 ENDPOINTS DE ANALYTICS:');
-  console.log('  • GET  /analytics - Métricas completas');
-  console.log('  • GET  /analytics/summary - Resumen rápido');
-  console.log('  • GET  /analytics/user/:phone - Stats de usuario');
-  console.log('');
-  console.log('✨ NUEVAS CARACTERÍSTICAS:');
-  console.log('  ✓ Sistema de contexto conversacional');
-  console.log('  ✓ Detección de intenciones con scoring');
-  console.log('  ✓ Rate limiting avanzado anti-spam');
-  console.log('  ✓ Analytics y métricas en tiempo real');
-  console.log('  ✓ Manejo de errores con reintentos');
-  console.log('  ✓ Respuestas inteligentes para baja confianza');
-  console.log('🏨 ==========================================');
-});
+
+// Inicializar base de datos y luego servidor
+async function startServer() {
+  try {
+    // Conectar a MongoDB (opcional)
+    await database.connect();
+    
+    // Verificar alertas cada 5 minutos
+    setInterval(async () => {
+      const analytics = hotelChatbot.getAnalytics();
+      await notificationSystem.checkAndAlert(analytics);
+    }, 5 * 60 * 1000);
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log('🏨 ===============================================');
+      console.log('🏨 AUTO HOTEL LUXOR CHATBOT v3.0 ADVANCED');
+      console.log('🏨 ===============================================');
+      console.log('✅ Servidor iniciado en puerto:', PORT);
+      console.log('');
+      console.log('🌐 DASHBOARD:');
+      console.log(`  • http://localhost:${PORT}/dashboard`);
+      console.log('');
+      console.log('📍 ENDPOINTS PRINCIPALES:');
+      console.log('  • POST /webhook - Webhook de WhatsApp');
+      console.log('  • GET  /webhook - Verificación de webhook');
+      console.log('  • GET  /health - Health check');
+      console.log('  • GET  /status - Estado de módulos');
+      console.log('  • POST /test-flow/:phone - Test manual de flow');
+      console.log('');
+      console.log('📊 ENDPOINTS DE ANALYTICS:');
+      console.log('  • GET  /analytics - Métricas completas');
+      console.log('  • GET  /analytics/summary - Resumen rápido');
+      console.log('  • GET  /analytics/user/:phone - Stats de usuario');
+      console.log('');
+      console.log('🤖 ENDPOINTS DE AI:');
+      console.log('  • POST /ai/detect-intent - Detección con IA');
+      console.log('  • POST /ai/correct-typos - Corrección de typos');
+      console.log('');
+      console.log('👥 ENDPOINTS DE USUARIOS:');
+      console.log('  • GET  /users/:phone - Perfil de usuario');
+      console.log('  • GET  /conversations/:phone - Conversaciones');
+      console.log('  • GET  /reservations/:phone - Reservaciones');
+      console.log('  • GET  /notifications - Notificaciones');
+      console.log('');
+      console.log('✨ CARACTERÍSTICAS v3.0:');
+      console.log('  ✓ Sistema de contexto conversacional');
+      console.log('  ✓ Detección de intenciones con scoring');
+      console.log('  ✓ Rate limiting avanzado anti-spam');
+      console.log('  ✓ Analytics y métricas en tiempo real');
+      console.log('  ✓ Manejo de errores con reintentos');
+      console.log('  ✓ Respuestas inteligentes para baja confianza');
+      console.log('');
+      console.log('🚀 NUEVAS CARACTERÍSTICAS AVANZADAS:');
+      console.log(`  ${database.isConnected() ? '✅' : '⚠️'}  Base de datos MongoDB`);
+      console.log(`  ${aiNLP.isEnabled() ? '✅' : '⚠️'}  AI NLP con OpenAI`);
+      console.log(`  ${notificationSystem.getStatus().emailEnabled ? '✅' : '⚠️'}  Sistema de notificaciones email`);
+      console.log(`  ${notificationSystem.getStatus().slackEnabled ? '✅' : '⚠️'}  Notificaciones Slack`);
+      console.log('  ✅ Dashboard web interactivo');
+      console.log('  ✅ UX mejorado con typing indicators');
+      console.log('  ✅ Respuestas dinámicas por hora/día');
+      console.log('  ✅ Sistema de seguimiento y remarketing');
+      console.log('  ✅ Segmentación automática de usuarios');
+      console.log('  ✅ Lead scoring automático');
+      console.log('🏨 ===============================================');
+      console.log('');
+      console.log(`🎯 Dashboard disponible en: http://localhost:${PORT}/dashboard`);
+      console.log('');
+    });
+  } catch (error) {
+    console.error('❌ Error iniciando servidor:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 module.exports = app;
