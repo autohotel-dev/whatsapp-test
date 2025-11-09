@@ -9,57 +9,26 @@ class HotelChatbot {
   }
 
   async handleMessage(userPhone, messageText, buttonId = null) {
-    // If it's a button click, handle it directly
-    if (buttonId) {
-      console.log(`🔄 Procesando botón: ${buttonId} de ${userPhone}`);
-      switch (buttonId) {
-        case 'ver_fotos':
-          return this.sendInfoResponse(userPhone, 'fotos');
-        case 'reservar_ahora':
-          await sendTextMessage(userPhone, this.responses.reservar.message);
-          return sendFlowMessage(userPhone);
-        case 'menu':
-          return this.sendInfoResponse(userPhone, 'menu');
-        case 'precios':
-          return this.sendInfoResponse(userPhone, 'precios');
-        case 'habitaciones':
-          return this.sendInfoResponse(userPhone, 'habitaciones');
-        case 'paquetes':
-          return this.sendInfoResponse(userPhone, 'paquetes');
-        case 'ubicacion':
-          return this.sendInfoResponse(userPhone, 'ubicacion');
-        case 'exclusivos':
-          return this.sendInfoResponse(userPhone, 'exclusivos');
-        case 'servicios':
-          return this.sendInfoResponse(userPhone, 'servicios');
-        case 'horarios':
-          return this.sendInfoResponse(userPhone, 'horarios');
-        default:
-          console.log(`❌ Botón no reconocido: ${buttonId}`);
-          return sendTextMessage(userPhone, 'Opción no reconocida. Por favor intenta de nuevo.');
-      }
-    }
-
-    const cleanMessage = messageText.toLowerCase().trim();
-
-    // ✅ VERIFICAR RATE LIMITING
-    const now = Date.now();
-    const lastMessageTime = this.userLastMessage.get(userPhone);
-
-    if (lastMessageTime && (now - lastMessageTime) < this.MIN_TIME_BETWEEN_MESSAGES) {
-      console.log(`⏰ Rate limiting para ${userPhone} - Mensaje muy rápido`);
-      return; // Ignorar mensajes muy rápidos
-    }
-
-    // ✅ ACTUALIZAR ÚLTIMO MENSAJE
-    this.userLastMessage.set(userPhone, now);
-
-    console.log(`💬 Mensaje de ${userPhone}: "${cleanMessage}"`);
-
-    // Detectar intención del usuario
-    const intent = this.detectIntent(cleanMessage);
-
     try {
+      // If it's a button click, handle it directly
+      if (buttonId) {
+        console.log(`🔄 Procesando botón: ${buttonId} de ${userPhone}`);
+        return this.handleButtonClick(userPhone, buttonId);
+      }
+
+      const cleanMessage = messageText.toLowerCase().trim();
+
+      // ✅ VERIFICAR RATE LIMITING
+      if (!this.checkRateLimit(userPhone)) {
+        console.log(`⏰ Rate limiting para ${userPhone} - Mensaje muy rápido`);
+        return;
+      }
+
+      console.log(`💬 Mensaje de ${userPhone}: "${cleanMessage}"`);
+
+      // Detectar intención del usuario
+      const intent = this.detectIntent(cleanMessage);
+
       // ✅ SWITCH CASE CORREGIDO
       switch (intent) {
         case 'menu':
@@ -68,55 +37,30 @@ class HotelChatbot {
           return this.sendInfoResponse(userPhone, 'default');
         case 'reservar':
           console.log(`🎯 Activando flow de reserva para ${userPhone}`);
-          // Primero enviar mensaje de confirmación
           await sendTextMessage(userPhone, this.responses.reservar.message);
-          // Luego enviar el flow
           await sendFlowMessage(userPhone);
           break;
-
         case 'habitaciones':
-          await this.sendInfoResponse(userPhone, 'habitaciones');
-          break;
-
         case 'precios':
-          await this.sendInfoResponse(userPhone, 'precios');
-          break;
-
         case 'paquetes':
-          await this.sendInfoResponse(userPhone, 'paquetes');
-          break;
-
         case 'fotos':
-          await this.sendInfoResponse(userPhone, 'fotos');
-          break;
-
         case 'servicios':
-          await sendTextMessage(userPhone, this.responses.servicios.message);
-          break;
-
         case 'exclusivos':
-          await sendTextMessage(userPhone, this.responses.exclusivos.message);
-          break;
-
         case 'horarios':
-          await sendTextMessage(userPhone, this.responses.horarios.message);
-          break;
-
         case 'ubicacion':
-          await sendTextMessage(userPhone, this.responses.ubicacion.message);
+          if (intent === 'servicios' || intent === 'exclusivos' || intent === 'horarios' || intent === 'ubicacion') {
+            await sendTextMessage(userPhone, this.responses[intent].message);
+          } else {
+            await this.sendInfoResponse(userPhone, intent);
+          }
           break;
-
         case 'ver_fotos':
-          // Manejar clic en el botón "Ver fotos"
           await this.sendInfoResponse(userPhone, 'fotos');
           break;
-
         case 'reservar_ahora':
-          // Manejar clic en el botón "Reservar"
           await sendTextMessage(userPhone, this.responses.reservar.message);
           await sendFlowMessage(userPhone);
           break;
-
         default:
           // ✅ EVITAR RESPONDER A MENSAJES MUY CORTOS O VACÍOS
           if (this.shouldRespondToDefault(cleanMessage)) {
@@ -128,15 +72,58 @@ class HotelChatbot {
       }
     } catch (error) {
       console.error('❌ Error enviando respuesta:', error);
-      // Enviar mensaje de error al usuario
-      try {
-        await sendTextMessage(userPhone, '⚠️ Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.');
-      } catch (fallbackError) {
-        console.error('❌ Error incluso enviando mensaje de fallback:', fallbackError);
-      }
+      await this.sendErrorResponse(userPhone, error);
     }
   }
 
+  // ✅ MANEJADOR DE CLICS EN BOTONES
+  async handleButtonClick(userPhone, buttonId) {
+    const buttonActions = {
+      'ver_fotos': () => this.sendInfoResponse(userPhone, 'fotos'),
+      'reservar_ahora': async () => {
+        await sendTextMessage(userPhone, this.responses.reservar.message);
+        return sendFlowMessage(userPhone);
+      },
+      'menu': () => this.sendInfoResponse(userPhone, 'menu'),
+      'precios': () => this.sendInfoResponse(userPhone, 'precios'),
+      'habitaciones': () => this.sendInfoResponse(userPhone, 'habitaciones'),
+      'paquetes': () => this.sendInfoResponse(userPhone, 'paquetes'),
+      'ubicacion': () => this.sendInfoResponse(userPhone, 'ubicacion'),
+      'exclusivos': () => this.sendInfoResponse(userPhone, 'exclusivos'),
+      'servicios': () => this.sendInfoResponse(userPhone, 'servicios'),
+      'horarios': () => this.sendInfoResponse(userPhone, 'horarios')
+    };
+
+    const action = buttonActions[buttonId];
+    if (action) {
+      return await action();
+    } else {
+      console.log(`❌ Botón no reconocido: ${buttonId}`);
+      return sendTextMessage(userPhone, 'Opción no reconocida. Por favor intenta de nuevo.');
+    }
+  }
+
+  // ✅ VERIFICAR RATE LIMITING
+  checkRateLimit(userPhone) {
+    const now = Date.now();
+    const lastMessageTime = this.userLastMessage.get(userPhone);
+
+    if (lastMessageTime && (now - lastMessageTime) < this.MIN_TIME_BETWEEN_MESSAGES) {
+      return false;
+    }
+
+    this.userLastMessage.set(userPhone, now);
+    return true;
+  }
+
+  // ✅ MANEJADOR DE ERRORES
+  async sendErrorResponse(userPhone, error) {
+    try {
+      await sendTextMessage(userPhone, '⚠️ Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.');
+    } catch (fallbackError) {
+      console.error('❌ Error incluso enviando mensaje de fallback:', fallbackError);
+    }
+  }
   // ✅ DETECTAR SI DEBEMOS RESPONDER A MENSAJE POR DEFECTO
   shouldRespondToDefault(message) {
     if (!message || message.trim().length === 0) return false;
@@ -178,12 +165,12 @@ class HotelChatbot {
         'cuanto vale', 'valor'
       ],
       paquetes: [
-        'paquetes', 'paquete', 'paquetes decorados', 'promociones decoradas', 'decoradas', 'decorados',
-        'precio de paquetes', 'paquetes', 'paquetes disponibles',
+        'paquetes', 'paquete', 'paquetes decorados', 'promociones decoradas', 
+        'decoradas', 'decorados', 'precio de paquetes', 'paquetes disponibles'
       ],
       fotos: [
-        'fotos de habitaciones decoradas', 'fotos de ejemplos decorados', 'fotos de decoradas',
-        'ejemplos decoradas', 'ver_fotos', 'ver fotos', 'fotos'
+        'fotos de habitaciones decoradas', 'fotos de ejemplos decorados', 
+        'fotos de decoradas', 'ejemplos decoradas', 'ver_fotos', 'ver fotos', 'fotos'
       ],
       servicios: [
         'servicios', 'servicio', 'amenidades', 'que servicios tienen',
@@ -197,50 +184,34 @@ class HotelChatbot {
       ubicacion: [
         'ubicación', 'ubicacion', 'dirección', 'direccion', 'donde están',
         'localización', 'localizacion', 'como llegar', 'contacto', 'teléfono',
-        'telefono', 'ubicacion', 'direcciones', 'donde esta', 'mapa'
+        'telefono', 'mapa', 'donde esta', 'direcciones'
       ],
       exclusivos: [
-        // Básicos y discretos
-        'compañía', 'exclusivos', 'exclusivo', 'compania', 'acompañamiento', 'acompanamiento',
-        'servicios exclusivos', 'servicios premium', 'servicios especiales',
-        'experiencias personalizadas', 'servicios personalizados', 'exclusivo', 'exclusivos',
-
-        // Términos comunes en el ambiente
-        'escorts', 'escort', 'escort service',
-        'damas de compañía', 'damas de compania',
-        'acompañantes', 'acompanantes',
-
-        // Servicios específicos
-        'compañía nocturna', 'compania nocturna',
-        'servicios nocturnos', 'servicios de noche',
-        'compañía por horas', 'compania por horas',
-
-        // Términos en inglés
-        'call girls', 'call girl', 'companion',
-        'adult services', 'adult entertainment',
-
-        // Términos de entretenimiento
-        'entretenimiento', 'entretenimiento adulto',
-        'servicios para adultos', 'servicios discretos',
-
-        // Para eventos
-        'compañía para eventos', 'compania para eventos',
-        'acompañamiento para cenas', 'acompanamiento para cenas',
-
-        // Términos locales comunes
-        'servicio privado', 'atención personal',
-        'servicios confidenciales', 'servicios reservados',
-
-        // Palabras relacionadas
-        'masajes', 'spa', 'relajación', 'compania femenina',
-        'compania masculina', 'modelos', 'edecanes'
+        'compañía', 'exclusivos', 'exclusivo', 'compania', 'acompañamiento', 
+        'acompanamiento', 'servicios exclusivos', 'servicios premium', 
+        'servicios especiales', 'experiencias personalizadas', 'servicios personalizados'
       ]
     };
 
+    // Buscar coincidencia exacta primero
     for (const [intent, keywords] of Object.entries(patterns)) {
-      if (keywords.some(keyword => message.includes(keyword))) {
+      if (keywords.includes(message)) {
         return intent;
       }
+    }
+
+    // Buscar coincidencias parciales
+    for (const [intent, keywords] of Object.entries(patterns)) {
+      for (const keyword of keywords) {
+        if (message.includes(keyword) || keyword.includes(message)) {
+          return intent;
+        }
+      }
+    }
+
+    // Comandos específicos
+    if (['menu', 'menú', 'opciones', 'ayuda', 'help'].includes(message)) {
+      return 'menu';
     }
 
     return 'default';
@@ -260,25 +231,24 @@ class HotelChatbot {
       if (response.image) {
         console.log(`🖼️ Enviando imagen individual: ${response.image}`);
         await sendImageMessage(userPhone, response.image, '');
-        await this.delay(1000); // Esperar 1 segundo
-      }
-      else if (response.images && response.images.length > 0) {
+        await this.delay(1000);
+      } else if (response.images && response.images.length > 0) {
         console.log(`🖼️ Enviando ${response.images.length} imágenes`);
         for (let i = 0; i < response.images.length; i++) {
           console.log(`📸 Imagen ${i + 1}: ${response.images[i]}`);
           await sendImageMessage(userPhone, response.images[i], '');
           if (i < response.images.length - 1) {
-            await this.delay(800); // Esperar entre imágenes
+            await this.delay(800);
           }
         }
-        await this.delay(500); // Esperar después de todas las imágenes
+        await this.delay(500);
       }
 
       // ✅ PASO 2: MENSAJE DE TEXTO (si existe)
       if (response.message) {
         console.log(`💬 Enviando mensaje de texto`);
         await sendTextMessage(userPhone, response.message);
-        await this.delay(500); // Esperar después del texto
+        await this.delay(500);
       }
 
       // ✅ PASO 3: BOTONES (si existen)
@@ -292,8 +262,6 @@ class HotelChatbot {
 
     } catch (error) {
       console.error(`❌ Error enviando ${responseKey}:`, error);
-
-      // Fallback elegante
       await this.sendFallbackResponse(userPhone, responseKey, error);
     }
   }
@@ -320,9 +288,6 @@ class HotelChatbot {
       console.error('💥 Error incluso en fallback:', fallbackError);
     }
   }
-
-  // El método sendTextMessage se ha eliminado porque ya existe una función global con el mismo nombre
-  // que está siendo importada al inicio del archivo
 }
 
 module.exports = new HotelChatbot();

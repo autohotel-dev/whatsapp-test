@@ -126,7 +126,7 @@ Escribe la *palabra clave* de tu interés para más información.`
   },
 
   servicios: {
-    message: `⭐ **Servicios del Hotel:**
+    message: `⭐ **Servicios del Motel:**
 
 - 🏊 Alberca
 - 🍽️ Servicio de comida y bebida (Servicio de habitación)
