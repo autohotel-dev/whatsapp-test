@@ -50,6 +50,8 @@ class HotelChatbot {
       switch (intent) {
         case 'menu':
           return this.sendInfoResponse(userPhone, 'menu');
+        case 'default':
+          return this.sendInfoResponse(userPhone, 'default');
         case 'reservar':
           console.log(`🎯 Activando flow de reserva para ${userPhone}`);
           // Primero enviar mensaje de confirmación
