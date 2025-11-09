@@ -129,7 +129,7 @@ Vamos a necesitar:
 *Presiona el botón "Reservar Ahora" para comenzar*`
       },
 
-      servicios_compania: {
+      exclusivos: {
         message: `💫 **Servicios Exclusivos**
 
 Para información sobre nuestros servicios premium y experiencias personalizadas, te invitamos a:
@@ -300,9 +300,9 @@ Escribe:
       ],
       exclusivos: [
         // Básicos y discretos
-        'compañía', 'exclusivos', 'compania', 'acompañamiento', 'acompanamiento',
+        'compañía', 'exclusivos', 'exclusivo', 'compania', 'acompañamiento', 'acompanamiento',
         'servicios exclusivos', 'servicios premium', 'servicios especiales',
-        'experiencias personalizadas', 'servicios personalizados', 'exclusivo', 'exclusivos', 'exclusivo',
+        'experiencias personalizadas', 'servicios personalizados', 'exclusivo', 'exclusivos',
 
         // Términos comunes en el ambiente
         'escorts', 'escort', 'escort service',
