@@ -120,45 +120,17 @@ class MessageSender {
    */
   async sendButtonMessage(phoneNumber, text, buttons) {
     try {
-      // Si hay más de 2 botones, usar lista para mejor presentación
-      if (buttons.length > 2) {
-        return this.sendListMessage(phoneNumber, text, "Selecciona una opción", [
-          {
-            title: "Opciones disponibles",
-            rows: buttons.map(button => ({
-              id: button.id,
-              title: button.title,
-              description: ""
-            }))
-          }
-        ]);
-      }
-
-      const messageData = {
-        messaging_product: "whatsapp",
-        to: this.formatPhoneNumber(phoneNumber),
-        type: "interactive",
-        interactive: {
-          type: "button",
-          body: {
-            text: text
-          },
-          action: {
-            buttons: buttons.map(button => ({
-              type: "reply",
-              reply: {
-                id: button.id,
-                title: button.title
-              }
-            }))
-          }
+      // Usar siempre lista para mejor presentación y mayor ancho
+      return this.sendListMessage(phoneNumber, text, "Selecciona una opción", [
+        {
+          title: "Opciones disponibles",
+          rows: buttons.map(button => ({
+            id: button.id,
+            title: button.title,
+            description: ""
+          }))
         }
-      };
-
-      console.log('Sending button message:', JSON.stringify(messageData, null, 2));
-      const response = await this.makeApiCall(messageData);
-      console.log('✅ Mensaje con botones enviado:', response.data);
-      return response.data;
+      ]);
     } catch (error) {
       console.error('❌ Error enviando mensaje con botones:', error.response?.data || error.message);
       throw error;
