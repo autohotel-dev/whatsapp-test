@@ -240,12 +240,14 @@ class HotelChatbot {
     }
 
     try {
-      // 1. Enviar imagen si existe (solo la primera imagen)
+      // 1. Enviar todas las imágenes primero
+      
+      // 1.1 Enviar imagen individual si existe
       if (response.image) {
         await sendImageMessage(userPhone, response.image, response.message || '');
       }
 
-      // 2. Enviar múltiples imágenes si existen
+      // 1.2 Enviar múltiples imágenes si existen
       if (response.images && response.images.length > 0) {
         for (const imageUrl of response.images) {
           await sendImageMessage(userPhone, imageUrl, '');
@@ -254,12 +256,15 @@ class HotelChatbot {
         }
       }
 
-      // 3. Finalmente, enviar el mensaje con botones si existen
-      if (response.buttons && response.buttons.length > 0) {
-        await sendButtonMessage(userPhone, response.text || 'Selecciona una opción', response.buttons);
-      } else if (response.message) {
-        // Solo enviar mensaje de texto si no hay botones
+      // 2. Luego, enviar el mensaje de texto si existe (sin botones)
+      if (response.message && !(response.buttons && response.buttons.length > 0)) {
         await sendTextMessage(userPhone, response.message);
+      }
+
+      // 3. Finalmente, si hay botones, enviar el mensaje con botones
+      if (response.buttons && response.buttons.length > 0) {
+        const buttonMessage = response.text || response.message || 'Selecciona una opción';
+        await sendButtonMessage(userPhone, buttonMessage, response.buttons);
       }
 
     } catch (error) {
