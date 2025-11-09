@@ -121,7 +121,7 @@ class MessageSender {
   async sendButtonMessage(phoneNumber, text, buttons) {
     try {
       // Usar siempre lista para mejor presentación y mayor ancho
-      return this.sendListMessage(phoneNumber, text, "Selecciona una opción", [
+      return this.sendListMessage(phoneNumber, text, "Opciones", [
         {
           title: "Opciones disponibles",
           rows: buttons.map(button => ({
