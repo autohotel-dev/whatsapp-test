@@ -254,35 +254,27 @@ class HotelChatbot {
     }
 
     try {
-      // 1. Manejar el caso de imágenes
+      // 1. Enviar imagen individual si existe
       if (response.image) {
-        // Si hay imagen individual, la enviamos con el mensaje (si existe)
-        await sendImageMessage(userPhone, response.image, response.message || '');
-      } else if (response.images && response.images.length > 0) {
-        // Si hay múltiples imágenes, las enviamos todas
+        await sendImageMessage(userPhone, response.image, '');
+      } 
+      // O enviar múltiples imágenes si existen
+      else if (response.images && response.images.length > 0) {
         for (const imageUrl of response.images) {
           await sendImageMessage(userPhone, imageUrl, '');
-          // Pequeña pausa entre imágenes para evitar rate limiting
           await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        // Si hay un mensaje y no hay imagen individual, lo enviamos después de las imágenes
-        if (response.message) {
-          await sendTextMessage(userPhone, response.message);
         }
       }
 
-      // 2. Manejar botones (si existen)
-      if (response.buttons && response.buttons.length > 0) {
-        // Si ya se mostró un mensaje con la imagen, no lo repetimos
-        const buttonMessage = (response.image || (response.images && response.images.length > 0)) 
-          ? (response.text || 'Selecciona una opción')
-          : (response.text || response.message || 'Selecciona una opción');
-        
-        await sendButtonMessage(userPhone, buttonMessage, response.buttons);
-      } 
-      // Si no hay botones ni imágenes, pero hay mensaje, lo enviamos
-      else if (response.message && !response.image && !(response.images && response.images.length > 0)) {
+      // 2. Enviar mensaje de texto si existe
+      if (response.message) {
         await sendTextMessage(userPhone, response.message);
+      }
+
+      // 3. Finalmente, enviar botones si existen
+      if (response.buttons && response.buttons.length > 0) {
+        const buttonMessage = response.text || 'Selecciona una opción';
+        await sendButtonMessage(userPhone, buttonMessage, response.buttons);
       }
 
     } catch (error) {
