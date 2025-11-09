@@ -136,12 +136,12 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
         buttons: [
             {
                 type: 'reply',
-                title: 'Ver fotos de habitaciones decoradas',
+                title: 'Ver fotos',  // Shortened from "Ver fotos de habitaciones decoradas"
                 id: 'ver_fotos'
             },
             {
                 type: 'reply',
-                title: 'Reservar Ahora',
+                title: 'Reservar',  // Shortened from "Reservar Ahora" to be consistent
                 id: 'reservar_ahora'
             }
         ]
