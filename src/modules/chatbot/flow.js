@@ -130,9 +130,9 @@ async function handleReservaScreen(data) {
   const hora = Array.isArray(HORAS_DATA) ? HORAS_DATA : [];
   const numero_personas = Array.isArray(PERSONAS_DATA) ? PERSONAS_DATA : [];
 
-  // Estructura del flow con el formato exacto esperado
+  // Estructura del flow con el formato exacto esperado por Meta
   const response = {
-    "version": "3.0",  // Añadido según la documentación
+    "version": "3.0",
     "screen": "RESERVA",
     "data": {
       "tipo_habitacion": tipo_habitacion,
@@ -145,7 +145,13 @@ async function handleReservaScreen(data) {
     }
   };
 
-  console.log('✅ Datos del flow preparados:', JSON.stringify(response, null, 2));
+  console.log('✅ Datos del flow preparados:');
+  console.log('   - Habitaciones:', tipo_habitacion.length, 'opciones');
+  console.log('   - Fechas:', fechas.length, 'opciones');
+  console.log('   - Horas:', hora.length, 'opciones');
+  console.log('   - Personas:', numero_personas.length, 'opciones');
+  console.log('   JSON completo:', JSON.stringify(response, null, 2));
+  
   return response;
 }
 
