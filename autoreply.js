@@ -251,7 +251,7 @@ class HotelChatbot {
         await this.delay(500);
       }
 
-      // ✅ PASO 3: BOTONES (si existen)
+      // ✅ PASO 3: BOTONES (si existen) - SIEMPRE SE EVALÚAN
       if (response.buttons && response.buttons.length > 0) {
         console.log(`🔘 Enviando ${response.buttons.length} botones`);
         const buttonMessage = response.text || '**Selecciona una opción**';
