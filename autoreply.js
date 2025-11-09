@@ -199,40 +199,40 @@ class HotelChatbot {
     return 'default';
   }
 
-  // In autoreply.js
-async sendInfoResponse(userPhone, responseKey) {
+  async sendInfoResponse(userPhone, responseKey) {
     const response = this.responses[responseKey];
     if (!response) {
-        console.error(`No se encontró respuesta para la clave: ${responseKey}`);
-        return;
+      console.error(`No se encontró respuesta para la clave: ${responseKey}`);
+      return;
     }
 
     try {
-        // Send the main message with buttons if they exist
-        if (response.buttons && response.buttons.length > 0) {
-            // Use the sendButtonMessage function directly
-            await sendButtonMessage(userPhone, response.message, response.buttons);
-        } else {
-            await sendTextMessage(userPhone, response.message);
-        }
+      // 1. Enviar imagen si existe (solo la primera imagen)
+      if (response.image) {
+        await sendImageMessage(userPhone, response.image, response.message || '');
+      }
 
-        // Send image if it exists
-        if (response.image) {
-            await sendImageMessage(userPhone, response.image, response.message || '');
+      // 2. Enviar múltiples imágenes si existen
+      if (response.images && response.images.length > 0) {
+        for (const imageUrl of response.images) {
+          await sendImageMessage(userPhone, imageUrl, '');
+          // Pequeña pausa entre imágenes para evitar rate limiting
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
+      }
 
-        // Send multiple images if they exist
-        if (response.images && response.images.length > 0) {
-            for (const imageUrl of response.images) {
-                await sendImageMessage(userPhone, imageUrl, '');
-                // Small delay between images to avoid rate limiting
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-        }
+      // 3. Finalmente, enviar el mensaje con botones si existen
+      if (response.buttons && response.buttons.length > 0) {
+        await sendButtonMessage(userPhone, response.message, response.buttons);
+      } else if (response.message) {
+        // Solo enviar mensaje de texto si no hay botones
+        await sendTextMessage(userPhone, response.message);
+      }
+
     } catch (error) {
-        console.error(`Error al enviar respuesta para ${responseKey}:`, error);
+      console.error(`Error al enviar respuesta para ${responseKey}:`, error);
     }
-}
+  }
 
   // ✅ MÉTODO PARA ENVIAR MENSAJES DE TEXTO (para usar desde app.js)
   async sendTextMessage(userPhone, message) {
