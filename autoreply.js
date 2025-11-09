@@ -1,5 +1,6 @@
 const { sendFlowMessage, sendTextMessage, sendImageMessage, sendButtonMessage } = require('./message-sender');
 const responses = require('./responses.js');
+const { database } = require('./database.js');
 
 class HotelChatbot {
   constructor() {
@@ -69,6 +70,21 @@ class HotelChatbot {
       // ✨ ANALYTICS: Tracking de intenciones
       this.analytics.intentCounts[intent] = (this.analytics.intentCounts[intent] || 0) + 1;
       this.trackUserInteraction(userPhone, 'message', intent);
+
+      // ✨ NUEVO: Guardar en base de datos (si está conectada)
+      if (database.isConnected()) {
+        // Guardar mensaje del usuario
+        await database.saveMessage(userPhone, {
+          text: cleanMessage,
+          intent: intent,
+          confidence: confidence,
+          direction: 'incoming',
+          messageType: 'text'
+        });
+
+        // Actualizar o crear perfil de usuario
+        await database.createOrUpdateUser(userPhone);
+      }
 
       // ✅ SWITCH CASE CORREGIDO
       switch (intent) {
@@ -509,6 +525,17 @@ Escribe la palabra clave o "menu" para ver todas las opciones.`;
       }
 
       console.log(`✅ Respuesta ${responseKey} enviada completamente`);
+
+      // ✨ NUEVO: Guardar respuesta del bot en BD (si está conectada)
+      if (database.isConnected()) {
+        await database.saveMessage(userPhone, {
+          text: response.message || `Respuesta: ${responseKey}`,
+          intent: responseKey,
+          confidence: 1.0,
+          direction: 'outgoing',
+          messageType: response.buttons ? 'button' : (response.image || response.images) ? 'image' : 'text'
+        });
+      }
 
     } catch (error) {
       console.error(`❌ Error enviando ${responseKey}:`, error);
