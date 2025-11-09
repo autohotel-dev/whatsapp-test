@@ -300,9 +300,9 @@ Escribe:
       ],
       exclusivos: [
         // Básicos y discretos
-        'compañía', 'compania', 'acompañamiento', 'acompanamiento',
+        'compañía', 'exclusivos', 'compania', 'acompañamiento', 'acompanamiento',
         'servicios exclusivos', 'servicios premium', 'servicios especiales',
-        'experiencias personalizadas', 'servicios personalizados',
+        'experiencias personalizadas', 'servicios personalizados', 'exclusivo', 'exclusivos', 'exclusivo',
 
         // Términos comunes en el ambiente
         'escorts', 'escort', 'escort service',
