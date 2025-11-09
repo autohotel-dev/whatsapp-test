@@ -199,23 +199,40 @@ class HotelChatbot {
     return 'default';
   }
 
-  async sendInfoResponse(userPhone, type) {
-    const response = this.responses[type];
+  // In autoreply.js
+async sendInfoResponse(userPhone, responseKey) {
+    const response = this.responses[responseKey];
+    if (!response) {
+        console.error(`No se encontró respuesta para la clave: ${responseKey}`);
+        return;
+    }
 
     try {
-      if (response.image) {
-        // Enviar imagen + texto
-        await sendImageMessage(userPhone, response.image, response.message);
-      } else {
-        // Enviar solo texto
-        await sendTextMessage(userPhone, response.message);
-      }
+        // Send the main message with buttons if they exist
+        if (response.buttons && response.buttons.length > 0) {
+            // Use the sendButtonMessage function directly
+            await sendButtonMessage(userPhone, response.message, response.buttons);
+        } else {
+            await sendTextMessage(userPhone, response.message);
+        }
+
+        // Send image if it exists
+        if (response.image) {
+            await sendImageMessage(userPhone, response.image, response.message || '');
+        }
+
+        // Send multiple images if they exist
+        if (response.images && response.images.length > 0) {
+            for (const imageUrl of response.images) {
+                await sendImageMessage(userPhone, imageUrl, '');
+                // Small delay between images to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
     } catch (error) {
-      console.error(`❌ Error enviando ${type}:`, error);
-      // Fallback: enviar solo texto si la imagen falla
-      await sendTextMessage(userPhone, response.message);
+        console.error(`Error al enviar respuesta para ${responseKey}:`, error);
     }
-  }
+}
 
   // ✅ MÉTODO PARA ENVIAR MENSAJES DE TEXTO (para usar desde app.js)
   async sendTextMessage(userPhone, message) {
