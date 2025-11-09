@@ -9,6 +9,21 @@ class HotelChatbot {
   }
 
   async handleMessage(userPhone, messageText) {
+    // If it's a button click, handle it directly
+    if (buttonId) {
+      console.log(`🔄 Procesando botón: ${buttonId} de ${userPhone}`);
+      switch (buttonId) {
+        case 'ver_fotos':
+          return this.sendInfoResponse(userPhone, 'fotos');
+        case 'reservar_ahora':
+          await sendTextMessage(userPhone, this.responses.reservar.message);
+          return sendFlowMessage(userPhone);
+        default:
+          console.log(`❌ Botón no reconocido: ${buttonId}`);
+          return sendTextMessage(userPhone, 'Opción no reconocida. Por favor intenta de nuevo.');
+      }
+    }
+    
     const cleanMessage = messageText.toLowerCase().trim();
 
     // ✅ VERIFICAR RATE LIMITING
