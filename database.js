@@ -138,10 +138,7 @@ class Database {
         return;
       }
 
-      await mongoose.connect(this.connectionString, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      });
+      await mongoose.connect(this.connectionString);
 
       this.connected = true;
       console.log('✅ Conectado a MongoDB exitosamente');
