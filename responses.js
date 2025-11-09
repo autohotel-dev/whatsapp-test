@@ -79,7 +79,7 @@ Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nue
   - 👤 Persona extra $380 MXN 
   - 👥 Máximo 10 personas
 
-*Incluye internet gratis, amenidades, servicio de habitación y servicio de comida*`,
+*Incluye internet gratis, amenidades, servicio a la habitación*`,
         image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg'
     },
 
@@ -127,6 +127,27 @@ Escribe "menu" para ver nuevamente las opciones.`
 ¿Necesitas indicaciones para llegar?
 Da click en el enlace "Ver en Google Maps"
 https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
+    },
+
+    paquetes: {
+        message: `⭐ **Paquetes Disponibles:**`,
+        image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
+        message: `Escribe "menu" para ver nuevamente las opciones.`,
+        button: 'Reservar Ahora'
+    },
+    fotos: {
+        message: `📸 **Fotos:**`,
+        images: [
+            'https://autohoteluxor.com/src/images/hab1.jpg', 
+            'https://autohoteluxor.com/src/images/hab2.jpg', 
+            'https://autohoteluxor.com/src/images/hab3.jpg', 
+            'https://autohoteluxor.com/src/images/hab4.jpg', 
+            'https://autohoteluxor.com/src/images/hab5.jpg', 
+            'https://autohoteluxor.com/src/images/hab6.jpg', 
+            'https://autohoteluxor.com/src/images/hab7.jpg', 
+        ],
+        message: `Escribe "menu" para ver nuevamente las opciones.`,
+        button: 'Reservar Ahora'
     },
 
     reservar: {
