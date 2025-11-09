@@ -50,6 +50,7 @@ Escribe la *palabra clave* de tu interés para más información.`
   },
 
   habitaciones: {
+    image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg',
     message: `🏨 **Tipos de Habitaciones Disponibles:**
 
 - 🛏 **Master Suite Junior** 
@@ -78,10 +79,10 @@ Escribe la *palabra clave* de tu interés para más información.`
         id: 'menu'
       }
     ],
-    image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
   },
 
   precios: {
+    image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg',
     message: `💰 **Tarifas por horas y/o noche:**
 
 - Master Suite Junior: $520 MXN para 2 👥 personas 
@@ -122,7 +123,6 @@ Escribe la *palabra clave* de tu interés para más información.`
         id: 'menu'
       }
     ],
-    image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg'
   },
 
   servicios: {

@@ -254,31 +254,35 @@ class HotelChatbot {
     }
 
     try {
-      // 1. Enviar todas las imágenes primero
-      
-      // 1.1 Enviar imagen individual si existe
+      // 1. Manejar el caso de imágenes
       if (response.image) {
+        // Si hay imagen individual, la enviamos con el mensaje (si existe)
         await sendImageMessage(userPhone, response.image, response.message || '');
-      }
-
-      // 1.2 Enviar múltiples imágenes si existen
-      if (response.images && response.images.length > 0) {
+      } else if (response.images && response.images.length > 0) {
+        // Si hay múltiples imágenes, las enviamos todas
         for (const imageUrl of response.images) {
           await sendImageMessage(userPhone, imageUrl, '');
           // Pequeña pausa entre imágenes para evitar rate limiting
           await new Promise(resolve => setTimeout(resolve, 500));
         }
+        // Si hay un mensaje y no hay imagen individual, lo enviamos después de las imágenes
+        if (response.message) {
+          await sendTextMessage(userPhone, response.message);
+        }
       }
 
-      // 2. Luego, enviar el mensaje de texto si existe (sin botones)
-      if (response.message && !(response.buttons && response.buttons.length > 0)) {
-        await sendTextMessage(userPhone, response.message);
-      }
-
-      // 3. Finalmente, si hay botones, enviar el mensaje con botones
+      // 2. Manejar botones (si existen)
       if (response.buttons && response.buttons.length > 0) {
-        const buttonMessage = response.text || response.message || 'Selecciona una opción';
+        // Si ya se mostró un mensaje con la imagen, no lo repetimos
+        const buttonMessage = (response.image || (response.images && response.images.length > 0)) 
+          ? (response.text || 'Selecciona una opción')
+          : (response.text || response.message || 'Selecciona una opción');
+        
         await sendButtonMessage(userPhone, buttonMessage, response.buttons);
+      } 
+      // Si no hay botones ni imágenes, pero hay mensaje, lo enviamos
+      else if (response.message && !response.image && !(response.images && response.images.length > 0)) {
+        await sendTextMessage(userPhone, response.message);
       }
 
     } catch (error) {
