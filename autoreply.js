@@ -8,7 +8,7 @@ class HotelChatbot {
     this.MIN_TIME_BETWEEN_MESSAGES = 2000; // 2 segundos mínimo entre mensajes
   }
 
-  async handleMessage(userPhone, messageText) {
+  async handleMessage(userPhone, messageText, buttonId = null) {
     // If it's a button click, handle it directly
     if (buttonId) {
       console.log(`🔄 Procesando botón: ${buttonId} de ${userPhone}`);
@@ -23,7 +23,7 @@ class HotelChatbot {
           return sendTextMessage(userPhone, 'Opción no reconocida. Por favor intenta de nuevo.');
       }
     }
-    
+
     const cleanMessage = messageText.toLowerCase().trim();
 
     // ✅ VERIFICAR RATE LIMITING
