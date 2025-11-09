@@ -71,6 +71,17 @@ class HotelChatbot {
           await sendTextMessage(userPhone, this.responses.ubicacion.message);
           break;
 
+        case 'ver_fotos':
+          // Manejar clic en el botón "Ver fotos"
+          await this.sendInfoResponse(userPhone, 'fotos');
+          break;
+
+        case 'reservar_ahora':
+          // Manejar clic en el botón "Reservar"
+          await sendTextMessage(userPhone, this.responses.reservar.message);
+          await sendFlowMessage(userPhone);
+          break;
+
         default:
           // ✅ EVITAR RESPONDER A MENSAJES MUY CORTOS O VACÍOS
           if (this.shouldRespondToDefault(cleanMessage)) {

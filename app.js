@@ -25,14 +25,14 @@ setInterval(() => {
 // ✅ FUNCIÓN PARA DETECTAR INTENCIÓN DE RESERVA (CORREGIDA)
 function isReservationIntent(message) {
   const reservationKeywords = [
-    'reservar', 'reserva', 'reservación', 'reservacion', 
-    'hacer reserva', 'quiero reservar', 'reservar ahora', 
+    'reservar', 'reserva', 'reservación', 'reservacion',
+    'hacer reserva', 'quiero reservar', 'reservar ahora',
     'agendar', 'booking', 'quiero una habitación',
     'necesito una habitación', 'disponibilidad', 'reservar habitación',
     'reservar cuarto', 'hacer reservación'
   ];
-  
-  return reservationKeywords.some(keyword => 
+
+  return reservationKeywords.some(keyword =>
     message.includes(keyword)
   );
 }
@@ -84,16 +84,16 @@ app.post('/webhook', async (req, res) => {
 
       // ✅ DETECTAR SI ES UNA RESERVA PARA ENVIAR FLOW
       const cleanMessage = messageText.toLowerCase().trim();
-      
+
       if (isReservationIntent(cleanMessage)) { // ✅ CORREGIDO: usar la función directamente
         console.log(`🎯 Usuario ${userPhone} quiere reservar - Enviando flow`);
-        
+
         try {
           // Enviar mensaje de confirmación primero
-          await hotelChatbot.sendTextMessage(userPhone, 
+          await hotelChatbot.sendTextMessage(userPhone,
             `🎉 ¡Excelente! Te ayudo a reservar tu habitación.\n\nVamos a necesitar:\n1. 🏨 Tipo de habitación\n2. 📅 Fecha de reservación\n3. 👥 Número de personas\n4. 📝 Tus datos de contacto\n\n*Presiona el botón "Comenzar Reserva" para continuar*`
           );
-          
+
           // Enviar el flow después de un breve delay
           setTimeout(async () => {
             try {
@@ -107,7 +107,7 @@ app.post('/webhook', async (req, res) => {
               );
             }
           }, 1000);
-          
+
         } catch (error) {
           console.error(`❌ Error procesando reserva para ${userPhone}:`, error);
           await hotelChatbot.sendTextMessage(userPhone,
@@ -126,7 +126,7 @@ app.post('/webhook', async (req, res) => {
     if (message && message.type === 'interactive') {
       const userPhone = message.from;
       const messageId = message.id;
-      
+
       // ✅ EVITAR DUPLICADOS
       if (messageCache.has(messageId)) {
         console.log(`⏭️  Mensaje interactivo duplicado ${messageId} - Ignorando`);
@@ -134,11 +134,19 @@ app.post('/webhook', async (req, res) => {
       }
 
       messageCache.set(messageId, Date.now());
-      
-      const interactiveType = message.interactive.type;
-      console.log(`🔘 Mensaje interactivo de ${userPhone}: ${interactiveType}`);
 
-      // Manejar otros tipos de mensajes interactivos si es necesario
+      const interactive = message.interactive;
+      console.log(`🔘 Mensaje interactivo de ${userPhone}:`, interactive.type);
+
+      // Manejar clic en botones
+      if (interactive.type === 'button_reply') {
+        const buttonId = interactive.button_reply.id;
+        console.log(`🔄 Botón presionado: ${buttonId}`);
+        await hotelChatbot.handleMessage(userPhone, null, buttonId);
+      }
+      // Puedes agregar más tipos de mensajes interactivos aquí si es necesario
+      // else if (interactive.type === 'list_reply') { ... }
+
       return res.status(200).send('EVENT_RECEIVED');
     }
 
@@ -203,7 +211,7 @@ app.post('/test-flow/:phone', async (req, res) => {
   try {
     const phone = req.params.phone;
     console.log(`🧪 Test manual de flow para: ${phone}`);
-    
+
     await sendFlowMessage(phone);
     res.json({ success: true, message: 'Flow enviado para testing' });
   } catch (error) {
@@ -215,7 +223,7 @@ app.post('/test-flow/:phone', async (req, res) => {
 // ✅ MANEJO DE ERRORES GLOBAL
 app.use((error, req, res, next) => {
   console.error('💥 Error global no manejado:', error);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal Server Error',
     message: 'Algo salió mal en el servidor'
   });
