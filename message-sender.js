@@ -5,7 +5,7 @@ class MessageSender {
     this.accessToken = process.env.VERIFY_TOKEN;
     this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
     this.flowId = process.env.FLOW_ID;
-    
+
     this.validateConfig();
   }
 
@@ -130,10 +130,10 @@ class MessageSender {
             text: text
           },
           action: {
-            buttons: buttons.map((button, index) => ({
+            buttons: buttons.map(button => ({
               type: "reply",
               reply: {
-                id: `btn_${index + 1}`,
+                id: button.id,
                 title: button.title
               }
             }))
@@ -141,6 +141,7 @@ class MessageSender {
         }
       };
 
+      console.log('Sending button message:', JSON.stringify(messageData, null, 2));
       const response = await this.makeApiCall(messageData);
       console.log('✅ Mensaje con botones enviado:', response.data);
       return response.data;
@@ -315,7 +316,7 @@ class MessageSender {
             description: "Piscina con vista al mar"
           },
           {
-            id: "servicio_2", 
+            id: "servicio_2",
             title: "🍽️ Restaurantes",
             description: "3 restaurantes gourmet"
           },
@@ -377,7 +378,7 @@ class MessageSender {
   formatPhoneNumber(phoneNumber) {
     // Remover espacios, guiones, paréntesis
     let cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
-    
+
     // Si no tiene código de país, agregar +52 (México) por defecto
     if (!cleanNumber.startsWith('+')) {
       if (cleanNumber.startsWith('52')) {
@@ -388,7 +389,7 @@ class MessageSender {
         cleanNumber = '+52' + cleanNumber;
       }
     }
-    
+
     return cleanNumber;
   }
 
@@ -409,7 +410,7 @@ class MessageSender {
           }
         }
       );
-      
+
       return response.data.id !== undefined;
     } catch (error) {
       console.error('Error verificando número:', error.response?.data || error.message);
@@ -425,7 +426,7 @@ const messageSender = new MessageSender();
 module.exports = {
   // Instancia completa
   messageSender,
-  
+
   // Funciones individuales (más fáciles de usar)
   sendTextMessage: (phone, text) => messageSender.sendTextMessage(phone, text),
   sendFlowMessage: (phone, token) => messageSender.sendFlowMessage(phone, token),
