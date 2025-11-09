@@ -254,10 +254,10 @@ class HotelChatbot {
 
       // 3. Finalmente, enviar el mensaje con botones si existen
       if (response.buttons && response.buttons.length > 0) {
-        await sendButtonMessage(userPhone, response.message, response.buttons);
+        await sendButtonMessage(userPhone, response.text || 'Por favor selecciona una opción:', response.buttons);
       } else if (response.message) {
         // Solo enviar mensaje de texto si no hay botones
-        await sendTextMessage(userPhone, response.message);
+        await sendTextMessage(userPhone, response.text);
       }
 
     } catch (error) {
