@@ -1,6 +1,6 @@
 module.exports = {
-    default: {
-        message: `🌟 *¡Bienvenido a Auto Hotel Luxor!* 🌟
+  default: {
+    message: `🌟 *¡Bienvenido a Auto Hotel Luxor!* 🌟
 
 *¿En qué podemos ayudarte hoy?* 👇
 
@@ -22,10 +22,10 @@ module.exports = {
 - 🚪 *Habitaciones Estándar*: Sujetas a disponibilidad
 
 Escribe la *palabra clave* de tu interés para más información.`
-    },
+  },
 
-    habitaciones: {
-        message: `🏨 **Tipos de Habitaciones Disponibles:**
+  habitaciones: {
+    message: `🏨 **Tipos de Habitaciones Disponibles:**
 
 - 🛏 **Master Suite Junior** 
   - Habitación de torre (Hotel)
@@ -43,11 +43,11 @@ Escribe la *palabra clave* de tu interés para más información.`
   - Habitación con alberca
 
 Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nuevamente las opciones.`,
-        image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
-    },
+    image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
+  },
 
-    precios: {
-        message: `💰 **Tarifas por horas y/o noche:**
+  precios: {
+    message: `💰 **Tarifas por horas y/o noche:**
 
 - Master Suite Junior: $520 MXN para 2 👥 personas 
   - 🕒 Hora extra $110 MXN 
@@ -80,11 +80,11 @@ Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nue
   - 👥 Máximo 10 personas
 
 *Incluye internet gratis, amenidades, servicio a la habitación*`,
-        image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg'
-    },
+    image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg'
+  },
 
-    servicios: {
-        message: `⭐ **Servicios del Hotel:**
+  servicios: {
+    message: `⭐ **Servicios del Hotel:**
 
 - 🏊 Alberca
 - 🍽️ Servicio de comida y bebida (Servicio de habitación)
@@ -96,10 +96,10 @@ Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nue
 - 🧼 Amenidades
 
 Escribe "menu" para ver nuevamente las opciones.`
-    },
+  },
 
-    horarios: {
-        message: `🕒 **Horarios:**
+  horarios: {
+    message: `🕒 **Horarios:**
 
 - Domingo a partir de las 06:00 am a Viernes a las 06:00 am, estancia de 12 Horas.
 
@@ -112,10 +112,10 @@ Escribe "menu" para ver nuevamente las opciones.`
 - Servicio de snacks de Lunes a Domingo de 22:00 - 4:00
 
 Escribe "menu" para ver nuevamente las opciones.`
-    },
+  },
 
-    ubicacion: {
-        message: `📍 **Ubicación:**
+  ubicacion: {
+    message: `📍 **Ubicación:**
 
 🏨 Auto Hotel Luxor
 🌊 Av. Prol. Boulevard Bernardo Quintana, 1000B
@@ -127,50 +127,51 @@ Escribe "menu" para ver nuevamente las opciones.`
 ¿Necesitas indicaciones para llegar?
 Da click en el enlace "Ver en Google Maps"
 https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
-    },
+  },
 
-    paquetes: {
-        image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
-        buttons: [
-            {
-                type: 'reply',
-                title: 'Ver fotos',  // Shortened from "Ver fotos de habitaciones decoradas"
-                id: 'ver_fotos'
-            },
-            {
-                type: 'reply',
-                title: 'Reservar',  // Shortened from "Reservar Ahora" to be consistent
-                id: 'reservar_ahora'
-            }
-        ]
-    },
-    fotos: {
-        message: `📸 **Fotos:**`,
-        images: [
-            'https://autohoteluxor.com/src/images/hab1.jpg',
-            'https://autohoteluxor.com/src/images/hab2.jpg',
-            'https://autohoteluxor.com/src/images/hab3.jpg',
-            'https://autohoteluxor.com/src/images/hab4.jpg',
-            'https://autohoteluxor.com/src/images/hab5.jpg',
-            'https://autohoteluxor.com/src/images/hab6.jpg',
-            'https://autohoteluxor.com/src/images/hab7.jpg',
-        ],
-        buttons: [
-            {
-                type: 'reply',
-                title: 'Reservar',  // Shortened from "Reservar Ahora" to be consistent
-                id: 'reservar_ahora'
-            },
-            {
-                type: 'reply',
-                title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
-                id: 'menu'
-            }
-        ]
-    },
+  paquetes: {
+    text: "🌟 *Paquetes de Decoración Especial* 🌟\n\n¡Descubre nuestras opciones de paquetes decorados para una experiencia única! ¿Qué te gustaría hacer?",
+    image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Ver fotos',  // Shortened from "Ver fotos de habitaciones decoradas"
+        id: 'ver_fotos'
+      },
+      {
+        type: 'reply',
+        title: 'Reservar',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'reservar_ahora'
+      }
+    ]
+  },
+  fotos: {
+    message: `📸 **Fotos:**`,
+    images: [
+      'https://autohoteluxor.com/src/images/hab1.jpg',
+      'https://autohoteluxor.com/src/images/hab2.jpg',
+      'https://autohoteluxor.com/src/images/hab3.jpg',
+      'https://autohoteluxor.com/src/images/hab4.jpg',
+      'https://autohoteluxor.com/src/images/hab5.jpg',
+      'https://autohoteluxor.com/src/images/hab6.jpg',
+      'https://autohoteluxor.com/src/images/hab7.jpg',
+    ],
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Reservar',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'reservar_ahora'
+      },
+      {
+        type: 'reply',
+        title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'menu'
+      }
+    ]
+  },
 
-    reservar: {
-        message: `🎉 ¡Excelente! Te ayudo a reservar tu habitación.
+  reservar: {
+    message: `🎉 ¡Excelente! Te ayudo a reservar tu habitación.
 
 Vamos a necesitar:
 1. 🏨 Tipo de habitación
@@ -179,10 +180,10 @@ Vamos a necesitar:
 4. 📝 Tus datos de contacto
 
 *Presiona el botón "Reservar Ahora" para comenzar*`
-    },
+  },
 
-    exclusivos: {
-        message: `💫 **Servicios Exclusivos**
+  exclusivos: {
+    message: `💫 **Servicios Exclusivos**
 
 Para información sobre nuestros servicios premium y experiencias personalizadas, te invitamos a:
 
@@ -192,10 +193,10 @@ Para información sobre nuestros servicios premium y experiencias personalizadas
 Nuestro equipo te atenderá de manera discreta y profesional para proporcionarte todos los detalles sobre las opciones disponibles.
 
 *Atención confidencial y personalizada*`
-    },
+  },
 
-    // Respuestas rápidas
-    gracias: "¡Gracias por contactarnos! ¿En qué más podemos ayudarte? 😊",
-    hola: "¡Hola! Bienvenido a Auto Hotel Luxor. ¿En qué puedo ayudarte hoy? 😊",
-    ayuda: "Escribe 'menu' para ver las opciones disponibles o cuéntame en qué necesitas ayuda."
+  // Respuestas rápidas
+  gracias: "¡Gracias por contactarnos! ¿En qué más podemos ayudarte? 😊",
+  hola: "¡Hola! Bienvenido a Auto Hotel Luxor. ¿En qué puedo ayudarte hoy? 😊",
+  ayuda: "Escribe 'menu' para ver las opciones disponibles o cuéntame en qué necesitas ayuda."
 };
