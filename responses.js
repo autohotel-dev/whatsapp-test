@@ -24,6 +24,31 @@ module.exports = {
 Escribe la *palabra clave* de tu interés para más información.`
   },
 
+  menu: {
+    message: `🌟 *¡Bienvenido a Auto Hotel Luxor!* 🌟
+
+*¿En qué podemos ayudarte hoy?* 👇
+
+*🏨 HABITACIONES Y RESERVAS*
+- 🛌 *"Habitaciones"* - Conoce nuestros tipos de habitación
+- 💰 *"Precios"* - Consulta nuestras tarifas
+- 🎀 *"Paquetes"* - Paquetes de decoración especial
+- 📸 *"Fotos"* - Galería de habitaciones decoradas
+- 📅 *"Reservar"* - Haz tu reserva ahora
+
+*🏨 SERVICIOS E INFORMACIÓN*
+- ⭐ *"Servicios"* - Conoce nuestras comodidades
+- 🕒 *"Horarios"* - Nuestro horario de atención
+- 📍 *"Ubicación"* - Cómo llegar y datos de contacto
+- 💫 *"Exclusivos"* - Experiencias personalizadas
+
+*📌 POLÍTICAS IMPORTANTES*
+- 🎀 *Habitaciones Decoradas*: Reserva con 2 días de anticipación
+- 🚪 *Habitaciones Estándar*: Sujetas a disponibilidad
+
+Escribe la *palabra clave* de tu interés para más información.`
+  },
+
   habitaciones: {
     message: `🏨 **Tipos de Habitaciones Disponibles:**
 
