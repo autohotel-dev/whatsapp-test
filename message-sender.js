@@ -169,9 +169,6 @@ class MessageSender {
           body: {
             text: text
           },
-          footer: {
-            text: "Selecciona una opción"
-          },
           action: {
             button: buttonText,
             sections: sections
