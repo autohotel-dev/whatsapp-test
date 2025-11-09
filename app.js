@@ -5,6 +5,7 @@ const { encryptResponse } = require('./src/utils/encrypt.js');
 const { processFlowLogic } = require('./src/modules/chatbot/flow.js');
 const hotelChatbot = require('./src/modules/chatbot/autoreply.js');
 const sendFlowMessage = require('./src/services/send-flow-message.js');
+const { sendTextMessage } = require('./src/services/message-sender.js');
 const analytics = require('./src/modules/analytics/analytics.js');
 const { database } = require('./src/modules/database/database.js');
 const aiNLP = require('./src/modules/ai/ai-nlp.js');
@@ -99,7 +100,7 @@ app.post('/webhook', async (req, res) => {
 
         try {
           // Enviar mensaje de confirmación primero
-          await hotelChatbot.sendTextMessage(userPhone,
+          await sendTextMessage(userPhone,
             `🎉 ¡Excelente! Te ayudo a reservar tu habitación.\n\nVamos a necesitar:\n1. 🏨 Tipo de habitación\n2. 📅 Fecha de reservación\n3. 👥 Número de personas\n4. 📝 Tus datos de contacto\n\n*Presiona el botón "Comenzar Reserva" para continuar*`
           );
 
@@ -111,7 +112,7 @@ app.post('/webhook', async (req, res) => {
             } catch (flowError) {
               console.error(`❌ Error enviando flow a ${userPhone}:`, flowError.message);
               // Fallback: enviar mensaje de error
-              await hotelChatbot.sendTextMessage(userPhone,
+              await sendTextMessage(userPhone,
                 '⚠️ Lo siento, hubo un problema al cargar el formulario de reserva. Por favor intenta de nuevo en unos momentos o contacta a recepción al 442 210 3292.'
               );
             }
@@ -119,7 +120,7 @@ app.post('/webhook', async (req, res) => {
 
         } catch (error) {
           console.error(`❌ Error procesando reserva para ${userPhone}:`, error);
-          await hotelChatbot.sendTextMessage(userPhone,
+          await sendTextMessage(userPhone,
             '⚠️ Lo siento, hubo un error. Por favor intenta de nuevo.'
           );
         }

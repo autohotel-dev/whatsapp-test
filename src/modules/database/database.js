@@ -316,15 +316,22 @@ class Database {
       };
 
       const scoreChange = scoreMap[intent] || 0;
-
-      await User.findOneAndUpdate(
-        { phone: userPhone },
-        { 
-          $inc: { leadScore: scoreChange },
-          $max: { leadScore: 100 },
-          $min: { leadScore: 0 }
+      
+      if (scoreChange !== 0) {
+        // Obtener usuario actual
+        const user = await User.findOne({ phone: userPhone });
+        if (user) {
+          // Calcular nuevo score con límites
+          let newScore = (user.leadScore || 0) + scoreChange;
+          newScore = Math.max(0, Math.min(100, newScore)); // Entre 0 y 100
+          
+          // Actualizar
+          await User.findOneAndUpdate(
+            { phone: userPhone },
+            { $set: { leadScore: newScore } }
+          );
         }
-      );
+      }
     } catch (error) {
       console.error('❌ Error actualizando lead score:', error.message);
     }
