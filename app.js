@@ -4,6 +4,7 @@ const { encryptResponse } = require('./encrypt.js');
 const { processFlowLogic } = require('./flow.js');
 const hotelChatbot = require('./autoreply.js');
 const sendFlowMessage = require('./send-flow-message.js');
+const analytics = require('./analytics.js');
 
 const app = express();
 app.use(express.json());
@@ -220,6 +221,65 @@ app.post('/test-flow/:phone', async (req, res) => {
   }
 });
 
+// ✨ NUEVO: ENDPOINT DE ANALYTICS
+app.get('/analytics', (req, res) => {
+  try {
+    const data = analytics.exportAnalytics();
+    res.json({
+      success: true,
+      ...data
+    });
+  } catch (error) {
+    console.error('Error obteniendo analytics:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ✨ NUEVO: ANALYTICS DE USUARIO ESPECÍFICO
+app.get('/analytics/user/:phone', (req, res) => {
+  try {
+    const phone = req.params.phone;
+    const stats = hotelChatbot.getUserStats(phone);
+    
+    if (!stats) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'No hay datos para este usuario' 
+      });
+    }
+    
+    res.json({
+      success: true,
+      phone,
+      stats
+    });
+  } catch (error) {
+    console.error('Error obteniendo stats de usuario:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ✨ NUEVO: RESUMEN RÁPIDO DE ANALYTICS (Para dashboard)
+app.get('/analytics/summary', (req, res) => {
+  try {
+    const data = hotelChatbot.getAnalytics();
+    res.json({
+      success: true,
+      summary: {
+        totalMessages: data.totalMessages,
+        activeUsers: data.activeUsers,
+        totalUsers: data.totalUsers,
+        errorRate: data.errorRate,
+        topIntent: data.topIntents[0]?.[0] || 'N/A',
+        topIntentCount: data.topIntents[0]?.[1] || 0
+      }
+    });
+  } catch (error) {
+    console.error('Error obteniendo resumen:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ✅ MANEJO DE ERRORES GLOBAL
 app.use((error, req, res, next) => {
   console.error('💥 Error global no manejado:', error);
@@ -232,14 +292,30 @@ app.use((error, req, res, next) => {
 // ✅ INICIAR SERVIDOR
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('🏨 ==================================');
-  console.log('🏨 AUTO HOTEL LUXOR CHATBOT');
-  console.log('🏨 ==================================');
+  console.log('🏨 ==========================================');
+  console.log('🏨 AUTO HOTEL LUXOR CHATBOT v2.1');
+  console.log('🏨 ==========================================');
   console.log('✅ Servidor iniciado en puerto:', PORT);
-  console.log('✅ Webhook: /webhook');
-  console.log('✅ Health check: /health');
-  console.log('✅ Flow activado con: "reservar habitación"');
-  console.log('🏨 ==================================');
+  console.log('');
+  console.log('📍 ENDPOINTS PRINCIPALES:');
+  console.log('  • POST /webhook - Webhook de WhatsApp');
+  console.log('  • GET  /webhook - Verificación de webhook');
+  console.log('  • GET  /health - Health check');
+  console.log('  • POST /test-flow/:phone - Test manual de flow');
+  console.log('');
+  console.log('📊 ENDPOINTS DE ANALYTICS:');
+  console.log('  • GET  /analytics - Métricas completas');
+  console.log('  • GET  /analytics/summary - Resumen rápido');
+  console.log('  • GET  /analytics/user/:phone - Stats de usuario');
+  console.log('');
+  console.log('✨ NUEVAS CARACTERÍSTICAS:');
+  console.log('  ✓ Sistema de contexto conversacional');
+  console.log('  ✓ Detección de intenciones con scoring');
+  console.log('  ✓ Rate limiting avanzado anti-spam');
+  console.log('  ✓ Analytics y métricas en tiempo real');
+  console.log('  ✓ Manejo de errores con reintentos');
+  console.log('  ✓ Respuestas inteligentes para baja confianza');
+  console.log('🏨 ==========================================');
 });
 
 module.exports = app;

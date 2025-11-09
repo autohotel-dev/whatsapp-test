@@ -6,28 +6,69 @@ class HotelChatbot {
     this.responses = responses;
     this.userLastMessage = new Map();
     this.MIN_TIME_BETWEEN_MESSAGES = 2000; // 2 segundos mínimo entre mensajes
+    
+    // ✨ NUEVO: Sistema de contexto conversacional
+    this.userContext = new Map(); // Guarda el contexto de cada usuario
+    this.userSessionTimeout = 30 * 60 * 1000; // 30 minutos
+    
+    // ✨ NUEVO: Analytics y métricas
+    this.analytics = {
+      totalMessages: 0,
+      intentCounts: {},
+      errorCount: 0,
+      userInteractions: new Map()
+    };
+    
+    // ✨ NUEVO: Rate limiting avanzado
+    this.userMessageCount = new Map(); // Contador de mensajes por usuario
+    this.MAX_MESSAGES_PER_MINUTE = 15;
+    
+    // ✨ NUEVO: FAQ común
+    this.commonFAQ = {
+      'cuanto cuesta': 'precios',
+      'esta abierto': 'horarios',
+      'donde estan': 'ubicacion',
+      'que incluye': 'servicios',
+      'como reservo': 'reservar'
+    };
   }
 
   async handleMessage(userPhone, messageText, buttonId = null) {
     try {
+      // ✨ ANALYTICS: Incrementar contador
+      this.analytics.totalMessages++;
+      
       // If it's a button click, handle it directly
       if (buttonId) {
         console.log(`🔄 Procesando botón: ${buttonId} de ${userPhone}`);
+        this.trackUserInteraction(userPhone, 'button_click', buttonId);
         return this.handleButtonClick(userPhone, buttonId);
       }
 
       const cleanMessage = messageText.toLowerCase().trim();
 
-      // ✅ VERIFICAR RATE LIMITING
-      if (!this.checkRateLimit(userPhone)) {
-        console.log(`⏰ Rate limiting para ${userPhone} - Mensaje muy rápido`);
+      // ✅ VERIFICAR RATE LIMITING AVANZADO
+      if (!this.checkAdvancedRateLimit(userPhone)) {
+        console.log(`⏰ Rate limiting para ${userPhone} - Demasiados mensajes`);
+        this.trackUserInteraction(userPhone, 'rate_limited');
         return;
       }
 
       console.log(`💬 Mensaje de ${userPhone}: "${cleanMessage}"`);
 
-      // Detectar intención del usuario
-      const intent = this.detectIntent(cleanMessage);
+      // ✨ NUEVO: Actualizar contexto de usuario
+      this.updateUserContext(userPhone, cleanMessage);
+
+      // ✨ MEJORADO: Detectar intención con scoring
+      const intentResult = this.detectIntentWithScore(cleanMessage);
+      const intent = intentResult.intent;
+      const confidence = intentResult.confidence;
+      
+      console.log(`🎯 Intención detectada: ${intent} (confianza: ${(confidence * 100).toFixed(1)}%)`);
+      
+      // ✨ ANALYTICS: Tracking de intenciones
+      this.analytics.intentCounts[intent] = (this.analytics.intentCounts[intent] || 0) + 1;
+      this.trackUserInteraction(userPhone, 'message', intent);
 
       // ✅ SWITCH CASE CORREGIDO
       switch (intent) {
@@ -58,8 +99,12 @@ class HotelChatbot {
           await sendFlowMessage(userPhone);
           break;
         default:
-          // ✅ EVITAR RESPONDER A MENSAJES MUY CORTOS O VACÍOS
-          if (this.shouldRespondToDefault(cleanMessage)) {
+          // ✨ MEJORADO: Verificar confianza antes de responder
+          if (confidence < 0.3) {
+            // Baja confianza - ofrecer ayuda
+            console.log(`❓ Baja confianza (${(confidence * 100).toFixed(1)}%) para: "${cleanMessage}"`);
+            await this.sendLowConfidenceResponse(userPhone, cleanMessage);
+          } else if (this.shouldRespondToDefault(cleanMessage)) {
             await sendTextMessage(userPhone, this.responses.default.message);
           } else {
             console.log(`🔇 Ignorando mensaje corto/vacío: "${cleanMessage}"`);
@@ -68,7 +113,8 @@ class HotelChatbot {
       }
     } catch (error) {
       console.error('❌ Error enviando respuesta:', error);
-      await this.sendErrorResponse(userPhone, error);
+      this.analytics.errorCount++;
+      await this.sendErrorResponseWithRetry(userPhone, error);
     }
   }
 
@@ -99,7 +145,7 @@ class HotelChatbot {
     }
   }
 
-  // ✅ VERIFICAR RATE LIMITING
+  // ✅ VERIFICAR RATE LIMITING (Mantener compatibilidad)
   checkRateLimit(userPhone) {
     const now = Date.now();
     const lastMessageTime = this.userLastMessage.get(userPhone);
@@ -112,13 +158,167 @@ class HotelChatbot {
     return true;
   }
 
-  // ✅ MANEJADOR DE ERRORES
+  // ✨ NUEVO: Rate limiting avanzado anti-spam
+  checkAdvancedRateLimit(userPhone) {
+    const now = Date.now();
+    const oneMinuteAgo = now - 60000;
+    
+    // Obtener o inicializar contador de mensajes
+    let messageLog = this.userMessageCount.get(userPhone) || [];
+    
+    // Filtrar mensajes del último minuto
+    messageLog = messageLog.filter(timestamp => timestamp > oneMinuteAgo);
+    
+    // Verificar si excede el límite
+    if (messageLog.length >= this.MAX_MESSAGES_PER_MINUTE) {
+      console.log(`🚫 Usuario ${userPhone} excedió límite: ${messageLog.length} mensajes/minuto`);
+      return false;
+    }
+    
+    // Agregar timestamp actual
+    messageLog.push(now);
+    this.userMessageCount.set(userPhone, messageLog);
+    
+    // También verificar rate limit básico
+    return this.checkRateLimit(userPhone);
+  }
+
+  // ✅ MANEJADOR DE ERRORES (mantener para compatibilidad)
   async sendErrorResponse(userPhone, error) {
     try {
       await sendTextMessage(userPhone, '⚠️ Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.');
     } catch (fallbackError) {
       console.error('❌ Error incluso enviando mensaje de fallback:', fallbackError);
     }
+  }
+
+  // ✨ NUEVO: Manejador de errores con reintentos
+  async sendErrorResponseWithRetry(userPhone, error, retries = 2) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        if (attempt > 0) {
+          console.log(`🔄 Reintento ${attempt}/${retries} para ${userPhone}`);
+          await this.delay(1000 * attempt); // Backoff exponencial
+        }
+        
+        await sendTextMessage(
+          userPhone, 
+          '⚠️ Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo o escribe "menu" para ver las opciones.'
+        );
+        return; // Éxito
+      } catch (fallbackError) {
+        console.error(`❌ Error en intento ${attempt + 1}:`, fallbackError.message);
+        if (attempt === retries) {
+          console.error('💥 Todos los reintentos fallaron');
+        }
+      }
+    }
+  }
+
+  // ✨ NUEVO: Respuesta para baja confianza
+  async sendLowConfidenceResponse(userPhone, originalMessage) {
+    const helpMessage = `🤔 No estoy seguro de entender "${originalMessage}".
+
+¿Quizás buscas información sobre?
+• 🏨 Habitaciones
+• 💰 Precios
+• 📅 Reservar
+• 📍 Ubicación
+
+Escribe la palabra clave o "menu" para ver todas las opciones.`;
+    
+    await sendTextMessage(userPhone, helpMessage);
+  }
+
+  // ✨ NUEVO: Actualizar contexto de usuario
+  updateUserContext(userPhone, message) {
+    const now = Date.now();
+    let context = this.userContext.get(userPhone) || {
+      messages: [],
+      intents: [],
+      firstInteraction: now,
+      lastInteraction: now
+    };
+
+    // Agregar mensaje al historial (mantener últimos 10)
+    context.messages.push({ text: message, timestamp: now });
+    if (context.messages.length > 10) {
+      context.messages.shift();
+    }
+
+    context.lastInteraction = now;
+    this.userContext.set(userPhone, context);
+
+    // Limpiar contextos antiguos (más de 30 minutos)
+    this.cleanOldContexts();
+  }
+
+  // ✨ NUEVO: Limpiar contextos viejos
+  cleanOldContexts() {
+    const now = Date.now();
+    for (const [phone, context] of this.userContext.entries()) {
+      if (now - context.lastInteraction > this.userSessionTimeout) {
+        this.userContext.delete(phone);
+        console.log(`🧹 Limpiando contexto antiguo de ${phone}`);
+      }
+    }
+  }
+
+  // ✨ NUEVO: Tracking de interacciones para analytics
+  trackUserInteraction(userPhone, type, data = null) {
+    const interaction = {
+      type,
+      data,
+      timestamp: Date.now()
+    };
+
+    let userInteractions = this.analytics.userInteractions.get(userPhone) || [];
+    userInteractions.push(interaction);
+    
+    // Mantener últimas 50 interacciones por usuario
+    if (userInteractions.length > 50) {
+      userInteractions.shift();
+    }
+    
+    this.analytics.userInteractions.set(userPhone, userInteractions);
+  }
+
+  // ✨ NUEVO: Obtener analytics
+  getAnalytics() {
+    return {
+      totalMessages: this.analytics.totalMessages,
+      intentCounts: this.analytics.intentCounts,
+      errorCount: this.analytics.errorCount,
+      activeUsers: this.userContext.size,
+      totalUsers: this.analytics.userInteractions.size,
+      topIntents: Object.entries(this.analytics.intentCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5),
+      errorRate: this.analytics.totalMessages > 0 
+        ? (this.analytics.errorCount / this.analytics.totalMessages * 100).toFixed(2) + '%'
+        : '0%'
+    };
+  }
+
+  // ✨ NUEVO: Obtener estadísticas de usuario específico
+  getUserStats(userPhone) {
+    const context = this.userContext.get(userPhone);
+    const interactions = this.analytics.userInteractions.get(userPhone) || [];
+    
+    if (!context && interactions.length === 0) {
+      return null;
+    }
+
+    return {
+      messageCount: context?.messages.length || 0,
+      interactionCount: interactions.length,
+      firstSeen: context?.firstInteraction || null,
+      lastSeen: context?.lastInteraction || null,
+      recentIntents: interactions
+        .filter(i => i.type === 'message')
+        .slice(-5)
+        .map(i => i.data)
+    };
   }
   // ✅ DETECTAR SI DEBEMOS RESPONDER A MENSAJE POR DEFECTO
   shouldRespondToDefault(message) {
@@ -142,8 +342,75 @@ class HotelChatbot {
     return true;
   }
 
+  // ✨ NUEVO: Detectar intención con scoring de confianza
+  detectIntentWithScore(message) {
+    const patterns = this.getIntentPatterns();
+    let bestMatch = { intent: 'default', confidence: 0, matches: [] };
+
+    // Verificar FAQ común primero
+    for (const [question, intent] of Object.entries(this.commonFAQ)) {
+      if (message.includes(question)) {
+        return { intent, confidence: 0.9, source: 'faq' };
+      }
+    }
+
+    // Buscar coincidencia exacta (alta confianza)
+    for (const [intent, keywords] of Object.entries(patterns)) {
+      if (keywords.includes(message)) {
+        return { intent, confidence: 1.0, source: 'exact' };
+      }
+    }
+
+    // Buscar coincidencias parciales con scoring
+    for (const [intent, keywords] of Object.entries(patterns)) {
+      let matchCount = 0;
+      let matchedKeywords = [];
+      
+      for (const keyword of keywords) {
+        if (message.includes(keyword)) {
+          matchCount++;
+          matchedKeywords.push(keyword);
+        } else if (keyword.includes(message) && message.length >= 3) {
+          matchCount += 0.5;
+          matchedKeywords.push(keyword);
+        }
+      }
+      
+      // Calcular confianza basada en coincidencias
+      const confidence = Math.min(matchCount / keywords.length, 1.0);
+      
+      if (confidence > bestMatch.confidence) {
+        bestMatch = {
+          intent,
+          confidence,
+          matches: matchedKeywords,
+          source: 'partial'
+        };
+      }
+    }
+
+    // Comandos específicos del menú
+    const menuCommands = ['menu', 'menú', 'opciones', 'ayuda', 'help'];
+    if (menuCommands.includes(message)) {
+      return { intent: 'menu', confidence: 1.0, source: 'command' };
+    }
+
+    // Si la mejor coincidencia es muy baja, retornar default
+    if (bestMatch.confidence < 0.2) {
+      return { intent: 'default', confidence: 0.1, source: 'fallback' };
+    }
+
+    return bestMatch;
+  }
+
+  // ✅ MANTENER: Método original para compatibilidad
   detectIntent(message) {
-    const patterns = {
+    return this.detectIntentWithScore(message).intent;
+  }
+
+  // ✨ NUEVO: Obtener patrones de intenciones (extraído para reutilización)
+  getIntentPatterns() {
+    return {
       reservar: [
         'reservar', 'reserva', 'reservación', 'reservacion', 'hacer reserva',
         'quiero reservar', 'reservar ahora', 'agendar', 'booking', 'quiero una habitación',
@@ -188,29 +455,6 @@ class HotelChatbot {
         'servicios especiales', 'experiencias personalizadas', 'servicios personalizados'
       ]
     };
-
-    // Buscar coincidencia exacta primero
-    for (const [intent, keywords] of Object.entries(patterns)) {
-      if (keywords.includes(message)) {
-        return intent;
-      }
-    }
-
-    // Buscar coincidencias parciales
-    for (const [intent, keywords] of Object.entries(patterns)) {
-      for (const keyword of keywords) {
-        if (message.includes(keyword) || keyword.includes(message)) {
-          return intent;
-        }
-      }
-    }
-
-    // Comandos específicos
-    if (['menu', 'menú', 'opciones', 'ayuda', 'help'].includes(message)) {
-      return 'menu';
-    }
-
-    return 'default';
   }
 
   async sendInfoResponse(userPhone, responseKey) {
