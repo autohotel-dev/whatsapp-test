@@ -48,11 +48,7 @@ class HotelChatbot {
         case 'exclusivos':
         case 'horarios':
         case 'ubicacion':
-          if (intent === 'servicios' || intent === 'exclusivos' || intent === 'horarios' || intent === 'ubicacion') {
-            await sendTextMessage(userPhone, this.responses[intent].message);
-          } else {
-            await this.sendInfoResponse(userPhone, intent);
-          }
+          await this.sendInfoResponse(userPhone, intent);
           break;
         case 'ver_fotos':
           await this.sendInfoResponse(userPhone, 'fotos');
