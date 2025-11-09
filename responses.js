@@ -68,6 +68,18 @@ Escribe la *palabra clave* de tu interés para más información.`
   - Habitación con alberca
 
 Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nuevamente las opciones.`,
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Ver Precios',  // Shortened from "Ver fotos de habitaciones decoradas"
+        id: 'precios'
+      },
+      {
+        type: 'reply',
+        title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'menu'
+      }
+    ],
     image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20%20Sauna%20y%20Jacuzzi.jpg'
   },
 
@@ -105,6 +117,13 @@ Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nue
   - 👥 Máximo 10 personas
 
 *Incluye internet gratis, amenidades, servicio a la habitación*`,
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'menu'
+      }
+    ],
     image: 'https://autohoteluxor.com/src/images/galeria/Master%20suite%20Sauna%20y%20Jacuzzi.jpg'
   },
 
@@ -118,9 +137,14 @@ Escribe "precios" para ver los precios de las habitaciones o "menu" para ver nue
 - 📶 WiFi gratis
 - 🅿️ Estacionamiento (Cochera)
 - 🚕 Servicio de taxis
-- 🧼 Amenidades
-
-Escribe "menu" para ver nuevamente las opciones.`
+- 🧼 Amenidades`,
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'menu'
+      }
+    ],
   },
 
   horarios: {
@@ -134,9 +158,14 @@ Escribe "menu" para ver nuevamente las opciones.`
 
 - Servicio de comida de Lunes a Sabado de 14:00 - 20:00 y Domingo de 14:00 - 19:00
 
-- Servicio de snacks de Lunes a Domingo de 22:00 - 4:00
-
-Escribe "menu" para ver nuevamente las opciones.`
+- Servicio de snacks de Lunes a Domingo de 22:00 - 4:00`,
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'menu'
+      }
+    ],
   },
 
   ubicacion: {
@@ -152,6 +181,13 @@ Escribe "menu" para ver nuevamente las opciones.`
 ¿Necesitas indicaciones para llegar?
 Da click en el enlace "Ver en Google Maps"
 https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'menu'
+      }
+    ],
   },
 
   paquetes: {
@@ -217,7 +253,14 @@ Para información sobre nuestros servicios premium y experiencias personalizadas
 
 Nuestro equipo te atenderá de manera discreta y profesional para proporcionarte todos los detalles sobre las opciones disponibles.
 
-*Atención confidencial y personalizada*`
+*Atención confidencial y personalizada*`,
+    buttons: [
+      {
+        type: 'reply',
+        title: 'Menu',  // Shortened from "Reservar Ahora" to be consistent
+        id: 'menu'
+      }
+    ],
   },
 
   // Respuestas rápidas
