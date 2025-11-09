@@ -250,7 +250,8 @@ class HotelChatbot {
       // ✅ PASO 3: BOTONES (si existen) - SIEMPRE SE EVALÚAN
       if (response.buttons && response.buttons.length > 0) {
         console.log(`🔘 Enviando ${response.buttons.length} botones`);
-        const buttonMessage = response.text || '**Selecciona una opción**';
+        // Usar response.text si existe, si no usar response.message, si no usar texto por defecto
+        const buttonMessage = response.text || response.message || '**Selecciona una opción**';
         await sendButtonMessage(userPhone, buttonMessage, response.buttons);
       }
 
