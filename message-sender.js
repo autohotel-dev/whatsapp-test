@@ -120,6 +120,20 @@ class MessageSender {
    */
   async sendButtonMessage(phoneNumber, text, buttons) {
     try {
+      // Si hay más de 2 botones, usar lista para mejor presentación
+      if (buttons.length > 2) {
+        return this.sendListMessage(phoneNumber, text, "Selecciona una opción", [
+          {
+            title: "Opciones disponibles",
+            rows: buttons.map(button => ({
+              id: button.id,
+              title: button.title,
+              description: ""
+            }))
+          }
+        ]);
+      }
+
       const messageData = {
         messaging_product: "whatsapp",
         to: this.formatPhoneNumber(phoneNumber),
