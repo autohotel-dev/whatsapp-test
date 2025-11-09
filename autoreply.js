@@ -20,6 +20,20 @@ class HotelChatbot {
           return sendFlowMessage(userPhone);
         case 'menu':
           return this.sendInfoResponse(userPhone, 'menu');
+        case 'precios':
+          return this.sendInfoResponse(userPhone, 'precios');
+        case 'habitaciones':
+          return this.sendInfoResponse(userPhone, 'habitaciones');
+        case 'paquetes':
+          return this.sendInfoResponse(userPhone, 'paquetes');
+        case 'ubicacion':
+          return this.sendInfoResponse(userPhone, 'ubicacion');
+        case 'exclusivos':
+          return this.sendInfoResponse(userPhone, 'exclusivos');
+        case 'servicios':
+          return this.sendInfoResponse(userPhone, 'servicios');
+        case 'horarios':
+          return this.sendInfoResponse(userPhone, 'horarios');
         default:
           console.log(`❌ Botón no reconocido: ${buttonId}`);
           return sendTextMessage(userPhone, 'Opción no reconocida. Por favor intenta de nuevo.');
