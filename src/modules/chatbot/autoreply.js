@@ -1,6 +1,7 @@
-const { sendFlowMessage, sendTextMessage, sendImageMessage, sendButtonMessage } = require('./message-sender');
+const { sendTextMessage, sendImageMessage, sendButtonMessage } = require('../../services/message-sender');
+const sendFlowMessage = require('../../services/send-flow-message');
 const responses = require('./responses.js');
-const { database } = require('./database.js');
+const { database } = require('../database/database.js');
 
 class HotelChatbot {
   constructor() {

@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "node test-improvements.js",
-    "analytics": "node analytics.js",
+    "test": "node tests/test-improvements.js",
+    "analytics": "node src/modules/analytics/analytics.js",
     "build": "echo 'Iniciando build...' && npm install && echo 'Build completado exitosamente'",
     "db:setup": "node scripts/setup-database.js",
     "dashboard": "echo 'Dashboard disponible en http://localhost:3000/dashboard'"

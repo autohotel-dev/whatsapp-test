@@ -1,15 +1,15 @@
 const express = require('express');
 const path = require('path');
-const { decryptRequest } = require('./decrypt.js');
-const { encryptResponse } = require('./encrypt.js');
-const { processFlowLogic } = require('./flow.js');
-const hotelChatbot = require('./autoreply.js');
-const sendFlowMessage = require('./send-flow-message.js');
-const analytics = require('./analytics.js');
-const { database } = require('./database.js');
-const aiNLP = require('./ai-nlp.js');
-const notificationSystem = require('./notifications.js');
-const uxEnhancer = require('./ux-enhancer.js');
+const { decryptRequest } = require('./src/utils/decrypt.js');
+const { encryptResponse } = require('./src/utils/encrypt.js');
+const { processFlowLogic } = require('./src/modules/chatbot/flow.js');
+const hotelChatbot = require('./src/modules/chatbot/autoreply.js');
+const sendFlowMessage = require('./src/services/send-flow-message.js');
+const analytics = require('./src/modules/analytics/analytics.js');
+const { database } = require('./src/modules/database/database.js');
+const aiNLP = require('./src/modules/ai/ai-nlp.js');
+const notificationSystem = require('./src/modules/notifications/notifications.js');
+const uxEnhancer = require('./src/modules/ux/ux-enhancer.js');
 
 const app = express();
 app.use(express.json());

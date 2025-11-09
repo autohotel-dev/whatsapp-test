@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const config = require('./config.js');
+const config = require('../config/config.js');
 
 function decryptRequest(body) {
   const { encrypted_aes_key, encrypted_flow_data, initial_vector } = body;

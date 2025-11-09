@@ -1,5 +1,5 @@
 // flow.js - Versión completamente corregida
-const { sendTextMessage } = require('./message-sender.js');
+const { sendTextMessage } = require('../../services/message-sender.js');
 
 // ✅ DATOS REALES DE HABITACIONES
 const HABITACIONES_DATA = [

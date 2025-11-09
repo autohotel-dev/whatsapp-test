@@ -1,4 +1,4 @@
-const chatbot = require('./autoreply');
+const chatbot = require('../chatbot/autoreply');
 
 /**
  * Módulo de Analytics para visualizar métricas del chatbot

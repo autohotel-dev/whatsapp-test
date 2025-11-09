@@ -5,7 +5,7 @@
  * en el chatbot sin necesidad de enviar mensajes reales de WhatsApp.
  */
 
-const chatbot = require('./autoreply');
+const chatbot = require('../src/modules/chatbot/autoreply');
 
 console.log('🧪 ===== TEST DE MEJORAS DEL CHATBOT =====\n');
 

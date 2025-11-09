@@ -3,7 +3,7 @@
  * Typing indicators, respuestas dinámicas, personalización
  */
 
-const { sendTextMessage } = require('./message-sender');
+const { sendTextMessage } = require('../../services/message-sender');
 const axios = require('axios');
 
 class UXEnhancer {
