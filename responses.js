@@ -133,6 +133,7 @@ https://maps.app.goo.gl/9xUHkBxyATFhE5Fr6`,
         message: `⭐ **Paquetes Disponibles:**`,
         image: 'https://autohoteluxor.com/src/images/paquetes-decorado.png',
         message: `Escribe "menu" para ver nuevamente las opciones.`,
+        button: 'Ver fotos de habitaciónes decoradas',
         button: 'Reservar Ahora'
     },
     fotos: {

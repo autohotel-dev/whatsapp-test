@@ -47,6 +47,14 @@ class HotelChatbot {
           await this.sendInfoResponse(userPhone, 'precios');
           break;
 
+        case 'paquetes':
+          await this.sendInfoResponse(userPhone, 'paquetes');
+          break;
+
+        case 'fotos':
+          await this.sendInfoResponse(userPhone, 'fotos');
+          break;
+
         case 'servicios':
           await sendTextMessage(userPhone, this.responses.servicios.message);
           break;
@@ -122,6 +130,13 @@ class HotelChatbot {
         'precios', 'precio', 'tarifas', 'tarifa', 'costos', 'costo',
         'cuanto cuesta', 'precio por noche', 'cuales son los precios',
         'cuanto vale', 'valor'
+      ],
+      paquetes: [
+        'paquetes', 'paquete', 'paquetes decorados', 'promociones decoradas', 'decoradas', 'decorados',
+        'precio de paquetes', 'paquetes', 'paquetes disponibles',
+      ],
+      fotos: [
+        'fotos de habitaciones decoradas', 'fotos de ejemplos decorados', 'fotos de decoradas', 'ejemplos decoradas',
       ],
       servicios: [
         'servicios', 'servicio', 'amenidades', 'que servicios tienen',
