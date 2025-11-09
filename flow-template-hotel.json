@@ -1,0 +1,387 @@
+{
+    "version": "7.2",
+    "data_api_version": "3.0",
+    "routing_model": {
+        "RESERVA": [
+            "DETALLES"
+        ],
+        "DETALLES": [
+            "RESUMEN"
+        ],
+        "RESUMEN": []
+    },
+    "screens": [
+        {
+            "id": "RESERVA",
+            "title": "Reserva de Habitación",
+            "data": {
+                "tipo_habitacion": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "master_suite_junior",
+                            "title": "🏨 Master Suite Junior - $520 MXN"
+                        },
+                        {
+                            "id": "master_suite",
+                            "title": "🛌 Master Suite - $600 MXN"
+                        }
+                    ]
+                },
+                "fecha": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "2025-11-10",
+                            "title": "lun, 10 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-11",
+                            "title": "mar, 11 de nov de 2025"
+                        }
+                    ]
+                },
+                "is_fecha_enabled": {
+                    "type": "boolean",
+                    "__example__": true
+                },
+                "hora": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "14:00",
+                            "title": "14:00 - Check-in estándar"
+                        },
+                        {
+                            "id": "15:00",
+                            "title": "15:00"
+                        }
+                    ]
+                },
+                "is_hora_enabled": {
+                    "type": "boolean",
+                    "__example__": true
+                },
+                "numero_personas": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "1",
+                            "title": "1 persona"
+                        },
+                        {
+                            "id": "2",
+                            "title": "2 personas"
+                        }
+                    ]
+                },
+                "is_numero_personas_enabled": {
+                    "type": "boolean",
+                    "__example__": true
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "formulario_reserva",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "🏨 Auto Hotel Luxor"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Complete los datos para su reserva:"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Tipo de Habitación",
+                                "name": "tipo_habitacion",
+                                "data-source": "${data.tipo_habitacion}",
+                                "required": true
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Fecha de Reserva",
+                                "name": "fecha",
+                                "data-source": "${data.fecha}",
+                                "required": "${data.is_fecha_enabled}",
+                                "enabled": "${data.is_fecha_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Hora de Check-in",
+                                "name": "hora",
+                                "data-source": "${data.hora}",
+                                "required": "${data.is_hora_enabled}",
+                                "enabled": "${data.is_hora_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Número de Personas",
+                                "name": "numero_personas",
+                                "data-source": "${data.numero_personas}",
+                                "required": "${data.is_numero_personas_enabled}",
+                                "enabled": "${data.is_numero_personas_enabled}"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continuar",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "DETALLES"
+                                    },
+                                    "payload": {
+                                        "tipo_habitacion": "${form.tipo_habitacion}",
+                                        "fecha": "${form.fecha}",
+                                        "hora": "${form.hora}",
+                                        "numero_personas": "${form.numero_personas}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "DETALLES",
+            "title": "Datos Personales",
+            "data": {
+                "tipo_habitacion": {
+                    "type": "string",
+                    "__example__": "master_suite_jacuzzi"
+                },
+                "fecha": {
+                    "type": "string",
+                    "__example__": "2025-11-10"
+                },
+                "hora": {
+                    "type": "string",
+                    "__example__": "16:00"
+                },
+                "numero_personas": {
+                    "type": "string",
+                    "__example__": "2"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "formulario_detalles",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "📝 Información de Contacto"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Por favor ingresa tus datos para confirmar la reserva:"
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Nombre Completo",
+                                "name": "nombre",
+                                "required": true
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Correo Electrónico",
+                                "name": "email",
+                                "input-type": "email",
+                                "required": true
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Teléfono",
+                                "name": "telefono",
+                                "input-type": "phone",
+                                "required": true
+                            },
+                            {
+                                "type": "TextArea",
+                                "label": "Comentarios Adicionales",
+                                "name": "comentarios",
+                                "helper-text": "Necesidades especiales, motivo de la visita, etc.",
+                                "required": false
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continuar",
+                                "on-click-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "tipo_habitacion": "${data.tipo_habitacion}",
+                                        "fecha": "${data.fecha}",
+                                        "hora": "${data.hora}",
+                                        "numero_personas": "${data.numero_personas}",
+                                        "nombre": "${form.nombre}",
+                                        "email": "${form.email}",
+                                        "telefono": "${form.telefono}",
+                                        "comentarios": "${form.comentarios}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "RESUMEN",
+            "title": "Resumen de Reserva",
+            "terminal": true,
+            "data": {
+                "reserva": {
+                    "type": "string",
+                    "__example__": "🛁 Master Suite con Jacuzzi\n📅 Fecha: lun, 10 de nov de 2025\n🕓 Hora: 16:00\n👥 Personas: 2 personas"
+                },
+                "detalles": {
+                    "type": "string",
+                    "__example__": "👤 Nombre: Juan Pérez\n📧 Email: juan@ejemplo.com\n📞 Teléfono: 4421234567\n💬 Comentarios: Aniversario de bodas"
+                },
+                "precio_total": {
+                    "type": "string",
+                    "__example__": "💰 Precio total: $900 MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México"
+                },
+                "tipo_habitacion": {
+                    "type": "string",
+                    "__example__": "master_suite_jacuzzi"
+                },
+                "fecha": {
+                    "type": "string",
+                    "__example__": "2025-11-10"
+                },
+                "hora": {
+                    "type": "string",
+                    "__example__": "16:00"
+                },
+                "numero_personas": {
+                    "type": "string",
+                    "__example__": "2"
+                },
+                "nombre": {
+                    "type": "string",
+                    "__example__": "Juan Pérez"
+                },
+                "email": {
+                    "type": "string",
+                    "__example__": "juan@ejemplo.com"
+                },
+                "telefono": {
+                    "type": "string",
+                    "__example__": "4421234567"
+                },
+                "comentarios": {
+                    "type": "string",
+                    "__example__": "Aniversario de bodas"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "formulario_confirmacion",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "✅ Resumen de tu Reserva"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.reserva}"
+                            },
+                            {
+                                "type": "TextHeading",
+                                "text": "📝 Tus Datos"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.detalles}"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.precio_total}"
+                            },
+                            {
+                                "type": "OptIn",
+                                "name": "terminos",
+                                "label": "Acepto los términos y condiciones",
+                                "required": true
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Confirmar Reserva",
+                                "on-click-action": {
+                                    "name": "complete",
+                                    "payload": {
+                                        "tipo_habitacion": "${data.tipo_habitacion}",
+                                        "fecha": "${data.fecha}",
+                                        "hora": "${data.hora}",
+                                        "numero_personas": "${data.numero_personas}",
+                                        "nombre": "${data.nombre}",
+                                        "email": "${data.email}",
+                                        "telefono": "${data.telefono}",
+                                        "comentarios": "${data.comentarios}",
+                                        "estado": "confirmada"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -94,6 +94,17 @@ async function processFlowLogic(decryptedBody) {
 
   const { screen, action, data, form_response } = decryptedBody;
 
+  // ✅ MANEJAR VERIFICACIÓN DE ENDPOINT (Health Check de Meta)
+  if (action?.name === 'ping' || action?.name === 'INIT' || !screen) {
+    console.log('🏥 Health check detectado - Enviando respuesta de verificación');
+    return {
+      version: "3.0",
+      data: {
+        status: "active"
+      }
+    };
+  }
+
   try {
     switch (screen) {
       case 'RESERVA':
