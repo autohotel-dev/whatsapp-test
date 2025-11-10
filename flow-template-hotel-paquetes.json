@@ -1,0 +1,562 @@
+{
+    "version": "7.2",
+    "data_api_version": "3.0",
+    "routing_model": {
+        "RESERVA": [
+            "DETALLES"
+        ],
+        "DETALLES": [
+            "RESUMEN"
+        ],
+        "RESUMEN": []
+    },
+    "screens": [
+        {
+            "id": "RESERVA",
+            "title": "Reserva de Habitación",
+            "data": {
+                "paquete": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "deseo",
+                            "title": "💝 Paquete Deseo - Habitación decorada + 1 botella"
+                        },
+                        {
+                            "id": "enamorados",
+                            "title": "❤️ Paquete Enamorados - Decoración + 1 botella + 2 refrescos"
+                        },
+                        {
+                            "id": "premium",
+                            "title": "👑 Paquete Premium - Decoración + botella premium + 5 refrescos"
+                        }
+                    ]
+                },
+                "tipo_habitacion": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "master_suite_sencilla",
+                            "title": "🛏️ Master Suite Sencilla - $1,350 MXN"
+                        },
+                        {
+                            "id": "master_suite_jacuzzi",
+                            "title": "🛁 Master Suite Jacuzzi - $1,650 MXN"
+                        },
+                        {
+                            "id": "master_suite_sauna_jacuzzi",
+                            "title": "♨️ Master Suite Sauna & Jacuzzi - $1,940 MXN"
+                        },
+                        {
+                            "id": "master_suite_alberca",
+                            "title": "🏊 Master Suite Alberca - $2,900 MXN"
+                        }
+                    ]
+                },
+                "is_tipo_habitacion_enabled": {
+                    "type": "boolean",
+                    "__example__": true
+                },
+                "fecha": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "2025-11-10",
+                            "title": "lun, 10 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-11",
+                            "title": "mar, 11 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-12",
+                            "title": "mié, 12 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-13",
+                            "title": "jue, 13 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-14",
+                            "title": "vie, 14 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-15",
+                            "title": "sáb, 15 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-16",
+                            "title": "dom, 16 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-17",
+                            "title": "lun, 17 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-18",
+                            "title": "mar, 18 de nov de 2025"
+                        },
+                        {
+                            "id": "2025-11-19",
+                            "title": "mié, 19 de nov de 2025"
+                        }
+                    ]
+                },
+                "is_fecha_enabled": {
+                    "type": "boolean",
+                    "__example__": true
+                },
+                "hora": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "06:00",
+                            "title": "06:00 AM"
+                        },
+                        {
+                            "id": "07:00",
+                            "title": "07:00 AM"
+                        },
+                        {
+                            "id": "08:00",
+                            "title": "08:00 AM"
+                        },
+                        {
+                            "id": "09:00",
+                            "title": "09:00 AM"
+                        },
+                        {
+                            "id": "10:00",
+                            "title": "10:00 AM"
+                        },
+                        {
+                            "id": "11:00",
+                            "title": "11:00 AM"
+                        },
+                        {
+                            "id": "12:00",
+                            "title": "12:00 PM"
+                        },
+                        {
+                            "id": "13:00",
+                            "title": "01:00 PM"
+                        },
+                        {
+                            "id": "14:00",
+                            "title": "02:00 PM"
+                        },
+                        {
+                            "id": "15:00",
+                            "title": "03:00 PM"
+                        },
+                        {
+                            "id": "16:00",
+                            "title": "04:00 PM"
+                        },
+                        {
+                            "id": "17:00",
+                            "title": "05:00 PM"
+                        },
+                        {
+                            "id": "18:00",
+                            "title": "06:00 PM"
+                        }
+                    ]
+                },
+                "is_hora_enabled": {
+                    "type": "boolean",
+                    "__example__": true
+                },
+                "numero_personas": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "1",
+                            "title": "1 persona"
+                        },
+                        {
+                            "id": "2",
+                            "title": "2 personas"
+                        },
+                        {
+                            "id": "3",
+                            "title": "3 personas"
+                        },
+                        {
+                            "id": "4",
+                            "title": "4 personas"
+                        },
+                        {
+                            "id": "5",
+                            "title": "5 personas"
+                        },
+                        {
+                            "id": "6",
+                            "title": "6 personas"
+                        },
+                        {
+                            "id": "7",
+                            "title": "7 personas"
+                        },
+                        {
+                            "id": "8",
+                            "title": "8 personas"
+                        },
+                        {
+                            "id": "9",
+                            "title": "9 personas"
+                        },
+                        {
+                            "id": "10",
+                            "title": "10 personas"
+                        }
+                    ]
+                },
+                "is_numero_personas_enabled": {
+                    "type": "boolean",
+                    "__example__": true
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "formulario_reserva",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "🏨 Auto Hotel Luxor"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Selecciona tu paquete y completa los datos de tu reserva:"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Selecciona tu Paquete",
+                                "name": "paquete",
+                                "data-source": "${data.paquete}",
+                                "required": true,
+                                "on-select-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "screen": "RESERVA",
+                                        "paquete_selected": "${form.paquete}"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Tipo de Habitación",
+                                "name": "tipo_habitacion",
+                                "data-source": "${data.tipo_habitacion}",
+                                "required": "${data.is_tipo_habitacion_enabled}",
+                                "enabled": "${data.is_tipo_habitacion_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Fecha de Reserva",
+                                "name": "fecha",
+                                "data-source": "${data.fecha}",
+                                "required": "${data.is_fecha_enabled}",
+                                "enabled": "${data.is_fecha_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Hora de Check-in",
+                                "name": "hora",
+                                "data-source": "${data.hora}",
+                                "required": "${data.is_hora_enabled}",
+                                "enabled": "${data.is_hora_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Número de Personas",
+                                "name": "numero_personas",
+                                "data-source": "${data.numero_personas}",
+                                "required": "${data.is_numero_personas_enabled}",
+                                "enabled": "${data.is_numero_personas_enabled}"
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continuar",
+                                "on-click-action": {
+                                    "name": "navigate",
+                                    "next": {
+                                        "type": "screen",
+                                        "name": "DETALLES"
+                                    },
+                                    "payload": {
+                                        "paquete": "${form.paquete}",
+                                        "tipo_habitacion": "${form.tipo_habitacion}",
+                                        "fecha": "${form.fecha}",
+                                        "hora": "${form.hora}",
+                                        "numero_personas": "${form.numero_personas}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "DETALLES",
+            "title": "Datos Personales",
+            "data": {
+                "paquete": {
+                    "type": "string",
+                    "__example__": "deseo"
+                },
+                "tipo_habitacion": {
+                    "type": "string",
+                    "__example__": "master_suite_jacuzzi"
+                },
+                "fecha": {
+                    "type": "string",
+                    "__example__": "2025-11-10"
+                },
+                "hora": {
+                    "type": "string",
+                    "__example__": "16:00"
+                },
+                "numero_personas": {
+                    "type": "string",
+                    "__example__": "2"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "formulario_detalles",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "📝 Información de Contacto"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Por favor ingresa tus datos para confirmar la reserva:"
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Nombre Completo",
+                                "name": "nombre",
+                                "required": true
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Correo Electrónico",
+                                "name": "email",
+                                "input-type": "email",
+                                "required": true
+                            },
+                            {
+                                "type": "TextInput",
+                                "label": "Teléfono",
+                                "name": "telefono",
+                                "input-type": "phone",
+                                "required": true
+                            },
+                            {
+                                "type": "TextArea",
+                                "label": "Comentarios Adicionales",
+                                "name": "comentarios",
+                                "helper-text": "Necesidades especiales, motivo de la visita, etc.",
+                                "required": false
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Continuar",
+                                "on-click-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "paquete": "${data.paquete}",
+                                        "tipo_habitacion": "${data.tipo_habitacion}",
+                                        "fecha": "${data.fecha}",
+                                        "hora": "${data.hora}",
+                                        "numero_personas": "${data.numero_personas}",
+                                        "nombre": "${form.nombre}",
+                                        "email": "${form.email}",
+                                        "telefono": "${form.telefono}",
+                                        "comentarios": "${form.comentarios}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "RESUMEN",
+            "title": "Resumen de Reserva",
+            "terminal": true,
+            "data": {
+                "reserva": {
+                    "type": "string",
+                    "__example__": "💝 Paquete Deseo\n🛁 Master Suite Jacuzzi\n📅 Fecha: lun, 10 de nov de 2025\n🕓 Hora: 16:00\n👥 Personas: 2 personas"
+                },
+                "detalles": {
+                    "type": "string",
+                    "__example__": "👤 Nombre: Juan Pérez\n📧 Email: juan@ejemplo.com\n📞 Teléfono: 4421234567\n💬 Comentarios: Aniversario de bodas"
+                },
+                "precio_total": {
+                    "type": "string",
+                    "__example__": "💰 Precio total: $1,650 MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México\n\n📞 Informes: (442) 210 32 92"
+                },
+                "paquete": {
+                    "type": "string",
+                    "__example__": "deseo"
+                },
+                "tipo_habitacion": {
+                    "type": "string",
+                    "__example__": "master_suite_jacuzzi"
+                },
+                "fecha": {
+                    "type": "string",
+                    "__example__": "2025-11-10"
+                },
+                "hora": {
+                    "type": "string",
+                    "__example__": "16:00"
+                },
+                "numero_personas": {
+                    "type": "string",
+                    "__example__": "2"
+                },
+                "nombre": {
+                    "type": "string",
+                    "__example__": "Juan Pérez"
+                },
+                "email": {
+                    "type": "string",
+                    "__example__": "juan@ejemplo.com"
+                },
+                "telefono": {
+                    "type": "string",
+                    "__example__": "4421234567"
+                },
+                "comentarios": {
+                    "type": "string",
+                    "__example__": "Aniversario de bodas"
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "formulario_confirmacion",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "✅ Resumen de tu Reserva"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.reserva}"
+                            },
+                            {
+                                "type": "TextHeading",
+                                "text": "📝 Tus Datos"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.detalles}"
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "${data.precio_total}"
+                            },
+                            {
+                                "type": "OptIn",
+                                "name": "terminos",
+                                "label": "Acepto los términos y condiciones",
+                                "required": true
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Confirmar Reserva",
+                                "on-click-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "screen": "RESUMEN",
+                                        "paquete": "${data.paquete}",
+                                        "tipo_habitacion": "${data.tipo_habitacion}",
+                                        "fecha": "${data.fecha}",
+                                        "hora": "${data.hora}",
+                                        "numero_personas": "${data.numero_personas}",
+                                        "nombre": "${data.nombre}",
+                                        "email": "${data.email}",
+                                        "telefono": "${data.telefono}",
+                                        "comentarios": "${data.comentarios}",
+                                        "estado": "confirmada"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}
