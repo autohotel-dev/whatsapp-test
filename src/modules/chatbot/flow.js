@@ -190,57 +190,63 @@ async function handleReservaScreen(data) {
 }
 
 // ✅ MANEJAR PANTALLA DE DETALLES
-async function handleDetallesScreen(data) {
-  const { data: screenData, form_response } = data;
+async function handleDetallesScreen(body) {
+  const { data: screenData, form_response } = body;
 
   console.log('📋 Procesando pantalla DETALLES');
+  console.log('📦 Datos recibidos:', screenData);
 
-  if (form_response) {
-    const { nombre, email, telefono, comentarios } = form_response;
+  // Los datos pueden venir en form_response o en data (dependiendo del action)
+  const datosFormulario = form_response || screenData || {};
+  
+  const { nombre, email, telefono, comentarios, tipo_habitacion, fecha, hora, numero_personas } = datosFormulario;
 
-    console.log('📝 Datos personales recibidos:', {
-      nombre: nombre ? '✓' : '✗',
-      email: email ? '✓' : '✗',
-      telefono: telefono ? '✓' : '✗'
-    });
+  console.log('📝 Datos personales recibidos:', {
+    nombre: nombre ? '✓' : '✗',
+    email: email ? '✓' : '✗',
+    telefono: telefono ? '✓' : '✗'
+  });
 
-    // Validar campos requeridos
-    if (!nombre || !email || !telefono) {
-      console.log('❌ Faltan campos obligatorios en datos personales');
-      return {
-        "screen": "DETALLES",
-        "data": screenData
-      };
-    }
-
-    // Combinar datos de reserva y detalles
-    const datosCompletos = {
-      ...screenData,
-      "nombre": nombre,
-      "email": email,
-      "telefono": telefono,
-      "comentarios": comentarios || ''
-    };
-
-    console.log('✅ Datos completos, pasando a RESUMEN');
-
-    // Generar el resumen formateado
-    const datosResumen = await generarDatosResumen(datosCompletos);
-
+  // Validar campos requeridos
+  if (!nombre || !email || !telefono) {
+    console.log('❌ Faltan campos obligatorios en datos personales');
     return {
       "version": "3.0",
-      "screen": "RESUMEN",
+      "screen": "DETALLES",
       "data": {
-        ...datosResumen,
-        ...datosCompletos  // Mantener todos los datos originales también
+        tipo_habitacion: tipo_habitacion || '',
+        fecha: fecha || '',
+        hora: hora || '',
+        numero_personas: numero_personas || ''
       }
     };
   }
 
+  // Combinar datos de reserva y detalles
+  const datosCompletos = {
+    "tipo_habitacion": tipo_habitacion,
+    "fecha": fecha,
+    "hora": hora,
+    "numero_personas": numero_personas,
+    "nombre": nombre,
+    "email": email,
+    "telefono": telefono,
+    "comentarios": comentarios || ''
+  };
+
+  console.log('✅ Datos completos, pasando a RESUMEN');
+  console.log('📊 Datos completos:', datosCompletos);
+
+  // Generar el resumen formateado
+  const datosResumen = await generarDatosResumen(datosCompletos);
+
   return {
     "version": "3.0",
-    "screen": "DETALLES",
-    "data": screenData
+    "screen": "RESUMEN",
+    "data": {
+      ...datosResumen,
+      ...datosCompletos  // Mantener todos los datos originales también
+    }
   };
 }
 
