@@ -72,9 +72,13 @@ const userSchema = new mongoose.Schema({
 // Esquema de Reservación
 const reservationSchema = new mongoose.Schema({
   userPhone: { type: String, required: true, index: true },
-  roomType: String,
+  packageType: String, // deseo, enamorados, premium
+  roomType: String, // master_suite_sencilla, master_suite_jacuzzi, etc.
   date: Date,
+  checkInTime: String, // hora de check-in
   numberOfGuests: Number,
+  customerName: String,
+  customerEmail: String,
   specialRequests: String,
   status: {
     type: String,
@@ -430,6 +434,11 @@ class Database {
       console.error('❌ Error creando notificación:', error.message);
       return null;
     }
+  }
+
+  async saveNotification(notificationData) {
+    // Alias para createNotification
+    return await this.createNotification(notificationData);
   }
 
   async getUnreadNotifications() {

@@ -9,6 +9,7 @@ const {
   getNombreHabitacion,
   getNombrePaquete
 } = require('./flow-data.js');
+const Database = require('../database/database.js');
 
 // ✅ GENERAR FECHAS REALES (próximos 15 días)
 function generarFechasReales() {
@@ -212,16 +213,20 @@ async function handleResumenScreen(data) {
     try {
       console.log('✅ Confirmando reserva con datos:', payload);
 
+      // ✅ GUARDAR RESERVA EN BASE DE DATOS
+      const reservaGuardada = await guardarReservaEnBD(payload);
+      console.log('💾 Reserva guardada en BD:', reservaGuardada?._id);
+
       // ✅ GENERAR RESUMEN FORMATEADO
       const datosResumen = await generarDatosResumen(payload);
 
       // ✅ ENVIAR NOTIFICACIÓN POR WHATSAPP AL HOTEL
-      await enviarNotificacionReserva(payload);
+      await enviarNotificacionReserva(payload, reservaGuardada?._id);
 
       // ✅ ENVIAR CONFIRMACIÓN AL CLIENTE
-      await enviarConfirmacionCliente(payload);
+      await enviarConfirmacionCliente(payload, reservaGuardada?._id);
 
-      console.log('✅ Reserva confirmada y notificaciones enviadas');
+      console.log('✅ Reserva confirmada, guardada en BD y notificaciones enviadas');
 
       return {
         "version": "3.0",
@@ -297,7 +302,7 @@ async function generarDatosResumen(datos) {
 }
 
 // ✅ ENVIAR NOTIFICACIÓN AL HOTEL
-async function enviarNotificacionReserva(datos) {
+async function enviarNotificacionReserva(datos, reservaId) {
   try {
     const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
     const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion).replace(/^[^\s]+\s/, ''); // Quitar emoji
@@ -327,6 +332,28 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
     console.log('📤 Enviando notificación al hotel:', telefonoHotel);
     await sendTextMessage(telefonoHotel, mensajeHotel);
 
+    // 💾 Guardar notificación en BD
+    try {
+      const db = new Database();
+      await db.saveNotification({
+        type: 'reservation_hotel',
+        recipientPhone: telefonoHotel,
+        message: mensajeHotel,
+        reservationId: reservaId,
+        status: 'sent',
+        metadata: {
+          customerName: datos.nombre,
+          customerPhone: datos.telefono,
+          packageType: datos.paquete,
+          roomType: datos.tipo_habitacion,
+          totalAmount: precio
+        }
+      });
+      console.log('💾 Notificación al hotel guardada en BD');
+    } catch (dbError) {
+      console.error('⚠️ Error guardando notificación en BD:', dbError.message);
+    }
+
   } catch (error) {
     console.error('❌ Error enviando notificación al hotel:', error);
     throw error;
@@ -334,7 +361,7 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
 }
 
 // ✅ ENVIAR CONFIRMACIÓN AL CLIENTE  
-async function enviarConfirmacionCliente(datos) {
+async function enviarConfirmacionCliente(datos, reservaId) {
   try {
     const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
     const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion);
@@ -370,9 +397,88 @@ _Horarios:_
     console.log('📤 Enviando confirmación al cliente:', datos.telefono);
     await sendTextMessage(datos.telefono, mensajeCliente);
 
+    // 💾 Guardar notificación en BD
+    try {
+      const db = new Database();
+      await db.saveNotification({
+        type: 'reservation_confirmation',
+        recipientPhone: datos.telefono,
+        message: mensajeCliente,
+        reservationId: reservaId,
+        status: 'sent',
+        metadata: {
+          customerName: datos.nombre,
+          packageType: datos.paquete,
+          roomType: datos.tipo_habitacion,
+          totalAmount: precio,
+          checkInDate: datos.fecha,
+          checkInTime: datos.hora
+        }
+      });
+      console.log('💾 Confirmación al cliente guardada en BD');
+    } catch (dbError) {
+      console.error('⚠️ Error guardando confirmación en BD:', dbError.message);
+    }
+
   } catch (error) {
     console.error('❌ Error enviando confirmación al cliente:', error);
     throw error;
+  }
+}
+
+// ✅ GUARDAR RESERVA EN BASE DE DATOS
+async function guardarReservaEnBD(datos) {
+  try {
+    // Generar código de confirmación único
+    const confirmationCode = `LXR${Date.now().toString().slice(-8)}`;
+    
+    // Obtener precio
+    const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
+    
+    // Formatear fecha para Date object
+    const fechaReserva = new Date(datos.fecha + 'T' + datos.hora + ':00');
+    
+    // Preparar datos de reserva para BD
+    const reservationData = {
+      userPhone: datos.telefono,
+      packageType: datos.paquete,
+      roomType: datos.tipo_habitacion,
+      date: fechaReserva,
+      checkInTime: datos.hora,
+      numberOfGuests: parseInt(datos.numero_personas) || 1,
+      customerName: datos.nombre,
+      customerEmail: datos.email,
+      specialRequests: datos.comentarios || '',
+      status: 'confirmed',
+      source: 'whatsapp',
+      totalAmount: precio,
+      confirmationCode: confirmationCode
+    };
+
+    console.log('💾 Guardando reserva en MongoDB:', {
+      nombre: datos.nombre,
+      telefono: datos.telefono,
+      fecha: datos.fecha,
+      precio: precio
+    });
+
+    // Guardar en base de datos
+    const db = new Database();
+    const reserva = await db.createReservation(reservationData);
+    
+    if (reserva) {
+      console.log('✅ Reserva guardada exitosamente - ID:', reserva._id);
+      console.log('✅ Código de confirmación:', confirmationCode);
+      return reserva;
+    } else {
+      console.log('⚠️ No se pudo guardar la reserva (BD no conectada)');
+      return null;
+    }
+
+  } catch (error) {
+    console.error('❌ Error guardando reserva en BD:', error);
+    // No lanzar error para que el proceso continúe
+    return null;
   }
 }
 
