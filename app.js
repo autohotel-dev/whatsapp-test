@@ -7,7 +7,7 @@ const hotelChatbot = require('./src/modules/chatbot/autoreply.js');
 const sendFlowMessage = require('./src/services/send-flow-message.js');
 const { sendTextMessage } = require('./src/services/message-sender.js');
 const analytics = require('./src/modules/analytics/analytics.js');
-const { database } = require('./src/modules/database/database.js');
+const { database, models } = require('./src/modules/database/database.js');
 const aiNLP = require('./src/modules/ai/ai-nlp.js');
 const notificationSystem = require('./src/modules/notifications/notifications.js');
 const uxEnhancer = require('./src/modules/ux/ux-enhancer.js');
@@ -149,8 +149,8 @@ app.post('/webhook', async (req, res) => {
 
       try {
         // DEBUG: Ver qué reservas tiene este usuario
-        console.log(' DEBUG: Buscando reservas para teléfono:', userPhone);
-        const todasReservas = await database.models.Reservation.find({ 
+        console.log('🔍 DEBUG: Buscando reservas para teléfono:', userPhone);
+        const todasReservas = await models.Reservation.find({ 
           $or: [
             { userPhone: userPhone },
             { userPhone: userPhone.replace('521', '') },
@@ -159,13 +159,13 @@ app.post('/webhook', async (req, res) => {
           ]
         }).sort({ createdAt: -1 }).limit(5);
         
-        console.log(' Reservas encontradas:', todasReservas.length);
+        console.log('📋 Reservas encontradas:', todasReservas.length);
         todasReservas.forEach(r => {
           console.log(`  - ID: ${r._id}, Teléfono: ${r.userPhone}, Status: ${r.status}, Deadline: ${r.paymentDeadline}`);
         });
 
         // Buscar si el usuario tiene una reserva pendiente de pago (con variaciones de teléfono)
-        const reservaPendiente = await database.models.Reservation.findOne({
+        const reservaPendiente = await models.Reservation.findOne({
           $or: [
             { userPhone: userPhone },
             { userPhone: userPhone.replace('521', '') },
