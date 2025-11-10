@@ -207,13 +207,21 @@ async function handleDetallesScreen(data) {
 
     console.log('✅ Datos completos, pasando a RESUMEN');
 
+    // Generar el resumen formateado
+    const datosResumen = await generarDatosResumen(datosCompletos);
+
     return {
+      "version": "3.0",
       "screen": "RESUMEN",
-      "data": await generarDatosResumen(datosCompletos)
+      "data": {
+        ...datosResumen,
+        ...datosCompletos  // Mantener todos los datos originales también
+      }
     };
   }
 
   return {
+    "version": "3.0",
     "screen": "DETALLES",
     "data": screenData
   };
@@ -221,47 +229,62 @@ async function handleDetallesScreen(data) {
 
 // ✅ MANEJAR PANTALLA DE RESUMEN
 async function handleResumenScreen(data) {
-  const { data: screenData, form_response } = data;
-
   console.log('📋 Procesando pantalla RESUMEN');
+  console.log('📦 Data recibida:', JSON.stringify(data, null, 2));
 
-  // Si confirmó la reserva
-  if (form_response && form_response.estado === 'confirmada') {
+  // Los datos pueden venir en data.data o en el payload directamente
+  const payload = data.data || data.flow_token || data;
+  
+  // Si viene del botón "Confirmar Reserva", el estado estará en el payload
+  if (payload.estado === 'confirmada') {
     try {
-      console.log('✅ Confirmando reserva...');
+      console.log('✅ Confirmando reserva con datos:', payload);
+
+      // ✅ GENERAR RESUMEN FORMATEADO
+      const datosResumen = await generarDatosResumen(payload);
 
       // ✅ ENVIAR NOTIFICACIÓN POR WHATSAPP AL HOTEL
-      await enviarNotificacionReserva(screenData);
+      await enviarNotificacionReserva(payload);
 
       // ✅ ENVIAR CONFIRMACIÓN AL CLIENTE
-      await enviarConfirmacionCliente(screenData);
+      await enviarConfirmacionCliente(payload);
 
       console.log('✅ Reserva confirmada y notificaciones enviadas');
 
       return {
-        "screen": "RESUMEN",
+        "version": "3.0",
+        "screen": "SUCCESS",
         "data": {
-          ...screenData,
-          "mensaje_exito": "✅ ¡Reserva confirmada! Te hemos enviado los detalles por WhatsApp."
-        },
-        "terminal": true
+          "extension_message_response": {
+            "params": {
+              "flow_token": "FLOW_TOKEN_PLACEHOLDER"
+            }
+          }
+        }
       };
 
     } catch (error) {
       console.error('❌ Error confirmando reserva:', error);
       return {
+        "version": "3.0",
         "screen": "RESUMEN",
         "data": {
-          ...screenData,
-          "mensaje_error": "⚠️ Error al confirmar la reserva. Por favor contacta al hotel directamente."
+          "error_message": "⚠️ Error al confirmar. Intenta nuevamente."
         }
       };
     }
   }
 
+  // Si es la primera carga de la pantalla RESUMEN, enviar los datos formateados
+  const datosResumen = await generarDatosResumen(payload);
+
   return {
+    "version": "3.0",
     "screen": "RESUMEN",
-    "data": screenData
+    "data": {
+      ...datosResumen,
+      ...payload
+    }
   };
 }
 

@@ -18,10 +18,10 @@ async function sendFlowMessage(phoneNumber) {
       type: "flow",
       header: {
         type: "text",
-        text: "🏨 Auto Hotel Luxor"
+        text: " Auto Hotel Luxor"
       },
       body: {
-        text: "Complete los datos para reservar su habitación 🌊"
+        text: "Complete los datos para reservar su habitación "
       },
       action: {
         name: "flow",
@@ -30,7 +30,7 @@ async function sendFlowMessage(phoneNumber) {
           flow_token: `luxor_${Date.now()}`,
           flow_id: FLOW_ID,
           flow_cta: "Comenzar Reserva",
-          flow_action: "navigate",
+          flow_action: "data_exchange",
           flow_action_payload: {
             screen: "RESERVA"
           }
@@ -40,7 +40,7 @@ async function sendFlowMessage(phoneNumber) {
   };
 
   try {
-    console.log(`📤 Enviando flow a: ${cleanPhone}`);
+    console.log(` Enviando flow a: ${cleanPhone}`);
     
     const response = await axios.post(
       `https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`,

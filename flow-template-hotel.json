@@ -364,8 +364,9 @@
                                 "type": "Footer",
                                 "label": "Confirmar Reserva",
                                 "on-click-action": {
-                                    "name": "complete",
+                                    "name": "data_exchange",
                                     "payload": {
+                                        "screen": "RESUMEN",
                                         "tipo_habitacion": "${data.tipo_habitacion}",
                                         "fecha": "${data.fecha}",
                                         "hora": "${data.hora}",
