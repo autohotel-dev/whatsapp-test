@@ -1,29 +1,14 @@
-// flow.js - Versión completamente corregida
+// flow.js - Versión con paquetes
 const { sendTextMessage } = require('../../services/message-sender.js');
-
-// ✅ DATOS REALES DE HABITACIONES
-const HABITACIONES_DATA = [
-  {
-    "id": "master_suite_junior",
-    "title": "🏨 Master Suite Junior - $520 MXN"
-  },
-  {
-    "id": "master_suite",
-    "title": "🛌 Master Suite - $600 MXN"
-  },
-  {
-    "id": "master_suite_jacuzzi",
-    "title": "🛁 Master Suite con Jacuzzi - $900 MXN"
-  },
-  {
-    "id": "master_suite_jacuzzi_sauna",
-    "title": "♨️ Master Suite con Jacuzzi y Sauna - $1240 MXN"
-  },
-  {
-    "id": "master_suite_alberca",
-    "title": "🏊 Master Suite con Alberca - $1990 MXN"
-  }
-];
+const { 
+  PAQUETES_DATA,
+  HORAS_DATA,
+  PERSONAS_DATA,
+  getHabitacionesPorPaquete,
+  getPrecio,
+  getNombreHabitacion,
+  getNombrePaquete
+} = require('./flow-data.js');
 
 // ✅ GENERAR FECHAS REALES (próximos 15 días)
 function generarFechasReales() {
@@ -50,44 +35,6 @@ function generarFechasReales() {
 
   return fechas;
 }
-
-// ✅ HORAS DISPONIBLES
-const HORAS_DATA = [
-  { "id": "14:00", "title": "14:00 - Check-in estándar" },
-  { "id": "15:00", "title": "15:00" },
-  { "id": "16:00", "title": "16:00" },
-  { "id": "17:00", "title": "17:00" },
-  { "id": "18:00", "title": "18:00" },
-  { "id": "19:00", "title": "19:00" },
-  { "id": "20:00", "title": "20:00" },
-  { "id": "21:00", "title": "21:00" },
-  { "id": "22:00", "title": "22:00" },
-  { "id": "23:00", "title": "23:00" },
-  { "id": "00:00", "title": "00:00 - Check-in nocturno" }
-];
-
-// ✅ OPCIONES DE PERSONAS
-const PERSONAS_DATA = [
-  { "id": "1", "title": "1 persona" },
-  { "id": "2", "title": "2 personas" },
-  { "id": "3", "title": "3 personas" },
-  { "id": "4", "title": "4 personas" },
-  { "id": "5", "title": "5 personas" },
-  { "id": "6", "title": "6 personas" },
-  { "id": "7", "title": "7 personas" },
-  { "id": "8", "title": "8 personas" },
-  { "id": "9", "title": "9 personas" },
-  { "id": "10", "title": "10 personas" }
-];
-
-// ✅ PRECIOS POR HABITACIÓN
-const PRECIOS_HABITACIONES = {
-  "master_suite_junior": 520,
-  "master_suite": 600,
-  "master_suite_jacuzzi": 900,
-  "master_suite_jacuzzi_sauna": 1240,
-  "master_suite_alberca": 1990
-};
 
 async function processFlowLogic(decryptedBody) {
   console.log('🔧 Procesando flow logic - Pantalla:', decryptedBody.screen);
@@ -148,9 +95,10 @@ async function processFlowLogic(decryptedBody) {
 async function handleReservaScreen(data) {
   console.log('🔄 ENVIANDO DATOS DINÁMICOS DEL BACKEND');
   
-  // Verificar si viene de una selección de habitación
-  if (data.data?.tipo_habitacion_selected) {
-    console.log('🏨 Habitación seleccionada:', data.data.tipo_habitacion_selected);
+  // Verificar si viene de una selección de paquete
+  const paqueteSeleccionado = data.data?.paquete_selected || 'deseo';
+  if (data.data?.paquete_selected) {
+    console.log('📦 Paquete seleccionado:', paqueteSeleccionado);
   }
 
   // Generar fechas para los próximos 10 días (datos dinámicos y actualizados)
@@ -159,32 +107,32 @@ async function handleReservaScreen(data) {
     title: date.title
   }));
 
-  // Asegurarse de que los datos tengan el formato correcto
-  const tipo_habitacion = Array.isArray(HABITACIONES_DATA) ? HABITACIONES_DATA : [];
-  const hora = Array.isArray(HORAS_DATA) ? HORAS_DATA : [];
-  const numero_personas = Array.isArray(PERSONAS_DATA) ? PERSONAS_DATA : [];
+  // Obtener habitaciones según el paquete seleccionado
+  const habitaciones = getHabitacionesPorPaquete(paqueteSeleccionado);
 
   // Estructura del flow con el formato exacto esperado por Meta
   const response = {
     "version": "3.0",
     "screen": "RESERVA",
     "data": {
-      "tipo_habitacion": tipo_habitacion,
+      "paquete": PAQUETES_DATA,
+      "tipo_habitacion": habitaciones,
+      "is_tipo_habitacion_enabled": !!paqueteSeleccionado,
       "fecha": fechas,
       "is_fecha_enabled": true,
-      "hora": hora,
+      "hora": HORAS_DATA,
       "is_hora_enabled": true,
-      "numero_personas": numero_personas,
+      "numero_personas": PERSONAS_DATA,
       "is_numero_personas_enabled": true
     }
   };
 
   console.log('✅ Datos del flow preparados:');
-  console.log('   - Habitaciones:', tipo_habitacion.length, 'opciones');
+  console.log('   - Paquetes:', PAQUETES_DATA.length, 'opciones');
+  console.log('   - Habitaciones:', habitaciones.length, 'opciones (paquete:', paqueteSeleccionado + ')');
   console.log('   - Fechas:', fechas.length, 'opciones');
-  console.log('   - Horas:', hora.length, 'opciones');
-  console.log('   - Personas:', numero_personas.length, 'opciones');
-  console.log('   JSON completo:', JSON.stringify(response, null, 2));
+  console.log('   - Horas:', HORAS_DATA.length, 'opciones');
+  console.log('   - Personas:', PERSONAS_DATA.length, 'opciones');
   
   return response;
 }
@@ -199,7 +147,7 @@ async function handleDetallesScreen(body) {
   // Los datos pueden venir en form_response o en data (dependiendo del action)
   const datosFormulario = form_response || screenData || {};
   
-  const { nombre, email, telefono, comentarios, tipo_habitacion, fecha, hora, numero_personas } = datosFormulario;
+  const { nombre, email, telefono, comentarios, paquete, tipo_habitacion, fecha, hora, numero_personas } = datosFormulario;
 
   console.log('📝 Datos personales recibidos:', {
     nombre: nombre ? '✓' : '✗',
@@ -224,6 +172,7 @@ async function handleDetallesScreen(body) {
 
   // Combinar datos de reserva y detalles
   const datosCompletos = {
+    "paquete": paquete,
     "tipo_habitacion": tipo_habitacion,
     "fecha": fecha,
     "hora": hora,
@@ -313,7 +262,9 @@ async function handleResumenScreen(data) {
 
 // ✅ GENERAR DATOS PARA EL RESUMEN
 async function generarDatosResumen(datos) {
-  const precio = PRECIOS_HABITACIONES[datos.tipo_habitacion] || 0;
+  // Obtener precio según paquete y habitación
+  const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
+  
   const fechaObj = new Date(datos.fecha);
   const fechaFormateada = fechaObj.toLocaleDateString('es-MX', {
     weekday: 'short',
@@ -322,23 +273,20 @@ async function generarDatosResumen(datos) {
     year: 'numeric'
   });
 
-  const nombresHabitaciones = {
-    "master_suite_junior": "🏨 Master Suite Junior",
-    "master_suite": "🛌 Master Suite",
-    "master_suite_jacuzzi": "🛁 Master Suite con Jacuzzi",
-    "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna",
-    "master_suite_alberca": "🏊 Master Suite con Alberca"
-  };
+  // Obtener nombres formateados
+  const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion);
+  const paqueteNombre = getNombrePaquete(datos.paquete);
 
-  const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación no especificada";
-
-  const textoReserva = `${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: ${datos.numero_personas} personas`;
+  const textoReserva = `${paqueteNombre}\n${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: ${datos.numero_personas} personas`;
 
   const textoDetalles = `👤 Nombre: ${datos.nombre}\n📧 Email: ${datos.email}\n📞 Teléfono: ${datos.telefono}${datos.comentarios ? `\n💬 Comentarios: ${datos.comentarios}` : ''}`;
 
-  const precioTotal = `💰 Precio total: $${precio} MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México`;
+  const precioTotal = `💰 Precio total: $${precio.toLocaleString('es-MX')} MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México\n\n📞 Informes: (442) 210 32 92`;
 
   console.log('📊 Resumen generado para pantalla');
+  console.log('   - Paquete:', paqueteNombre);
+  console.log('   - Habitación:', habitacionNombre);
+  console.log('   - Precio:', precio);
 
   return {
     "reserva": textoReserva,
@@ -351,20 +299,14 @@ async function generarDatosResumen(datos) {
 // ✅ ENVIAR NOTIFICACIÓN AL HOTEL
 async function enviarNotificacionReserva(datos) {
   try {
-    const precio = PRECIOS_HABITACIONES[datos.tipo_habitacion] || 0;
-    const nombresHabitaciones = {
-      "master_suite_junior": "Master Suite Junior",
-      "master_suite": "Master Suite",
-      "master_suite_jacuzzi": "Master Suite con Jacuzzi",
-      "master_suite_jacuzzi_sauna": "Master Suite con Jacuzzi y Sauna",
-      "master_suite_alberca": "Master Suite con Alberca"
-    };
-
-    const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación no especificada";
+    const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
+    const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion).replace(/^[^\s]+\s/, ''); // Quitar emoji
+    const paqueteNombre = getNombrePaquete(datos.paquete).replace(/^[^\s]+\s/, ''); // Quitar emoji
 
     const mensajeHotel = `🏨 **NUEVA RESERVA - Auto Hotel Luxor** 🏨
 
 📋 **Detalles de la Reserva:**
+• Paquete: ${paqueteNombre}
 • Habitación: ${habitacionNombre}
 • Fecha: ${datos.fecha}
 • Hora: ${datos.hora}
@@ -376,7 +318,7 @@ async function enviarNotificacionReserva(datos) {
 • Teléfono: ${datos.telefono}
 ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
 
-💰 **Total: $${precio} MXN**
+💰 **Total: $${precio.toLocaleString('es-MX')} MXN**
 
 ⏰ _Reserva recibida: ${new Date().toLocaleString('es-MX')}_`;
 
