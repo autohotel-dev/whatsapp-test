@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const { decryptRequest } = require('./src/utils/decrypt.js');
 const { encryptResponse } = require('./src/utils/encrypt.js');
@@ -13,6 +14,33 @@ const notificationSystem = require('./src/modules/notifications/notifications.js
 const uxEnhancer = require('./src/modules/ux/ux-enhancer.js');
 
 const app = express();
+
+// ✅ CONFIGURACIÓN CORS
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permitir peticiones sin origen (como apps móviles o Postman)
+    if (!origin) return callback(null, true);
+    
+    // Lista de orígenes permitidos
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'https://whatsapp-test-gwdx.onrender.com'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost')) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Para desarrollo, permitir todos los orígenes
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Servir archivos estáticos (dashboard)
