@@ -148,12 +148,38 @@ app.post('/webhook', async (req, res) => {
       console.log(` Imagen recibida de ${userPhone} - ID: ${imageId}`);
 
       try {
-        // Buscar si el usuario tiene una reserva pendiente de pago
+        // DEBUG: Ver qué reservas tiene este usuario
+        console.log(' DEBUG: Buscando reservas para teléfono:', userPhone);
+        const todasReservas = await database.models.Reservation.find({ 
+          $or: [
+            { userPhone: userPhone },
+            { userPhone: userPhone.replace('521', '') },
+            { userPhone: '521' + userPhone },
+            { userPhone: userPhone.replace('52', '') }
+          ]
+        }).sort({ createdAt: -1 }).limit(5);
+        
+        console.log(' Reservas encontradas:', todasReservas.length);
+        todasReservas.forEach(r => {
+          console.log(`  - ID: ${r._id}, Teléfono: ${r.userPhone}, Status: ${r.status}, Deadline: ${r.paymentDeadline}`);
+        });
+
+        // Buscar si el usuario tiene una reserva pendiente de pago (con variaciones de teléfono)
         const reservaPendiente = await database.models.Reservation.findOne({
-          userPhone: userPhone,
+          $or: [
+            { userPhone: userPhone },
+            { userPhone: userPhone.replace('521', '') },
+            { userPhone: '521' + userPhone },
+            { userPhone: userPhone.replace('52', '') }
+          ],
           status: 'pending_payment',
           paymentDeadline: { $gt: new Date() }
         }).sort({ createdAt: -1 });
+        
+        console.log(' Reserva pendiente encontrada:', reservaPendiente ? 'SÍ' : 'NO');
+        if (!reservaPendiente && todasReservas.length > 0) {
+          console.log('⚠️ Hay reservas pero ninguna cumple los criterios (status o deadline)');
+        }
 
         if (reservaPendiente) {
           console.log(' Comprobante detectado para reserva:', reservaPendiente._id);
