@@ -94,12 +94,25 @@ const reservationSchema = new mongoose.Schema({
 const notificationSchema = new mongoose.Schema({
   type: { 
     type: String, 
-    enum: ['error', 'warning', 'info', 'success'],
+    enum: [
+      'error', 
+      'warning', 
+      'info', 
+      'success',
+      'reservation_hotel',         // Notificación de reserva al hotel
+      'reservation_confirmation',  // Confirmación de reserva al cliente
+      'reservation_reminder',      // Recordatorio de reserva
+      'reservation_cancelled'      // Cancelación de reserva
+    ],
     required: true 
   },
+  recipientPhone: String,           // Teléfono del destinatario
+  reservationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Reservation' }, // Referencia a reserva
+  status: { type: String, enum: ['sent', 'delivered', 'failed'], default: 'sent' }, // Estado de envío
   title: String,
   message: String,
-  data: mongoose.Schema.Types.Mixed,
+  data: mongoose.Schema.Types.Mixed,  // Ahora se llama metadata en el código
+  metadata: mongoose.Schema.Types.Mixed, // Datos adicionales
   read: { type: Boolean, default: false },
   priority: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' }
 }, { timestamps: true });
