@@ -275,15 +275,23 @@ router.get('/messages/user/:phone', async (req, res) => {
     const phone = req.params.phone;
     const { limit = 100 } = req.query;
     
-    const messages = await models.Message
+    // Los mensajes están dentro del modelo Conversation
+    const conversations = await models.Conversation
       .find({ userPhone: phone })
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit));
+      .sort({ createdAt: -1 });
+    
+    // Extraer todos los mensajes de todas las conversaciones
+    const messages = conversations.flatMap(conv => conv.messages || []);
+    
+    // Ordenar por timestamp y limitar
+    const sortedMessages = messages
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, parseInt(limit));
     
     res.json({
       success: true,
-      total: messages.length,
-      messages
+      total: sortedMessages.length,
+      messages: sortedMessages
     });
   } catch (error) {
     console.error('Error obteniendo mensajes:', error);
@@ -294,29 +302,41 @@ router.get('/messages/user/:phone', async (req, res) => {
 // Estadísticas de mensajes
 router.get('/messages/stats', async (req, res) => {
   try {
-    const total = await models.Message.countDocuments();
+    // Los mensajes están dentro del modelo Conversation
+    const conversations = await models.Conversation.find({});
     
-    // Por dirección
-    const byDirection = await models.Message.aggregate([
-      { $group: { _id: '$direction', count: { $sum: 1 } } }
-    ]);
+    // Extraer todos los mensajes
+    const allMessages = conversations.flatMap(conv => conv.messages || []);
+    const total = allMessages.length;
     
-    // Por intención
-    const byIntent = await models.Message.aggregate([
-      { $group: { _id: '$intent', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 10 }
-    ]);
+    // Contar por dirección
+    const byDirection = {};
+    allMessages.forEach(msg => {
+      if (msg.direction) {
+        byDirection[msg.direction] = (byDirection[msg.direction] || 0) + 1;
+      }
+    });
+    
+    // Contar por intención
+    const intentCounts = {};
+    allMessages.forEach(msg => {
+      if (msg.intent) {
+        intentCounts[msg.intent] = (intentCounts[msg.intent] || 0) + 1;
+      }
+    });
+    
+    // Top 10 intenciones
+    const topIntents = Object.entries(intentCounts)
+      .map(([intent, count]) => ({ _id: intent, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
     
     res.json({
       success: true,
       stats: {
         total,
-        byDirection: byDirection.reduce((acc, item) => {
-          acc[item._id] = item.count;
-          return acc;
-        }, {}),
-        topIntents: byIntent
+        byDirection,
+        topIntents
       }
     });
   } catch (error) {
@@ -486,10 +506,23 @@ router.get('/analytics/realtime', async (req, res) => {
   try {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     
-    const [recentMessages, pendingReservations] = await Promise.all([
-      models.Message.countDocuments({ createdAt: { $gte: fiveMinutesAgo } }),
-      models.Reservation.countDocuments({ status: 'pending_payment' })
-    ]);
+    // Contar conversaciones recientes y mensajes dentro de ellas
+    const recentConversations = await models.Conversation.find({
+      'messages.timestamp': { $gte: fiveMinutesAgo }
+    });
+    
+    // Contar mensajes recientes
+    let recentMessages = 0;
+    recentConversations.forEach(conv => {
+      const recent = (conv.messages || []).filter(
+        msg => msg.timestamp >= fiveMinutesAgo
+      );
+      recentMessages += recent.length;
+    });
+    
+    const pendingReservations = await models.Reservation.countDocuments({ 
+      status: 'pending_payment' 
+    });
     
     res.json({
       success: true,
