@@ -18,6 +18,10 @@ app.use(express.json());
 // Servir archivos estáticos (dashboard)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ✨ RUTAS API PARA DASHBOARD
+const apiRoutes = require('./src/routes/api');
+app.use('/api', apiRoutes);
+
 // ✅ MEMORIA PARA EVITAR DUPLICADOS
 const messageCache = new Map();
 const CACHE_TTL = 30000; // 30 segundos

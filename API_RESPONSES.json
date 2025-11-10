@@ -1,0 +1,284 @@
+{
+  "dashboard_summary": {
+    "endpoint": "GET /api/dashboard/summary",
+    "response": {
+      "success": true,
+      "summary": {
+        "today": {
+          "reservations": 8,
+          "newUsers": 12,
+          "revenue": 23400
+        },
+        "week": {
+          "reservations": 56,
+          "newUsers": 85,
+          "revenue": 164800
+        },
+        "month": {
+          "reservations": 220,
+          "newUsers": 340,
+          "revenue": 644000
+        },
+        "topPackage": "enamorados",
+        "topRoom": "master_suite_jacuzzi",
+        "conversionRate": 18.3
+      }
+    }
+  },
+
+  "reservations_list": {
+    "endpoint": "GET /api/reservations",
+    "response": {
+      "success": true,
+      "total": 125,
+      "count": 50,
+      "reservations": [
+        {
+          "_id": "674a1b2c3d4e5f6789012345",
+          "userPhone": "2462636547",
+          "packageType": "deseo",
+          "roomType": "master_suite_alberca",
+          "date": "2025-11-16T12:00:00.000Z",
+          "checkInTime": "12:00",
+          "numberOfGuests": 2,
+          "customerName": "Ricardo Alfredo Minor Martinez",
+          "customerEmail": "hackminor@live.com.mx",
+          "specialRequests": "Botella de vino",
+          "status": "pending_payment",
+          "totalAmount": 2900,
+          "confirmationCode": "LXR62759012",
+          "paymentDeadline": "2025-11-10T18:00:00.000Z",
+          "source": "whatsapp",
+          "createdAt": "2025-11-10T08:00:00.000Z",
+          "updatedAt": "2025-11-10T08:00:00.000Z"
+        }
+      ]
+    }
+  },
+
+  "reservations_stats": {
+    "endpoint": "GET /api/reservations/stats",
+    "response": {
+      "success": true,
+      "stats": {
+        "total": 125,
+        "byStatus": {
+          "pending_payment": 5,
+          "payment_received": 3,
+          "confirmed": 100,
+          "cancelled": 15,
+          "completed": 2
+        },
+        "byPackage": {
+          "deseo": 50,
+          "enamorados": 45,
+          "premium": 30
+        },
+        "byRoom": {
+          "master_suite_sencilla": 40,
+          "master_suite_jacuzzi": 45,
+          "master_suite_sauna_jacuzzi": 25,
+          "master_suite_alberca": 15
+        },
+        "totalRevenue": 287500,
+        "averageAmount": 2300
+      }
+    }
+  },
+
+  "user_detail": {
+    "endpoint": "GET /api/users/2462636547",
+    "response": {
+      "success": true,
+      "user": {
+        "_id": "674a1b2c3d4e5f6789012346",
+        "phone": "2462636547",
+        "name": "Ricardo Alfredo Minor Martinez",
+        "email": "hackminor@live.com.mx",
+        "firstInteraction": "2025-11-01T10:00:00.000Z",
+        "lastInteraction": "2025-11-10T08:00:00.000Z",
+        "totalConversations": 5,
+        "totalMessages": 45,
+        "totalReservations": 2,
+        "leadScore": 85,
+        "interests": ["habitaciones", "precios", "servicios"],
+        "preferredLanguage": "es",
+        "segmentation": "frequent",
+        "createdAt": "2025-11-01T10:00:00.000Z",
+        "updatedAt": "2025-11-10T08:00:00.000Z"
+      },
+      "reservations": [
+        {
+          "_id": "674a1b2c3d4e5f6789012345",
+          "status": "confirmed",
+          "totalAmount": 2900,
+          "date": "2025-11-16T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+
+  "users_stats": {
+    "endpoint": "GET /api/users/stats",
+    "response": {
+      "success": true,
+      "stats": {
+        "total": 450,
+        "bySegmentation": {
+          "new": 120,
+          "engaged": 180,
+          "frequent": 80,
+          "vip": 50,
+          "inactive": 20
+        },
+        "averageLeadScore": 65
+      }
+    }
+  },
+
+  "messages_user": {
+    "endpoint": "GET /api/messages/user/2462636547",
+    "response": {
+      "success": true,
+      "total": 25,
+      "messages": [
+        {
+          "_id": "674a1b2c3d4e5f6789012347",
+          "userPhone": "2462636547",
+          "text": "hola",
+          "direction": "incoming",
+          "intent": "greeting",
+          "confidence": 0.85,
+          "messageType": "text",
+          "createdAt": "2025-11-10T08:00:00.000Z"
+        },
+        {
+          "_id": "674a1b2c3d4e5f6789012348",
+          "userPhone": "2462636547",
+          "text": "¡Hola! Bienvenido a Auto Hotel Luxor",
+          "direction": "outgoing",
+          "intent": "greeting",
+          "confidence": 1.0,
+          "messageType": "text",
+          "createdAt": "2025-11-10T08:00:01.000Z"
+        }
+      ]
+    }
+  },
+
+  "messages_stats": {
+    "endpoint": "GET /api/messages/stats",
+    "response": {
+      "success": true,
+      "stats": {
+        "total": 5420,
+        "byDirection": {
+          "incoming": 2850,
+          "outgoing": 2570
+        },
+        "topIntents": [
+          { "_id": "reservar", "count": 450 },
+          { "_id": "precios", "count": 380 },
+          { "_id": "habitaciones", "count": 320 }
+        ]
+      }
+    }
+  },
+
+  "notifications_unread": {
+    "endpoint": "GET /api/notifications/unread",
+    "response": {
+      "success": true,
+      "total": 5,
+      "notifications": [
+        {
+          "_id": "674a1b2c3d4e5f6789012349",
+          "type": "reservation_hotel",
+          "recipientPhone": "5214422103292",
+          "reservationId": "674a1b2c3d4e5f6789012345",
+          "status": "sent",
+          "message": "🔔 COMPROBANTE DE PAGO RECIBIDO...",
+          "metadata": {
+            "customerName": "Ricardo Minor",
+            "customerPhone": "2462636547",
+            "packageType": "deseo",
+            "totalAmount": 2900
+          },
+          "read": false,
+          "priority": "high",
+          "createdAt": "2025-11-10T08:30:00.000Z"
+        }
+      ]
+    }
+  },
+
+  "realtime_analytics": {
+    "endpoint": "GET /api/analytics/realtime",
+    "response": {
+      "success": true,
+      "realtime": {
+        "messagesLast5Min": 12,
+        "pendingReservations": 3,
+        "systemStatus": "healthy",
+        "dbConnected": true,
+        "uptime": 86400,
+        "timestamp": "2025-11-10T09:00:00.000Z"
+      }
+    }
+  },
+
+  "search_global": {
+    "endpoint": "GET /api/search?q=Ricardo",
+    "response": {
+      "success": true,
+      "query": "Ricardo",
+      "results": {
+        "users": [
+          {
+            "_id": "674a1b2c3d4e5f6789012346",
+            "phone": "2462636547",
+            "name": "Ricardo Alfredo Minor Martinez",
+            "email": "hackminor@live.com.mx",
+            "segmentation": "frequent"
+          }
+        ],
+        "reservations": [
+          {
+            "_id": "674a1b2c3d4e5f6789012345",
+            "customerName": "Ricardo Alfredo Minor Martinez",
+            "userPhone": "2462636547",
+            "status": "confirmed",
+            "totalAmount": 2900
+          }
+        ]
+      }
+    }
+  },
+
+  "system_status": {
+    "endpoint": "GET /api/status",
+    "response": {
+      "success": true,
+      "status": "healthy",
+      "modules": {
+        "database": true,
+        "aiNLP": false,
+        "notifications": true,
+        "analytics": true
+      },
+      "uptime": 86400,
+      "memory": {
+        "heapUsed": 45.2,
+        "heapTotal": 89.5
+      }
+    }
+  },
+
+  "error_example": {
+    "endpoint": "GET /api/reservations/invalid_id",
+    "response": {
+      "success": false,
+      "error": "Reserva no encontrada"
+    }
+  }
+}
