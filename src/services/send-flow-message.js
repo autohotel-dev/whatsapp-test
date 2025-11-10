@@ -30,10 +30,7 @@ async function sendFlowMessage(phoneNumber) {
           flow_token: `luxor_${Date.now()}`,
           flow_id: FLOW_ID,
           flow_cta: "Comenzar Reserva",
-          flow_action: "navigate",
-          flow_action_payload: {
-            screen: "RESERVA"
-          }
+          flow_action: "data_exchange"
         }
       }
     }
