@@ -111,6 +111,12 @@ async function processFlowLogic(decryptedBody) {
     console.log('🎬 Apertura de flow detectada - Procesando pantalla:', screen);
   }
 
+  // Si no hay pantalla y action es 'data_exchange', es un on-init de RESERVA
+  if (!screen && (action === 'data_exchange' || action?.name === 'data_exchange')) {
+    console.log('🎬 On-init detectado - Cargando pantalla RESERVA');
+    return await handleReservaScreen(decryptedBody);
+  }
+
   try {
     switch (screen) {
       case 'RESERVA':
