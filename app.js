@@ -12,6 +12,7 @@ const { database, models } = require('./src/modules/database/database.js');
 const aiNLP = require('./src/modules/ai/ai-nlp.js');
 const notificationSystem = require('./src/modules/notifications/notifications.js');
 const uxEnhancer = require('./src/modules/ux/ux-enhancer.js');
+const cloudinaryUploader = require('./src/services/cloudinary-uploader.js');
 
 const app = express();
 
@@ -216,16 +217,34 @@ app.post('/webhook', async (req, res) => {
         if (reservaPendiente) {
           console.log(' Comprobante detectado para reserva:', reservaPendiente._id);
 
-          // Guardar referencia de la imagen
-          const imageUrl = `whatsapp://media/${imageId}`;
+          // 📤 SUBIR COMPROBANTE A CLOUDINARY
+          const uploadResult = await cloudinaryUploader.uploadPaymentReceipt(
+            imageId,
+            reservaPendiente.confirmationCode
+          );
 
-          // Actualizar reserva
-          reservaPendiente.status = 'payment_received';
-          reservaPendiente.paymentProof = imageUrl;
-          reservaPendiente.paidAt = new Date();
-          await reservaPendiente.save();
+          if (uploadResult.success) {
+            console.log('✅ Comprobante subido a Cloudinary:', uploadResult.url);
+            
+            // Actualizar reserva con URL de Cloudinary
+            reservaPendiente.status = 'payment_received';
+            reservaPendiente.paymentProof = uploadResult.url;
+            reservaPendiente.paidAt = new Date();
+            await reservaPendiente.save();
 
-          console.log(' Reserva actualizada a payment_received');
+            console.log(' Reserva actualizada a payment_received');
+          } else {
+            console.error('❌ Error subiendo comprobante a Cloudinary:', uploadResult.error);
+            
+            // Fallback: guardar referencia de WhatsApp si Cloudinary falla
+            const imageUrl = `whatsapp://media/${imageId}`;
+            reservaPendiente.status = 'payment_received';
+            reservaPendiente.paymentProof = imageUrl;
+            reservaPendiente.paidAt = new Date();
+            await reservaPendiente.save();
+            
+            console.log('⚠️ Reserva actualizada con referencia de WhatsApp (Cloudinary falló)');
+          }
 
           // Notificar al cliente
           await sendTextMessage(userPhone, 
