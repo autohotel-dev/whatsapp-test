@@ -336,37 +336,36 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
 // ✅ ENVIAR CONFIRMACIÓN AL CLIENTE  
 async function enviarConfirmacionCliente(datos) {
   try {
-    const precio = PRECIOS_HABITACIONES[datos.tipo_habitacion] || 0;
-    const nombresHabitaciones = {
-      "master_suite_junior": "🏨 Master Suite Junior",
-      "master_suite": "🛌 Master Suite",
-      "master_suite_jacuzzi": "🛁 Master Suite con Jacuzzi",
-      "master_suite_jacuzzi_sauna": "♨️ Master Suite con Jacuzzi y Sauna",
-      "master_suite_alberca": "🏊 Master Suite con Alberca"
-    };
+    const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
+    const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion);
+    const paqueteNombre = getNombrePaquete(datos.paquete).replace(/^[^\s]+\s/, ''); // Quitar emoji
 
-    const habitacionNombre = nombresHabitaciones[datos.tipo_habitacion] || "Habitación no especificada";
+    const mensajeCliente = `✅ *¡Reserva Confirmada!* - Auto Hotel Luxor 🏨
 
-    const mensajeCliente = `✅ **¡Reserva Confirmada! - Auto Hotel Luxor** 🏨
+Gracias *${datos.nombre}*, tu reserva ha sido confirmada:
 
-Gracias ${datos.nombre}, tu reserva ha sido confirmada:
-
-📋 **Detalles de tu Reserva:**
-• ${habitacionNombre} - $${precio} MXN
+📋 *Detalles de tu Reserva:*
+• Paquete: ${paqueteNombre}
+• ${habitacionNombre}
 • Fecha: ${datos.fecha}  
 • Hora de check-in: ${datos.hora}
 • Número de personas: ${datos.numero_personas}
 
-💰 **Total a pagar: $${precio} MXN**
+💰 *Total a pagar: $${precio.toLocaleString('es-MX')} MXN*
 
-📍 **Ubicación:**
+📍 *Ubicación:*
 Auto Hotel Luxor
 Av. Prol. Boulevard Bernardo Quintana, 1000B
 Querétaro, México
 
-📞 **Contacto: 442 210 3292**
+📞 *Informes y reservaciones:*
+(442) 210 32 92
 
-_¡Te esperamos! Recuerda traer identificación oficial._`;
+_¡Te esperamos! Recuerda traer identificación oficial._
+
+_Horarios:_
+• Domingo a Jueves: 06:00 AM - 12:00 hrs
+• Viernes y Sábado: 8 horas`;
 
     console.log('📤 Enviando confirmación al cliente:', datos.telefono);
     await sendTextMessage(datos.telefono, mensajeCliente);
