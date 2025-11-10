@@ -9,7 +9,7 @@ const {
   getNombreHabitacion,
   getNombrePaquete
 } = require('./flow-data.js');
-const Database = require('../database/database.js');
+const { database } = require('../database/database.js');
 
 // ✅ GENERAR FECHAS REALES (próximos 15 días)
 function generarFechasReales() {
@@ -334,8 +334,7 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
 
     // 💾 Guardar notificación en BD
     try {
-      const db = new Database();
-      await db.saveNotification({
+      await database.saveNotification({
         type: 'reservation_hotel',
         recipientPhone: telefonoHotel,
         message: mensajeHotel,
@@ -399,8 +398,7 @@ _Horarios:_
 
     // 💾 Guardar notificación en BD
     try {
-      const db = new Database();
-      await db.saveNotification({
+      await database.saveNotification({
         type: 'reservation_confirmation',
         recipientPhone: datos.telefono,
         message: mensajeCliente,
@@ -463,8 +461,7 @@ async function guardarReservaEnBD(datos) {
     });
 
     // Guardar en base de datos
-    const db = new Database();
-    const reserva = await db.createReservation(reservationData);
+    const reserva = await database.createReservation(reservationData);
     
     if (reserva) {
       console.log('✅ Reserva guardada exitosamente - ID:', reserva._id);
