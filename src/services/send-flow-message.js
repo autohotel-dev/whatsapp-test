@@ -32,8 +32,7 @@ async function sendFlowMessage(phoneNumber) {
           flow_cta: "Comenzar Reserva",
           flow_action: "navigate",
           flow_action_payload: {
-            screen: "RESERVA",
-            data: {}
+            screen: "RESERVA"
           }
         }
       }

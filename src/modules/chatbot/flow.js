@@ -113,7 +113,13 @@ async function processFlowLogic(decryptedBody) {
 
   // Si no hay pantalla y action es 'data_exchange', es un on-init de RESERVA
   if (!screen && (action === 'data_exchange' || action?.name === 'data_exchange')) {
-    console.log('🎬 On-init detectado - Cargando pantalla RESERVA');
+    console.log('🎬 Data exchange inicial detectado - Cargando pantalla RESERVA');
+    return await handleReservaScreen(decryptedBody);
+  }
+
+  // Si hay data con screen RESERVA en el payload, también procesarlo
+  if (data?.screen === 'RESERVA' && (action === 'data_exchange' || action?.name === 'data_exchange')) {
+    console.log('🔄 Data exchange por selección - Actualizando datos de RESERVA');
     return await handleReservaScreen(decryptedBody);
   }
 
@@ -140,9 +146,14 @@ async function processFlowLogic(decryptedBody) {
 
 // ✅ MANEJAR PANTALLA DE RESERVA
 async function handleReservaScreen(data) {
-  console.log('🔄 ENVIANDO DATOS REALES A FLOW');
+  console.log('🔄 ENVIANDO DATOS DINÁMICOS DEL BACKEND');
+  
+  // Verificar si viene de una selección de habitación
+  if (data.data?.tipo_habitacion_selected) {
+    console.log('🏨 Habitación seleccionada:', data.data.tipo_habitacion_selected);
+  }
 
-  // Generar fechas para los próximos 10 días
+  // Generar fechas para los próximos 10 días (datos dinámicos y actualizados)
   const fechas = generarFechasReales().slice(0, 10).map(date => ({
     id: date.id,
     title: date.title

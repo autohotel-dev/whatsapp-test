@@ -256,7 +256,14 @@
                                 "label": "Tipo de Habitación",
                                 "name": "tipo_habitacion",
                                 "data-source": "${data.tipo_habitacion}",
-                                "required": true
+                                "required": true,
+                                "on-select-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "screen": "RESERVA",
+                                        "tipo_habitacion_selected": "${form.tipo_habitacion}"
+                                    }
+                                }
                             },
                             {
                                 "type": "Dropdown",
