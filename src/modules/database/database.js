@@ -82,9 +82,12 @@ const reservationSchema = new mongoose.Schema({
   specialRequests: String,
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'cancelled', 'completed'],
-    default: 'pending'
+    enum: ['pending_payment', 'payment_received', 'confirmed', 'cancelled', 'completed'],
+    default: 'pending_payment'
   },
+  paymentProof: String, // URL del comprobante de pago
+  paymentDeadline: Date, // Fecha límite para pagar (5-6 horas después de crear reserva)
+  paidAt: Date, // Fecha cuando se recibió el comprobante
   source: { type: String, default: 'whatsapp' },
   totalAmount: Number,
   confirmationCode: String

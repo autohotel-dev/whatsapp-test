@@ -125,8 +125,80 @@ app.post('/webhook', async (req, res) => {
           );
         }
       } else {
-        // ✅ PROCESAR CON CHATBOT NORMAL
+        // PROCESAR CON CHATBOT NORMAL
         await hotelChatbot.handleMessage(userPhone, messageText);
+      }
+
+      return res.status(200).send('EVENT_RECEIVED');
+    }
+
+    // 2.5. SI ES UNA IMAGEN (POSIBLE COMPROBANTE DE PAGO)
+    if (message && message.type === 'image') {
+      const userPhone = message.from;
+      const messageId = message.id;
+      const imageId = message.image.id;
+
+      // EVITAR DUPLICADOS
+      if (messageCache.has(messageId)) {
+        console.log(`  Imagen duplicada ${messageId} - Ignorando`);
+        return res.status(200).send('EVENT_RECEIVED');
+      }
+
+      messageCache.set(messageId, Date.now());
+      console.log(` Imagen recibida de ${userPhone} - ID: ${imageId}`);
+
+      try {
+        // Buscar si el usuario tiene una reserva pendiente de pago
+        const reservaPendiente = await database.models.Reservation.findOne({
+          userPhone: userPhone,
+          status: 'pending_payment',
+          paymentDeadline: { $gt: new Date() }
+        }).sort({ createdAt: -1 });
+
+        if (reservaPendiente) {
+          console.log(' Comprobante detectado para reserva:', reservaPendiente._id);
+
+          // Guardar referencia de la imagen
+          const imageUrl = `whatsapp://media/${imageId}`;
+
+          // Actualizar reserva
+          reservaPendiente.status = 'payment_received';
+          reservaPendiente.paymentProof = imageUrl;
+          reservaPendiente.paidAt = new Date();
+          await reservaPendiente.save();
+
+          console.log(' Reserva actualizada a payment_received');
+
+          // Notificar al cliente
+          await sendTextMessage(userPhone, 
+            ` *Comprobante Recibido*\n\n` +
+            `Gracias, hemos recibido tu comprobante de pago.\n\n` +
+            ` *En verificación:* Nuestro equipo está verificando tu pago.\n\n` +
+            ` Te confirmaremos en los próximos minutos.\n\n` +
+            ` Código de reserva: *${reservaPendiente.confirmationCode}*\n\n` +
+            `_Si tienes dudas: (442) 210 32 92_`
+          );
+
+          // Notificar al hotel
+          const mensajeHotel = ` *COMPROBANTE DE PAGO RECIBIDO*\n\n` +
+            ` Código: ${reservaPendiente.confirmationCode}\n` +
+            ` Cliente: ${reservaPendiente.customerName}\n` +
+            ` Teléfono: ${userPhone}\n` +
+            ` Monto: $${reservaPendiente.totalAmount.toLocaleString('es-MX')} MXN\n\n` +
+            ` El cliente envió una imagen como comprobante.\n\n` +
+            ` *ACCIÓN REQUERIDA:* Verificar pago y confirmar reserva.\n\n` +
+            `_ID: ${reservaPendiente._id}_`;
+
+          const telefonoHotel = process.env.HOTEL_NOTIFICATION_PHONE || '5214422103292';
+          await sendTextMessage(telefonoHotel, mensajeHotel);
+
+          console.log(' Notificaciones enviadas');
+        } else {
+          console.log(' No hay reserva pendiente de pago');
+        }
+
+      } catch (error) {
+        console.error(' Error procesando comprobante:', error);
       }
 
       return res.status(200).send('EVENT_RECEIVED');
@@ -137,7 +209,7 @@ app.post('/webhook', async (req, res) => {
       const userPhone = message.from;
       const messageId = message.id;
 
-      // ✅ EVITAR DUPLICADOS
+      // EVITAR DUPLICADOS
       if (messageCache.has(messageId)) {
         console.log(`⏭️  Mensaje interactivo duplicado ${messageId} - Ignorando`);
         return res.status(200).send('EVENT_RECEIVED');

@@ -1,5 +1,5 @@
 // flow.js - Versión con paquetes
-const { sendTextMessage } = require('../../services/message-sender.js');
+const { sendTextMessage, sendImageMessage } = require('../../services/message-sender.js');
 const { 
   PAQUETES_DATA,
   HORAS_DATA,
@@ -359,16 +359,17 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
   }
 }
 
-// ✅ ENVIAR CONFIRMACIÓN AL CLIENTE  
+// ✅ ENVIAR CONFIRMACIÓN AL CLIENTE CON INSTRUCCIONES DE PAGO
 async function enviarConfirmacionCliente(datos, reservaId) {
   try {
     const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
     const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion);
     const paqueteNombre = getNombrePaquete(datos.paquete).replace(/^[^\s]+\s/, ''); // Quitar emoji
 
-    const mensajeCliente = `✅ *¡Reserva Confirmada!* - Auto Hotel Luxor 🏨
+    // Mensaje 1: Confirmación de reserva
+    const mensajeConfirmacion = `✅ *Pre-Reserva Registrada* - Auto Hotel Luxor 🏨
 
-Gracias *${datos.nombre}*, tu reserva ha sido confirmada:
+Gracias *${datos.nombre}*, tu reserva ha sido pre-registrada:
 
 📋 *Detalles de tu Reserva:*
 • Paquete: ${paqueteNombre}
@@ -384,17 +385,66 @@ Auto Hotel Luxor
 Av. Prol. Boulevard Bernardo Quintana, 1000B
 Querétaro, México
 
-📞 *Informes y reservaciones:*
-(442) 210 32 92
-
-_¡Te esperamos! Recuerda traer identificación oficial._
-
-_Horarios:_
-• Domingo a Jueves: 06:00 AM - 12:00 hrs
-• Viernes y Sábado: 8 horas`;
+📞 *Informes: (442) 210 32 92*`;
 
     console.log('📤 Enviando confirmación al cliente:', datos.telefono);
-    await sendTextMessage(datos.telefono, mensajeCliente);
+    await sendTextMessage(datos.telefono, mensajeConfirmacion);
+    
+    // Delay para que los mensajes lleguen en orden
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Mensaje 2: Instrucciones de pago
+    const mensajePago = `💳 *INSTRUCCIONES DE PAGO*
+
+⚠️ *IMPORTANTE:* Para confirmar tu reserva, debes realizar el pago en las próximas *6 HORAS*.
+
+🏦 *Datos para transferencia:*
+Te envío una imagen con los datos bancarios 👇`;
+
+    await sendTextMessage(datos.telefono, mensajePago);
+    
+    // Delay antes de enviar imagen
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Mensaje 3: Enviar imagen con datos bancarios
+    const DATOS_BANCARIOS_URL = process.env.PAYMENT_IMAGE_URL || 'https://i.imgur.com/XXXXXXX.jpg'; // REEMPLAZAR CON TU URL
+    
+    try {
+      console.log('📸 Enviando imagen con datos bancarios');
+      await sendImageMessage(datos.telefono, DATOS_BANCARIOS_URL, '💳 Datos bancarios para transferencia');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    } catch (imgError) {
+      console.error('⚠️ Error enviando imagen bancaria:', imgError.message);
+      // Si falla la imagen, enviar datos por texto
+      const datosBancariosTexto = `💳 *DATOS BANCARIOS:*
+
+🏦 Banco: [TU BANCO]
+👤 Titular: [NOMBRE TITULAR]
+💳 CLABE: [TU CLABE]
+📱 Tarjeta: [TU TARJETA]
+
+_O paga con transferencia/depósito_`;
+      await sendTextMessage(datos.telefono, datosBancariosTexto);
+    }
+    
+    // Mensaje 4: Instrucciones finales
+    const mensajeInstrucciones = `📤 *ENVÍA TU COMPROBANTE*
+
+Después de realizar tu transferencia:
+1️⃣ Toma una foto clara del comprobante
+2️⃣ Envíalo como *imagen* a este chat
+3️⃣ Espera la confirmación (te responderemos pronto)
+
+⏰ *IMPORTANTE:*
+• Tienes *6 HORAS* para realizar el pago
+• Si no recibes el comprobante en ese tiempo, tu reserva será *CANCELADA automáticamente*
+• Guarda tu código de reserva: *${reservaId || 'Ver mensaje anterior'}*
+
+❓ Dudas: (442) 210 32 92
+
+_Gracias por tu preferencia_ 🏨✨`;
+
+    await sendTextMessage(datos.telefono, mensajeInstrucciones);
 
     // 💾 Guardar notificación en BD
     try {
@@ -436,6 +486,10 @@ async function guardarReservaEnBD(datos) {
     // Formatear fecha para Date object
     const fechaReserva = new Date(datos.fecha + 'T' + datos.hora + ':00');
     
+    // Calcular deadline de pago (6 horas desde ahora)
+    const paymentDeadline = new Date();
+    paymentDeadline.setHours(paymentDeadline.getHours() + 6);
+    
     // Preparar datos de reserva para BD
     const reservationData = {
       userPhone: datos.telefono,
@@ -447,7 +501,8 @@ async function guardarReservaEnBD(datos) {
       customerName: datos.nombre,
       customerEmail: datos.email,
       specialRequests: datos.comentarios || '',
-      status: 'confirmed',
+      status: 'pending_payment',  // Estado inicial: esperando pago
+      paymentDeadline: paymentDeadline,
       source: 'whatsapp',
       totalAmount: precio,
       confirmationCode: confirmationCode
