@@ -383,9 +383,10 @@ router.post('/messages/send', async (req, res) => {
     
     conversation.messages.push({
       text: message,
-      direction: 'outbound',
+      direction: 'outgoing',
       timestamp: new Date(),
-      intent: 'manual_message'
+      intent: 'manual_message',
+      messageType: 'text'
     });
     
     await conversation.save();

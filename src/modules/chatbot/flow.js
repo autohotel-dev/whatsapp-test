@@ -451,7 +451,7 @@ _Gracias por tu preferencia_ 🏨✨`;
       await database.saveNotification({
         type: 'reservation_confirmation',
         recipientPhone: datos.telefono,
-        message: mensajeCliente,
+        message: mensajeConfirmacion,
         reservationId: reservaId,
         status: 'sent',
         metadata: {

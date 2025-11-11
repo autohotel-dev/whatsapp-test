@@ -224,7 +224,7 @@ GET /api/messages/stats
     "total": 5420,
     "byDirection": {
       "incoming": 2850,
-      "outbound": 2570
+      "outgoing": 2570
     },
     "topIntents": [
       { "_id": "reservar", "count": 450 },
