@@ -13,6 +13,8 @@ const aiNLP = require('./src/modules/ai/ai-nlp.js');
 const notificationSystem = require('./src/modules/notifications/notifications.js');
 const uxEnhancer = require('./src/modules/ux/ux-enhancer.js');
 const cloudinaryUploader = require('./src/services/cloudinary-uploader.js');
+const messageLogger = require('./src/services/message-logger.js');
+const analyticsUpdater = require('./src/services/analytics-updater.js');
 
 const app = express();
 
@@ -125,6 +127,9 @@ app.post('/webhook', async (req, res) => {
       messageCache.set(messageId, Date.now());
       console.log(`💬 Nuevo mensaje de ${userPhone}: "${messageText}"`);
 
+      // 💾 GUARDAR MENSAJE ENTRANTE EN BD
+      await messageLogger.logIncoming(userPhone, messageText, 'pending', 0, 'text');
+
       // ✅ DETECTAR SI ES UNA RESERVA PARA ENVIAR FLOW
       const cleanMessage = messageText.toLowerCase().trim();
 
@@ -179,6 +184,9 @@ app.post('/webhook', async (req, res) => {
 
       messageCache.set(messageId, Date.now());
       console.log(` Imagen recibida de ${userPhone} - ID: ${imageId}`);
+
+      // 💾 GUARDAR MENSAJE DE IMAGEN EN BD
+      await messageLogger.logIncoming(userPhone, '[Imagen - Comprobante de pago]', 'payment_proof', 1.0, 'image');
 
       try {
         // DEBUG: Ver qué reservas tiene este usuario
@@ -598,6 +606,14 @@ async function startServer() {
       console.log('');
       console.log(`🎯 Dashboard disponible en: http://localhost:${PORT}/dashboard`);
       console.log('');
+
+      // 📊 Iniciar actualización automática de analytics
+      if (database.isConnected()) {
+        console.log('📊 Iniciando sistema de analytics diarias...');
+        analyticsUpdater.startAutoUpdate(1); // Actualizar cada 1 hora
+        console.log('✅ Analytics updater iniciado (actualización cada 1 hora)');
+        console.log('');
+      }
     });
   } catch (error) {
     console.error('❌ Error iniciando servidor:', error);

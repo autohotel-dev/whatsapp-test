@@ -653,4 +653,62 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// ============================================
+// 📊 ANALYTICS DIARIAS
+// ============================================
+
+// Obtener analytics de los últimos N días
+router.get('/analytics/daily', async (req, res) => {
+  try {
+    const { days = 7 } = req.query;
+    
+    const analyticsUpdater = require('../services/analytics-updater');
+    const analytics = await analyticsUpdater.getAnalyticsSummary(parseInt(days));
+    
+    res.json({
+      success: true,
+      days: parseInt(days),
+      analytics
+    });
+  } catch (error) {
+    console.error('Error obteniendo analytics diarias:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Actualizar analytics manualmente (forzar actualización)
+router.post('/analytics/update', async (req, res) => {
+  try {
+    const analyticsUpdater = require('../services/analytics-updater');
+    const result = await analyticsUpdater.updateDailyAnalytics();
+    
+    res.json({
+      success: true,
+      message: 'Analytics actualizadas',
+      result
+    });
+  } catch (error) {
+    console.error('Error actualizando analytics:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Regenerar analytics históricas (últimos N días)
+router.post('/analytics/regenerate', async (req, res) => {
+  try {
+    const { days = 7 } = req.body;
+    
+    const analyticsUpdater = require('../services/analytics-updater');
+    await analyticsUpdater.updateHistoricalAnalytics(parseInt(days));
+    
+    res.json({
+      success: true,
+      message: `Analytics de los últimos ${days} días regeneradas`
+    });
+  } catch (error) {
+    console.error('Error regenerando analytics:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

@@ -1,4 +1,5 @@
 const axios = require('axios');
+const messageLogger = require('./message-logger');
 
 class MessageSender {
   constructor() {
@@ -37,6 +38,10 @@ class MessageSender {
 
       const response = await this.makeApiCall(messageData);
       console.log('✅ Mensaje de texto enviado:', response.data);
+      
+      // 💾 Guardar mensaje saliente en BD
+      await messageLogger.logOutgoing(phoneNumber, text, 'bot_response', 'text');
+      
       return response.data;
     } catch (error) {
       console.error('❌ Error enviando mensaje de texto:', error.response?.data || error.message);
@@ -84,6 +89,10 @@ class MessageSender {
 
       const response = await this.makeApiCall(messageData);
       console.log('✅ Flow message enviado:', response.data);
+      
+      // 💾 Guardar mensaje de flow en BD
+      await messageLogger.logOutgoing(phoneNumber, '[Flow de Reserva enviado]', 'reservation_flow', 'flow');
+      
       return response.data;
     } catch (error) {
       console.error('❌ Error enviando flow message:', error.response?.data || error.message);
@@ -108,6 +117,10 @@ class MessageSender {
 
       const response = await this.makeApiCall(messageData);
       console.log('✅ Imagen enviada:', response.data);
+      
+      // 💾 Guardar mensaje de imagen en BD
+      await messageLogger.logOutgoing(phoneNumber, caption || '[Imagen enviada]', 'image_sent', 'image');
+      
       return response.data;
     } catch (error) {
       console.error('❌ Error enviando imagen:', error.response?.data || error.message);
