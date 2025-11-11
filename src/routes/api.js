@@ -345,6 +345,69 @@ router.get('/messages/stats', async (req, res) => {
   }
 });
 
+// Enviar mensaje a un usuario
+router.post('/messages/send', async (req, res) => {
+  try {
+    const { phone, message } = req.body;
+    
+    // Validar campos requeridos
+    if (!phone) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'El número de teléfono es requerido' 
+      });
+    }
+    
+    if (!message) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'El mensaje es requerido' 
+      });
+    }
+    
+    // Importar el servicio de mensajería
+    const { sendTextMessage } = require('../services/message-sender');
+    
+    // Enviar mensaje a través de WhatsApp
+    await sendTextMessage(phone, message);
+    
+    // Registrar el mensaje en la conversación
+    let conversation = await models.Conversation.findOne({ userPhone: phone });
+    
+    if (!conversation) {
+      conversation = new models.Conversation({
+        userPhone: phone,
+        messages: []
+      });
+    }
+    
+    conversation.messages.push({
+      text: message,
+      direction: 'outbound',
+      timestamp: new Date(),
+      intent: 'manual_message'
+    });
+    
+    await conversation.save();
+    
+    res.json({
+      success: true,
+      message: 'Mensaje enviado exitosamente',
+      data: {
+        phone,
+        message,
+        sentAt: new Date()
+      }
+    });
+  } catch (error) {
+    console.error('Error enviando mensaje:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Error al enviar el mensaje'
+    });
+  }
+});
+
 // ============================================
 // 🔔 NOTIFICACIONES
 // ============================================

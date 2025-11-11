@@ -221,41 +221,70 @@ GET /api/messages/stats
 {
   "success": true,
   "stats": {
-    "totalMessages": 5420,
-    "incoming": 2850,
-    "outgoing": 2570,
-    "byIntent": {
-      "reservar": 450,
-      "precios": 380,
-      "habitaciones": 320,
-      "servicios": 250,
-      "ubicacion": 180
+    "total": 5420,
+    "byDirection": {
+      "incoming": 2850,
+      "outbound": 2570
     },
-    "averageConfidence": 0.78
+    "topIntents": [
+      { "_id": "reservar", "count": 450 },
+      { "_id": "precios", "count": 380 },
+      { "_id": "habitaciones", "count": 320 },
+      { "_id": "servicios", "count": 250 },
+      { "_id": "ubicacion", "count": 180 }
+    ]
   }
 }
 ```
+
+### 17. Enviar mensaje a un usuario
+```http
+POST /api/messages/send
+Content-Type: application/json
+```
+**Body:**
+```json
+{
+  "phone": "5214426363547",
+  "message": "Hola, tu reserva ha sido confirmada exitosamente."
+}
+```
+**Respuesta exitosa:**
+```json
+{
+  "success": true,
+  "message": "Mensaje enviado exitosamente",
+  "data": {
+    "phone": "5214426363547",
+    "message": "Hola, tu reserva ha sido confirmada exitosamente.",
+    "sentAt": "2025-11-10T23:45:00.000Z"
+  }
+}
+```
+**Errores posibles:**
+- `400` - Falta el número de teléfono o el mensaje
+- `500` - Error al enviar el mensaje (problema con WhatsApp API)
 
 ---
 
 ## 🔔 **NOTIFICACIONES**
 
-### 17. Obtener todas las notificaciones
+### 18. Obtener todas las notificaciones
 ```http
 GET /api/notifications
 ```
 
-### 18. Obtener notificaciones no leídas
+### 19. Obtener notificaciones no leídas
 ```http
 GET /api/notifications/unread
 ```
 
-### 19. Marcar notificación como leída
+### 20. Marcar notificación como leída
 ```http
 PUT /api/notifications/:id/read
 ```
 
-### 20. Obtener notificaciones por tipo
+### 21. Obtener notificaciones por tipo
 ```http
 GET /api/notifications?type=reservation_hotel
 GET /api/notifications?type=reservation_confirmation
