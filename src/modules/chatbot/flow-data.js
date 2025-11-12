@@ -92,7 +92,7 @@ const BOTELLAS_DATA = {
     { "id": "vino_espanol", "title": "🍷 Vino Español" },
     { "id": "tradicional", "title": "🥃 Tradicional" },
     { "id": "centenario_plata", "title": "🥃 Centenario de Plata" },
-    { "id": "etiqueta_roja", "title": "🥥 Etiqueta Roja" },
+    { "id": "etiqueta_roja", "title": "🥃 Etiqueta Roja" },
     { "id": "absolut_vodka", "title": "🍸 Absolut Vodka" }
   ],
   "premium": [
@@ -106,12 +106,20 @@ const BOTELLAS_DATA = {
 // ✅ OPCIONES DE REFRESCOS
 const REFRESCOS_DATA = [
   {"id": "coca_cola", "title": "🥤 Coca-Cola"},
+  {"id": "coca_cola_light", "title": "🥤 Coca-Cola Light"},
+  {"id": "coca_cola_zero", "title": "🥤 Coca-Cola Zero"},
   {"id": "fanta", "title": "🥤 Fanta"},
   {"id": "sprite", "title": "🥤 Sprite"},
-  {"id": "gatorade", "title": "🥤 Gatorade"},
-  {"id": "coca_cola_zero", "title": "🥤 Coca-Cola Zero"},
-  {"id": "fanta_zero", "title": "🥤 Fanta Zero"},
-  {"id": "coca_cola_light", "title": "🥤 Coca-Cola Light"}
+  {"id": "fresca", "title": "🥤 Fresca"},
+  {"id": "sidral", "title": "🥤 Sidral Mundet"},
+  {"id": "agua_mideral", "title": "🥤 Peñafiel Agua Mideral"},
+  {"id": "fanta", "title": "🥤 Fanta"},
+  {"id": "delaware", "title": "🥤 Delaware Punch"},
+  {"id": "ginger_ale", "title": "🥤 Schweppes Ginger Ale"},
+  {"id": "agua_tonica", "title": "🥤 Schweppes Agua Tónica"},
+  {"id": "agua_tonica", "title": "🥤 Schweppes Agua Tónica"},
+  {"id": "jugo_granada", "title": "🥤 Jugo de Granada"},
+  {"id": "jugo_arandano", "title": "🥤 Jugo de Arándano"},
 ];
 
 function getHabitacionesPorPaquete(paqueteId) {
