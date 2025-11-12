@@ -15,6 +15,24 @@ const {
 } = require('./flow-data.js');
 const { database } = require('../database/database.js');
 
+// ✅ COMBINAR REFRESCOS INDIVIDUALES EN ARRAY
+function combinarRefrescos(datos) {
+  const refrescos = [];
+  for (let i = 1; i <= 5; i++) {
+    const refresco = datos[`refresco${i}`];
+    if (refresco && refresco.trim() !== '') {
+      refrescos.push(refresco);
+    }
+  }
+  return refrescos;
+}
+
+// ✅ FORMATEAR REFRESCOS PARA MOSTRAR
+function formatearRefrescos(refrescos) {
+  if (!refrescos || refrescos.length === 0) return '';
+  return refrescos.map((r, i) => getNombreRefresco(r)).join(', ');
+}
+
 // ✅ GENERAR FECHAS REALES (próximos 15 días)
 function generarFechasReales() {
   const fechas = [];
@@ -124,11 +142,20 @@ async function handleReservaScreen(data) {
     botellasDelPaquete = [];
   }
   
+  // Determinar cuántos refrescos según el paquete
+  const cantidadRefrescos = {
+    'deseo': 0,        // No incluye refrescos
+    'enamorados': 2,   // 2 refrescos
+    'premium': 5       // 5 refrescos
+  };
+  
+  const numRefrescos = cantidadRefrescos[paqueteSeleccionado] || 0;
+  
   // Debug: Verificar tipo de datos
-  console.log('🔍 DEBUG - botellasDelPaquete:', {
-    tipo: Array.isArray(botellasDelPaquete) ? 'array' : typeof botellasDelPaquete,
-    cantidad: botellasDelPaquete.length,
-    paquete: paqueteSeleccionado
+  console.log('🔍 DEBUG:', {
+    paquete: paqueteSeleccionado,
+    botellas: botellasDelPaquete.length,
+    refrescos: numRefrescos
   });
 
   // Estructura del flow con el formato exacto esperado por Meta
@@ -148,7 +175,11 @@ async function handleReservaScreen(data) {
       "botella": botellasDelPaquete,
       "is_botella_enabled": true,
       "refresco": REFRESCOS_DATA,
-      "is_refresco_enabled": true
+      "is_refresco1_enabled": numRefrescos >= 1,
+      "is_refresco2_enabled": numRefrescos >= 2,
+      "is_refresco3_enabled": numRefrescos >= 3,
+      "is_refresco4_enabled": numRefrescos >= 4,
+      "is_refresco5_enabled": numRefrescos >= 5
     }
   };
 
@@ -315,9 +346,17 @@ async function generarDatosResumen(datos) {
   const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion);
   const paqueteNombre = getNombrePaquete(datos.paquete);
   const botellaNombre = getNombreBotella(datos.botella);
-  const refrescoNombre = getNombreRefresco(datos.refresco);
-
-  const textoReserva = `${paqueteNombre}\n${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: 2 personas\nbebida: ${botellaNombre}\nrefresco: ${refrescoNombre}`;
+  
+  // Combinar todos los refrescos seleccionados
+  const refrescos = combinarRefrescos(datos);
+  const refrescosTexto = formatearRefrescos(refrescos);
+  
+  // Construir texto de reserva
+  let textoReserva = `${paqueteNombre}\n${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: 2 personas\n🍾 Bebida: ${botellaNombre}`;
+  
+  if (refrescosTexto) {
+    textoReserva += `\n🥤 Refrescos: ${refrescosTexto}`;
+  }
 
   const textoDetalles = `👤 Nombre: ${datos.nombre}\n📧 Email: ${datos.email}\n📞 Teléfono: ${datos.telefono}${datos.comentarios ? `\n💬 Comentarios: ${datos.comentarios}` : ''}`;
 
@@ -342,8 +381,12 @@ async function enviarNotificacionReserva(datos, reservaId) {
     const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
     const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion).replace(/^[^\s]+\s/, ''); // Quitar emoji
     const paqueteNombre = getNombrePaquete(datos.paquete).replace(/^[^\s]+\s/, ''); // Quitar emoji
+    
+    // Combinar refrescos
+    const refrescos = combinarRefrescos(datos);
+    const refrescosTexto = formatearRefrescos(refrescos);
 
-    const mensajeHotel = `🏨 **NUEVA RESERVA - Auto Hotel Luxor** 🏨
+    let mensajeHotel = `🏨 **NUEVA RESERVA - Auto Hotel Luxor** 🏨
 
 📋 **Detalles de la Reserva:**
 • Paquete: ${paqueteNombre}
@@ -351,8 +394,13 @@ async function enviarNotificacionReserva(datos, reservaId) {
 • Fecha: ${datos.fecha}
 • Hora: ${datos.hora}
 • Personas: 2
-• Botella: ${botellaNombre}
-• Refresco: ${refrescoNombre}
+• Botella: ${getNombreBotella(datos.botella)}`;
+    
+    if (refrescosTexto) {
+      mensajeHotel += `\n• Refrescos: ${refrescosTexto}`;
+    }
+    
+    mensajeHotel += `
 
 👤 **Datos del Cliente:**
 • Nombre: ${datos.nombre}
@@ -383,8 +431,8 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
           packageType: datos.paquete,
           roomType: datos.tipo_habitacion,
           totalAmount: precio,
-          bottle: botellaNombre,
-          soda: refrescoNombre
+          bottle: getNombreBotella(datos.botella),
+          sodas: refrescosTexto || 'Sin refrescos'
         }
       });
       console.log('💾 Notificación al hotel guardada en BD');
@@ -404,9 +452,13 @@ async function enviarConfirmacionCliente(datos, reservaId) {
     const precio = getPrecio(datos.paquete, datos.tipo_habitacion);
     const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion);
     const paqueteNombre = getNombrePaquete(datos.paquete).replace(/^[^\s]+\s/, ''); // Quitar emoji
+    
+    // Combinar refrescos
+    const refrescos = combinarRefrescos(datos);
+    const refrescosTexto = formatearRefrescos(refrescos);
 
     // Mensaje 1: Confirmación de reserva
-    const mensajeConfirmacion = `✅ *Pre-Reserva Registrada* - Auto Hotel Luxor 🏨
+    let mensajeConfirmacion = `✅ *Pre-Reserva Registrada* - Auto Hotel Luxor 🏨
 
 Gracias *${datos.nombre}*, tu reserva ha sido pre-registrada:
 
@@ -416,8 +468,13 @@ Gracias *${datos.nombre}*, tu reserva ha sido pre-registrada:
 • Fecha: ${datos.fecha}  
 • Hora de check-in: ${datos.hora}
 • Número de personas: 2
-• Botella: ${botellaNombre}
-• Refresco: ${refrescoNombre}
+• Botella: ${getNombreBotella(datos.botella)}`;
+    
+    if (refrescosTexto) {
+      mensajeConfirmacion += `\n• Refrescos: ${refrescosTexto}`;
+    }
+    
+    mensajeConfirmacion += `
 
 💰 *Total a pagar: $${precio.toLocaleString('es-MX')} MXN*
 
@@ -531,6 +588,9 @@ async function guardarReservaEnBD(datos) {
     const paymentDeadline = new Date();
     paymentDeadline.setHours(paymentDeadline.getHours() + 6);
     
+    // Combinar refrescos
+    const refrescos = combinarRefrescos(datos);
+    
     // Preparar datos de reserva para BD
     const reservationData = {
       userPhone: datos.telefono,
@@ -547,8 +607,8 @@ async function guardarReservaEnBD(datos) {
       source: 'whatsapp',
       totalAmount: precio,
       confirmationCode: confirmationCode,
-      bottle: botellaNombre,
-      soda: refrescoNombre
+      bottle: getNombreBotella(datos.botella),
+      sodas: refrescos  // Array de refrescos
     };
 
     console.log('💾 Guardando reserva en MongoDB:', {
@@ -556,8 +616,8 @@ async function guardarReservaEnBD(datos) {
       telefono: datos.telefono,
       fecha: datos.fecha,
       precio: precio,
-      botella: botellaNombre,
-      refresco: refrescoNombre
+      botella: getNombreBotella(datos.botella),
+      refrescos: refrescos.length
     });
 
     // Guardar en base de datos

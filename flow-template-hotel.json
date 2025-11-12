@@ -303,9 +303,25 @@
                         }
                     ]
                 },
-                "is_refresco_enabled": {
+                "is_refresco1_enabled": {
                     "type": "boolean",
-                    "__example__": true
+                    "__example__": false
+                },
+                "is_refresco2_enabled": {
+                    "type": "boolean",
+                    "__example__": false
+                },
+                "is_refresco3_enabled": {
+                    "type": "boolean",
+                    "__example__": false
+                },
+                "is_refresco4_enabled": {
+                    "type": "boolean",
+                    "__example__": false
+                },
+                "is_refresco5_enabled": {
+                    "type": "boolean",
+                    "__example__": false
                 }
             },
             "layout": {
@@ -371,11 +387,43 @@
                             },
                             {
                                 "type": "Dropdown",
-                                "label": "Refresco",
-                                "name": "refresco",
+                                "label": "🥤 Refresco 1",
+                                "name": "refresco1",
                                 "data-source": "${data.refresco}",
-                                "required": "${data.is_refresco_enabled}",
-                                "enabled": "${data.is_refresco_enabled}"
+                                "required": "${data.is_refresco1_enabled}",
+                                "enabled": "${data.is_refresco1_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "🥤 Refresco 2",
+                                "name": "refresco2",
+                                "data-source": "${data.refresco}",
+                                "required": "${data.is_refresco2_enabled}",
+                                "enabled": "${data.is_refresco2_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "🥤 Refresco 3",
+                                "name": "refresco3",
+                                "data-source": "${data.refresco}",
+                                "required": "${data.is_refresco3_enabled}",
+                                "enabled": "${data.is_refresco3_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "🥤 Refresco 4",
+                                "name": "refresco4",
+                                "data-source": "${data.refresco}",
+                                "required": "${data.is_refresco4_enabled}",
+                                "enabled": "${data.is_refresco4_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "🥤 Refresco 5",
+                                "name": "refresco5",
+                                "data-source": "${data.refresco}",
+                                "required": "${data.is_refresco5_enabled}",
+                                "enabled": "${data.is_refresco5_enabled}"
                             },
                             {
                                 "type": "Footer",
@@ -393,7 +441,11 @@
                                         "hora": "${form.hora}",
                                         "numero_personas": "2",
                                         "botella": "${form.botella}",
-                                        "refresco": "${form.refresco}"
+                                        "refresco1": "${form.refresco1}",
+                                        "refresco2": "${form.refresco2}",
+                                        "refresco3": "${form.refresco3}",
+                                        "refresco4": "${form.refresco4}",
+                                        "refresco5": "${form.refresco5}"
                                     }
                                 }
                             }
@@ -426,9 +478,25 @@
                     "type": "string",
                     "__example__": "2"
                 },
-                "refresco": {
+                "refresco1": {
                     "type": "string",
-                    "__example__": "Coca-Cola"
+                    "__example__": ""
+                },
+                "refresco2": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "refresco3": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "refresco4": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "refresco5": {
+                    "type": "string",
+                    "__example__": ""
                 },
                 "botella": {
                     "type": "string",
@@ -487,7 +555,11 @@
                                         "tipo_habitacion": "${data.tipo_habitacion}",
                                         "fecha": "${data.fecha}",
                                         "hora": "${data.hora}",
-                                        "refresco": "${data.refresco}",
+                                        "refresco1": "${data.refresco1}",
+                                        "refresco2": "${data.refresco2}",
+                                        "refresco3": "${data.refresco3}",
+                                        "refresco4": "${data.refresco4}",
+                                        "refresco5": "${data.refresco5}",
                                         "botella": "${data.botella}",
                                         "nombre": "${form.nombre}",
                                         "email": "${form.email}",
@@ -538,9 +610,25 @@
                     "type": "string",
                     "__example__": "Vino Redonda"
                 },
-                "refresco": {
+                "refresco1": {
                     "type": "string",
-                    "__example__": "Coca-Cola"
+                    "__example__": ""
+                },
+                "refresco2": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "refresco3": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "refresco4": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "refresco5": {
+                    "type": "string",
+                    "__example__": ""
                 },
                 "numero_personas": {
                     "type": "string",
@@ -609,7 +697,11 @@
                                         "hora": "${data.hora}",
                                         "numero_personas": "2",
                                         "botella": "${data.botella}",
-                                        "refresco": "${data.refresco}",
+                                        "refresco1": "${data.refresco1}",
+                                        "refresco2": "${data.refresco2}",
+                                        "refresco3": "${data.refresco3}",
+                                        "refresco4": "${data.refresco4}",
+                                        "refresco5": "${data.refresco5}",
                                         "nombre": "${data.nombre}",
                                         "email": "${data.email}",
                                         "telefono": "${data.telefono}",
