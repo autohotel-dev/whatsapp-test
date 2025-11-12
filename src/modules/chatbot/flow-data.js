@@ -77,7 +77,43 @@ const PERSONAS_DATA = [
   { "id": "10", "title": "10 personas" }
 ];
 
-// ✅ FUNCIÓN PARA OBTENER HABITACIONES CON PRECIOS SEGÚN PAQUETE
+// ✅ OPCIONES DE BOTELLAS
+const BOTELLAS_DATA = {
+  "deseo": [
+    { "id": "vino_redonda", "title": "🍷 Vino Redonda" },
+    { "id": "six_cerveza", "title": "🍺 Six Cerveza" },
+    { "id": "bacardi_blanco", "title": "🥃 Bacardi Blanco" },
+    { "id": "presidente_clasico", "title": "🥃 Presidente Clásico" },
+    { "id": "cazadores", "title": "🥃 Cazadores" },
+    { "id": "wyboroba", "title": "🥃 Wyboroba" },
+    { "id": "azteca_oro", "title": "🥃 Azteca de Oro" }
+  ],
+  "enamorados": [
+    { "id": "vino_espanol", "title": "🍷 Vino Español" },
+    { "id": "tradicional", "title": "🥃 Tradicional" },
+    { "id": "centenario_plata", "title": "🥃 Centenario de Plata" },
+    { "id": "etiqueta_roja", "title": "🥥 Etiqueta Roja" },
+    { "id": "absolut_vodka", "title": "🍸 Absolut Vodka" }
+  ],
+  "premium": [
+    { "id": "don_julio", "title": "🥃 Don Julio" },
+    { "id": "vsop", "title": "🥃 VSOP" },
+    { "id": "freixenet", "title": "🍾 Freixenet" },
+    { "id": "buchanans_12", "title": "🥃 Buchanans 12" }
+  ]
+};
+
+// ✅ OPCIONES DE REFRESCOS
+const REFRESCOS_DATA = [
+  {"title": "Coca-Cola"},
+  {"title": "Fanta"},
+  {"title": "Sprite"},
+  {"title": "Gatorade"},
+  {"title": "Coca-Cola Zero"},
+  {"title": "Fanta Zero"},
+  {"title": "Coca-Cola Light"}
+];
+
 function getHabitacionesPorPaquete(paqueteId) {
   if (!PRECIOS_PAQUETES[paqueteId]) {
     paqueteId = "deseo"; // Default
@@ -106,14 +142,30 @@ function getNombrePaquete(paqueteId) {
   return paq ? paq.title : paqueteId;
 }
 
+// ✅ FUNCIÓN PARA OBTENER NOMBRE DE BOTELLA
+function getNombreBotella(paqueteId) {
+  const botella = BOTELLAS_DATA[paqueteId];
+  return botella ? botella.title : paqueteId;
+}
+
+// ✅ FUNCIÓN PARA OBTENER NOMBRE DE REFRESCO
+function getNombreRefresco(refrescoId) {
+  const refresco = REFRESCOS_DATA.find(r => r.title === refrescoId);
+  return refresco ? refresco.title : refrescoId;
+}
+
 module.exports = {
   PAQUETES_DATA,
   HABITACIONES_BASE,
   PRECIOS_PAQUETES,
   HORAS_DATA,
   PERSONAS_DATA,
+  BOTELLAS_DATA,
+  REFRESCOS_DATA,
   getHabitacionesPorPaquete,
   getPrecio,
   getNombreHabitacion,
-  getNombrePaquete
+  getNombrePaquete,
+  getNombreBotella,
+  getNombreRefresco
 };

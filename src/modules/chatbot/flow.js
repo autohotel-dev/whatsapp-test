@@ -148,7 +148,7 @@ async function handleDetallesScreen(body) {
   // Los datos pueden venir en form_response o en data (dependiendo del action)
   const datosFormulario = form_response || screenData || {};
   
-  const { nombre, email, telefono, comentarios, paquete, tipo_habitacion, fecha, hora, numero_personas } = datosFormulario;
+  const { nombre, email, telefono, comentarios, paquete, tipo_habitacion, fecha, hora, botella, refresco } = datosFormulario;
 
   console.log('📝 Datos personales recibidos:', {
     nombre: nombre ? '✓' : '✗',
@@ -166,7 +166,9 @@ async function handleDetallesScreen(body) {
         tipo_habitacion: tipo_habitacion || '',
         fecha: fecha || '',
         hora: hora || '',
-        numero_personas: numero_personas || ''
+        numero_personas: 2,
+        botella: botella || '',
+        refresco: refresco || ''
       }
     };
   }
@@ -177,11 +179,13 @@ async function handleDetallesScreen(body) {
     "tipo_habitacion": tipo_habitacion,
     "fecha": fecha,
     "hora": hora,
-    "numero_personas": numero_personas,
+    "numero_personas": 2,
     "nombre": nombre,
     "email": email,
     "telefono": telefono,
-    "comentarios": comentarios || ''
+    "comentarios": comentarios || '',
+    "botella": botella,
+    "refresco": refresco
   };
 
   console.log('✅ Datos completos, pasando a RESUMEN');
@@ -282,7 +286,7 @@ async function generarDatosResumen(datos) {
   const habitacionNombre = getNombreHabitacion(datos.tipo_habitacion);
   const paqueteNombre = getNombrePaquete(datos.paquete);
 
-  const textoReserva = `${paqueteNombre}\n${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: ${datos.numero_personas} personas`;
+  const textoReserva = `${paqueteNombre}\n${habitacionNombre}\n📅 Fecha: ${fechaFormateada}\n🕓 Hora: ${datos.hora}\n👥 Personas: 2 personas\nbebida: ${datos.botella}\nrefresco: ${datos.refresco}`;
 
   const textoDetalles = `👤 Nombre: ${datos.nombre}\n📧 Email: ${datos.email}\n📞 Teléfono: ${datos.telefono}${datos.comentarios ? `\n💬 Comentarios: ${datos.comentarios}` : ''}`;
 
@@ -315,7 +319,9 @@ async function enviarNotificacionReserva(datos, reservaId) {
 • Habitación: ${habitacionNombre}
 • Fecha: ${datos.fecha}
 • Hora: ${datos.hora}
-• Personas: ${datos.numero_personas}
+• Personas: 2
+• Botella: ${datos.botella}
+• Refresco: ${datos.refresco}
 
 👤 **Datos del Cliente:**
 • Nombre: ${datos.nombre}
@@ -345,7 +351,9 @@ ${datos.comentarios ? `• Comentarios: ${datos.comentarios}` : ''}
           customerPhone: datos.telefono,
           packageType: datos.paquete,
           roomType: datos.tipo_habitacion,
-          totalAmount: precio
+          totalAmount: precio,
+          bottle: datos.botella,
+          soda: datos.refresco
         }
       });
       console.log('💾 Notificación al hotel guardada en BD');
@@ -376,7 +384,9 @@ Gracias *${datos.nombre}*, tu reserva ha sido pre-registrada:
 • ${habitacionNombre}
 • Fecha: ${datos.fecha}  
 • Hora de check-in: ${datos.hora}
-• Número de personas: ${datos.numero_personas}
+• Número de personas: 2
+• Botella: ${datos.botella}
+• Refresco: ${datos.refresco}
 
 💰 *Total a pagar: $${precio.toLocaleString('es-MX')} MXN*
 
@@ -505,14 +515,18 @@ async function guardarReservaEnBD(datos) {
       paymentDeadline: paymentDeadline,
       source: 'whatsapp',
       totalAmount: precio,
-      confirmationCode: confirmationCode
+      confirmationCode: confirmationCode,
+      bottle: datos.botella,
+      soda: datos.refresco
     };
 
     console.log('💾 Guardando reserva en MongoDB:', {
       nombre: datos.nombre,
       telefono: datos.telefono,
       fecha: datos.fecha,
-      precio: precio
+      precio: precio,
+      botella: datos.botella,
+      refresco: datos.refresco
     });
 
     // Guardar en base de datos

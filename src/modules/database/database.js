@@ -90,6 +90,8 @@ const reservationSchema = new mongoose.Schema({
   paidAt: Date, // Fecha cuando se recibió el comprobante
   source: { type: String, default: 'whatsapp' },
   totalAmount: Number,
+  bottle: String,
+  soda: String,
   confirmationCode: String
 }, { timestamps: true });
 

@@ -15,6 +15,34 @@
             "id": "RESERVA",
             "title": "Reserva de Habitación",
             "data": {
+                "paquete": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "deseo",
+                            "title": "💝 Paquete Deseo - Habitación decorada + 1 botella"
+                        },
+                        {
+                            "id": "enamorados",
+                            "title": "❤️ Paquete Enamorados - Decoración + 1 botella + 2 refrescos"
+                        },
+                        {
+                            "id": "premium",
+                            "title": "👑 Paquete Premium - Decoración + botella premium + 5 refrescos"
+                        }
+                    ]
+                },
                 "tipo_habitacion": {
                     "type": "array",
                     "items": {
@@ -30,26 +58,26 @@
                     },
                     "__example__": [
                         {
-                            "id": "master_suite_junior",
-                            "title": "🏨 Master Suite Junior - $520 MXN"
-                        },
-                        {
-                            "id": "master_suite",
-                            "title": "🛌 Master Suite - $600 MXN"
+                            "id": "master_suite_sencilla",
+                            "title": "🛏️ Master Suite Sencilla - $1,350 MXN"
                         },
                         {
                             "id": "master_suite_jacuzzi",
-                            "title": "🛁 Master Suite con Jacuzzi - $900 MXN"
+                            "title": "🛁 Master Suite Jacuzzi - $1,650 MXN"
                         },
                         {
-                            "id": "master_suite_jacuzzi_sauna",
-                            "title": "♨️ Master Suite con Jacuzzi y Sauna - $1240 MXN"
+                            "id": "master_suite_sauna_jacuzzi",
+                            "title": "♨️ Master Suite Sauna & Jacuzzi - $1,940 MXN"
                         },
                         {
                             "id": "master_suite_alberca",
-                            "title": "🏊 Master Suite con Alberca - $1990 MXN"
+                            "title": "🏊 Master Suite Alberca - $2,900 MXN"
                         }
                     ]
+                },
+                "is_tipo_habitacion_enabled": {
+                    "type": "boolean",
+                    "__example__": true
                 },
                 "fecha": {
                     "type": "array",
@@ -126,48 +154,56 @@
                     },
                     "__example__": [
                         {
+                            "id": "06:00",
+                            "title": "06:00 AM"
+                        },
+                        {
+                            "id": "07:00",
+                            "title": "07:00 AM"
+                        },
+                        {
+                            "id": "08:00",
+                            "title": "08:00 AM"
+                        },
+                        {
+                            "id": "09:00",
+                            "title": "09:00 AM"
+                        },
+                        {
+                            "id": "10:00",
+                            "title": "10:00 AM"
+                        },
+                        {
+                            "id": "11:00",
+                            "title": "11:00 AM"
+                        },
+                        {
+                            "id": "12:00",
+                            "title": "12:00 PM"
+                        },
+                        {
+                            "id": "13:00",
+                            "title": "01:00 PM"
+                        },
+                        {
                             "id": "14:00",
-                            "title": "14:00 - Check-in estándar"
+                            "title": "02:00 PM"
                         },
                         {
                             "id": "15:00",
-                            "title": "15:00"
+                            "title": "03:00 PM"
                         },
                         {
                             "id": "16:00",
-                            "title": "16:00"
+                            "title": "04:00 PM"
                         },
                         {
                             "id": "17:00",
-                            "title": "17:00"
+                            "title": "05:00 PM"
                         },
                         {
                             "id": "18:00",
-                            "title": "18:00"
-                        },
-                        {
-                            "id": "19:00",
-                            "title": "19:00"
-                        },
-                        {
-                            "id": "20:00",
-                            "title": "20:00"
-                        },
-                        {
-                            "id": "21:00",
-                            "title": "21:00"
-                        },
-                        {
-                            "id": "22:00",
-                            "title": "22:00"
-                        },
-                        {
-                            "id": "23:00",
-                            "title": "23:00"
-                        },
-                        {
-                            "id": "00:00",
-                            "title": "00:00 - Check-in nocturno"
+                            "title": "06:00 PM"
                         }
                     ]
                 },
@@ -175,7 +211,7 @@
                     "type": "boolean",
                     "__example__": true
                 },
-                "numero_personas": {
+                "botella": {
                     "type": "array",
                     "items": {
                         "type": "object",
@@ -190,50 +226,94 @@
                     },
                     "__example__": [
                         {
-                            "id": "1",
-                            "title": "1 persona"
+                            "id": "vino_redonda",
+                            "title": "Vino Redonda"
                         },
                         {
-                            "id": "2",
-                            "title": "2 personas"
+                            "id": "six_cerveza",
+                            "title": "Six Cerveza"
                         },
                         {
-                            "id": "3",
-                            "title": "3 personas"
+                            "id": "bacardi_blanco",
+                            "title": "Bacardi Blanco"
                         },
                         {
-                            "id": "4",
-                            "title": "4 personas"
+                            "id": "presidente_clasico",
+                            "title": "Presidente Clásico"
                         },
                         {
-                            "id": "5",
-                            "title": "5 personas"
+                            "id": "cazadores",
+                            "title": "Cazadores"
                         },
                         {
-                            "id": "6",
-                            "title": "6 personas"
+                            "id": "wyboroba",
+                            "title": "Wyboroba"
                         },
                         {
-                            "id": "7",
-                            "title": "7 personas"
-                        },
-                        {
-                            "id": "8",
-                            "title": "8 personas"
-                        },
-                        {
-                            "id": "9",
-                            "title": "9 personas"
-                        },
-                        {
-                            "id": "10",
-                            "title": "10 personas"
+                            "id": "azteca_oro",
+                            "title": "Azteca de Oro"
                         }
                     ]
                 },
-                "is_numero_personas_enabled": {
+                "is_botella_enabled": {
                     "type": "boolean",
                     "__example__": true
+                },
+                "refresco": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "coca_cola",
+                            "title": "Coca-Cola"
+                        },
+                        {
+                            "id": "coca_cola_zero",
+                            "title": "Coca-Cola Zero"
+                        },
+                        {
+                            "id": "coca_cola_light",
+                            "title": "Coca-Cola Light"
+                        },
+                        {
+                            "id": "sidral_mundet",
+                            "title": "Sidral Mundet"
+                        },
+                        {
+                            "id": "fresca",
+                            "title": "Fresca"
+                        },
+                        {
+                            "id": "schweppes",
+                            "title": "Schweppes"
+                        },
+                        {
+                            "id": "penafiel",
+                            "title": "Peñafiel"
+                        },
+                        {
+                            "id": "fanta",
+                            "title": "Fanta"
+                        },
+                        {
+                            "id": "delaware_punch",
+                            "title": "Delaware Punch"
+                        }
+                    ]
+                },
+                "is_refresco_enabled": {
+                    "type": "boolean",
+                    "__example__": false
                 }
             },
             "layout": {
@@ -249,21 +329,29 @@
                             },
                             {
                                 "type": "TextBody",
-                                "text": "Complete los datos para su reserva:"
+                                "text": "Selecciona tu paquete y completa los datos de tu reserva:"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Selecciona tu Paquete",
+                                "name": "paquete",
+                                "data-source": "${data.paquete}",
+                                "required": true,
+                                "on-select-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "screen": "RESERVA",
+                                        "paquete_selected": "${form.paquete}"
+                                    }
+                                }
                             },
                             {
                                 "type": "Dropdown",
                                 "label": "Tipo de Habitación",
                                 "name": "tipo_habitacion",
                                 "data-source": "${data.tipo_habitacion}",
-                                "required": true,
-                                "on-select-action": {
-                                    "name": "data_exchange",
-                                    "payload": {
-                                        "screen": "RESERVA",
-                                        "tipo_habitacion_selected": "${form.tipo_habitacion}"
-                                    }
-                                }
+                                "required": "${data.is_tipo_habitacion_enabled}",
+                                "enabled": "${data.is_tipo_habitacion_enabled}"
                             },
                             {
                                 "type": "Dropdown",
@@ -283,11 +371,19 @@
                             },
                             {
                                 "type": "Dropdown",
-                                "label": "Número de Personas",
-                                "name": "numero_personas",
-                                "data-source": "${data.numero_personas}",
-                                "required": "${data.is_numero_personas_enabled}",
-                                "enabled": "${data.is_numero_personas_enabled}"
+                                "label": "Botella",
+                                "name": "botella",
+                                "data-source": "${data.botella}",
+                                "required": "${data.is_botella_enabled}",
+                                "enabled": "${data.is_botella_enabled}"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "label": "Refresco",
+                                "name": "refresco",
+                                "data-source": "${data.refresco}",
+                                "required": "${data.is_refresco_enabled}",
+                                "enabled": "${data.is_refresco_enabled}"
                             },
                             {
                                 "type": "Footer",
@@ -299,10 +395,13 @@
                                         "name": "DETALLES"
                                     },
                                     "payload": {
+                                        "paquete": "${form.paquete}",
                                         "tipo_habitacion": "${form.tipo_habitacion}",
                                         "fecha": "${form.fecha}",
                                         "hora": "${form.hora}",
-                                        "numero_personas": "${form.numero_personas}"
+                                        "numero_personas": "2",
+                                        "botella": "${form.botella}",
+                                        "refresco": "${form.refresco}"
                                     }
                                 }
                             }
@@ -315,6 +414,10 @@
             "id": "DETALLES",
             "title": "Datos Personales",
             "data": {
+                "paquete": {
+                    "type": "string",
+                    "__example__": "deseo"
+                },
                 "tipo_habitacion": {
                     "type": "string",
                     "__example__": "master_suite_jacuzzi"
@@ -330,6 +433,14 @@
                 "numero_personas": {
                     "type": "string",
                     "__example__": "2"
+                },
+                "refresco": {
+                    "type": "string",
+                    "__example__": "Coca-Cola"
+                },
+                "botella": {
+                    "type": "string",
+                    "__example__": "Vino Redonda"
                 }
             },
             "layout": {
@@ -380,10 +491,12 @@
                                 "on-click-action": {
                                     "name": "data_exchange",
                                     "payload": {
+                                        "paquete": "${data.paquete}",
                                         "tipo_habitacion": "${data.tipo_habitacion}",
                                         "fecha": "${data.fecha}",
                                         "hora": "${data.hora}",
-                                        "numero_personas": "${data.numero_personas}",
+                                        "refresco": "${data.refresco}",
+                                        "botella": "${data.botella}",
                                         "nombre": "${form.nombre}",
                                         "email": "${form.email}",
                                         "telefono": "${form.telefono}",
@@ -403,7 +516,7 @@
             "data": {
                 "reserva": {
                     "type": "string",
-                    "__example__": "🛁 Master Suite con Jacuzzi\n📅 Fecha: lun, 10 de nov de 2025\n🕓 Hora: 16:00\n👥 Personas: 2 personas"
+                    "__example__": "💝 Paquete Deseo\n🛁 Master Suite Jacuzzi\n📅 Fecha: lun, 10 de nov de 2025\n🕓 Hora: 16:00\n👥 Personas: 2 personas"
                 },
                 "detalles": {
                     "type": "string",
@@ -411,7 +524,11 @@
                 },
                 "precio_total": {
                     "type": "string",
-                    "__example__": "💰 Precio total: $900 MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México"
+                    "__example__": "💰 Precio total: $1,650 MXN\n\n📍 Ubicación: Auto Hotel Luxor\nAv. Prol. Boulevard Bernardo Quintana, 1000B\nQuerétaro, México\n\n📞 Informes: (442) 210 32 92"
+                },
+                "paquete": {
+                    "type": "string",
+                    "__example__": "deseo"
                 },
                 "tipo_habitacion": {
                     "type": "string",
@@ -424,6 +541,14 @@
                 "hora": {
                     "type": "string",
                     "__example__": "16:00"
+                },
+                "botella": {
+                    "type": "string",
+                    "__example__": "Vino Redonda"
+                },
+                "refresco": {
+                    "type": "string",
+                    "__example__": "Coca-Cola"
                 },
                 "numero_personas": {
                     "type": "string",
@@ -486,10 +611,13 @@
                                     "name": "data_exchange",
                                     "payload": {
                                         "screen": "RESUMEN",
+                                        "paquete": "${data.paquete}",
                                         "tipo_habitacion": "${data.tipo_habitacion}",
                                         "fecha": "${data.fecha}",
                                         "hora": "${data.hora}",
-                                        "numero_personas": "${data.numero_personas}",
+                                        "numero_personas": "2",
+                                        "botella": "${data.botella}",
+                                        "refresco": "${data.refresco}",
                                         "nombre": "${data.nombre}",
                                         "email": "${data.email}",
                                         "telefono": "${data.telefono}",
