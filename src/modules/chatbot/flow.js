@@ -4,6 +4,8 @@ const {
   PAQUETES_DATA,
   HORAS_DATA,
   PERSONAS_DATA,
+  BOTELLAS_DATA,
+  REFRESCOS_DATA,
   getHabitacionesPorPaquete,
   getPrecio,
   getNombreHabitacion,
