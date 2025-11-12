@@ -17,14 +17,26 @@ const { database } = require('../database/database.js');
 
 // ✅ COMBINAR REFRESCOS INDIVIDUALES EN ARRAY (CON NOMBRES FORMATEADOS)
 function combinarRefrescos(datos) {
+  console.log('🔍 DEBUG combinarRefrescos - Datos recibidos:', {
+    refresco1: datos.refresco1,
+    refresco2: datos.refresco2,
+    refresco3: datos.refresco3,
+    refresco4: datos.refresco4,
+    refresco5: datos.refresco5
+  });
+  
   const refrescos = [];
   for (let i = 1; i <= 5; i++) {
     const refrescoId = datos[`refresco${i}`];
+    console.log(`  - refresco${i}:`, refrescoId);
     if (refrescoId && refrescoId.trim() !== '') {
       // Guardar el nombre formateado en lugar del ID
-      refrescos.push(getNombreRefresco(refrescoId));
+      const nombre = getNombreRefresco(refrescoId);
+      console.log(`    ✓ Agregando: ${nombre}`);
+      refrescos.push(nombre);
     }
   }
+  console.log('🥤 Refrescos combinados:', refrescos);
   return refrescos;
 }
 
@@ -208,8 +220,9 @@ async function handleDetallesScreen(body) {
 
   // Los datos pueden venir en form_response o en data (dependiendo del action)
   const datosFormulario = form_response || screenData || {};
+  console.log('🔍 DEBUG datosFormulario completo:', JSON.stringify(datosFormulario, null, 2));
   
-  const { nombre, email, telefono, comentarios, paquete, tipo_habitacion, fecha, hora, botella, refresco } = datosFormulario;
+  const { nombre, email, telefono, comentarios, paquete, tipo_habitacion, fecha, hora, botella, refresco1, refresco2, refresco3, refresco4, refresco5 } = datosFormulario;
 
   console.log('📝 Datos personales recibidos:', {
     nombre: nombre ? '✓' : '✗',
@@ -229,7 +242,11 @@ async function handleDetallesScreen(body) {
         hora: hora || '',
         numero_personas: "2",
         botella: botella || '',
-        refresco: refresco || ''
+        refresco1: refresco1 || '',
+        refresco2: refresco2 || '',
+        refresco3: refresco3 || '',
+        refresco4: refresco4 || '',
+        refresco5: refresco5 || ''
       }
     };
   }
@@ -246,7 +263,11 @@ async function handleDetallesScreen(body) {
     "telefono": telefono,
     "comentarios": comentarios || '',
     "botella": botella,
-    "refresco": refresco
+    "refresco1": refresco1 || '',
+    "refresco2": refresco2 || '',
+    "refresco3": refresco3 || '',
+    "refresco4": refresco4 || '',
+    "refresco5": refresco5 || ''
   };
 
   console.log('✅ Datos completos, pasando a RESUMEN');
@@ -276,7 +297,7 @@ async function handleResumenScreen(data) {
   // Si viene del botón "Confirmar Reserva", el estado estará en el payload
   if (payload.estado === 'confirmada') {
     try {
-      console.log('✅ Confirmando reserva con datos:', payload);
+      console.log('✅ Confirmando reserva con datos:', JSON.stringify(payload, null, 2));
 
       // ✅ GUARDAR RESERVA EN BASE DE DATOS
       const reservaGuardada = await guardarReservaEnBD(payload);
