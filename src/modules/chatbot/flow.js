@@ -226,7 +226,7 @@ async function handleDetallesScreen(body) {
         tipo_habitacion: tipo_habitacion || '',
         fecha: fecha || '',
         hora: hora || '',
-        numero_personas: 2,
+        numero_personas: "2",
         botella: botella || '',
         refresco: refresco || ''
       }
@@ -239,7 +239,7 @@ async function handleDetallesScreen(body) {
     "tipo_habitacion": tipo_habitacion,
     "fecha": fecha,
     "hora": hora,
-    "numero_personas": 2,
+    "numero_personas": "2",
     "nombre": nombre,
     "email": email,
     "telefono": telefono,
