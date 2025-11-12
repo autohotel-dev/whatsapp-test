@@ -91,7 +91,7 @@ const reservationSchema = new mongoose.Schema({
   source: { type: String, default: 'whatsapp' },
   totalAmount: Number,
   bottle: String,
-  soda: String,
+  sodas: [String],
   confirmationCode: String
 }, { timestamps: true });
 

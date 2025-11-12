@@ -15,13 +15,14 @@ const {
 } = require('./flow-data.js');
 const { database } = require('../database/database.js');
 
-// ✅ COMBINAR REFRESCOS INDIVIDUALES EN ARRAY
+// ✅ COMBINAR REFRESCOS INDIVIDUALES EN ARRAY (CON NOMBRES FORMATEADOS)
 function combinarRefrescos(datos) {
   const refrescos = [];
   for (let i = 1; i <= 5; i++) {
-    const refresco = datos[`refresco${i}`];
-    if (refresco && refresco.trim() !== '') {
-      refrescos.push(refresco);
+    const refrescoId = datos[`refresco${i}`];
+    if (refrescoId && refrescoId.trim() !== '') {
+      // Guardar el nombre formateado en lugar del ID
+      refrescos.push(getNombreRefresco(refrescoId));
     }
   }
   return refrescos;
@@ -30,7 +31,7 @@ function combinarRefrescos(datos) {
 // ✅ FORMATEAR REFRESCOS PARA MOSTRAR
 function formatearRefrescos(refrescos) {
   if (!refrescos || refrescos.length === 0) return '';
-  return refrescos.map((r, i) => getNombreRefresco(r)).join(', ');
+  return refrescos.join(', '); // Los refrescos ya vienen formateados
 }
 
 // ✅ GENERAR FECHAS REALES (próximos 15 días)
@@ -590,6 +591,7 @@ async function guardarReservaEnBD(datos) {
     
     // Combinar refrescos
     const refrescos = combinarRefrescos(datos);
+    console.log('🥤 Refrescos a guardar:', refrescos);
     
     // Preparar datos de reserva para BD
     const reservationData = {
