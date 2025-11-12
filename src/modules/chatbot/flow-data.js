@@ -113,7 +113,6 @@ const REFRESCOS_DATA = [
   {"id": "fresca", "title": "🥤 Fresca"},
   {"id": "sidral", "title": "🥤 Sidral Mundet"},
   {"id": "agua_mideral", "title": "🥤 Peñafiel Agua Mideral"},
-  {"id": "fanta", "title": "🥤 Fanta"},
   {"id": "delaware", "title": "🥤 Delaware Punch"},
   {"id": "ginger_ale", "title": "🥤 Schweppes Ginger Ale"},
   {"id": "agua_tonica", "title": "🥤 Schweppes Agua Tónica"},
