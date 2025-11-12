@@ -114,6 +114,22 @@ async function handleReservaScreen(data) {
 
   // Obtener habitaciones según el paquete seleccionado
   const habitaciones = getHabitacionesPorPaquete(paqueteSeleccionado);
+  
+  // Obtener botellas según el paquete seleccionado
+  let botellasDelPaquete = BOTELLAS_DATA[paqueteSeleccionado] || BOTELLAS_DATA['deseo'] || [];
+  
+  // Asegurar que siempre sea un array
+  if (!Array.isArray(botellasDelPaquete)) {
+    console.error('⚠️ ERROR: botellasDelPaquete no es un array, convirtiendo...');
+    botellasDelPaquete = [];
+  }
+  
+  // Debug: Verificar tipo de datos
+  console.log('🔍 DEBUG - botellasDelPaquete:', {
+    tipo: Array.isArray(botellasDelPaquete) ? 'array' : typeof botellasDelPaquete,
+    cantidad: botellasDelPaquete.length,
+    paquete: paqueteSeleccionado
+  });
 
   // Estructura del flow con el formato exacto esperado por Meta
   const response = {
@@ -129,7 +145,7 @@ async function handleReservaScreen(data) {
       "is_hora_enabled": true,
       "numero_personas": PERSONAS_DATA,
       "is_numero_personas_enabled": true,
-      "botella": BOTELLAS_DATA,
+      "botella": botellasDelPaquete,
       "is_botella_enabled": true,
       "refresco": REFRESCOS_DATA,
       "is_refresco_enabled": true
@@ -142,8 +158,11 @@ async function handleReservaScreen(data) {
   console.log('   - Fechas:', fechas.length, 'opciones');
   console.log('   - Horas:', HORAS_DATA.length, 'opciones');
   console.log('   - Personas:', PERSONAS_DATA.length, 'opciones');
-  console.log('   - Botellas:', BOTELLAS_DATA.length, 'opciones');
+  console.log('   - Botellas:', botellasDelPaquete.length, 'opciones (paquete:', paqueteSeleccionado + ')');
   console.log('   - Refrescos:', REFRESCOS_DATA.length, 'opciones');
+  
+  // Log completo del objeto de respuesta para debug
+  console.log('📤 Response completo:', JSON.stringify(response, null, 2));
   
   return response;
 }

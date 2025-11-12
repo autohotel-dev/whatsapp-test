@@ -227,31 +227,31 @@
                     "__example__": [
                         {
                             "id": "vino_redonda",
-                            "title": "Vino Redonda"
+                            "title": "🍷 Vino Redonda"
                         },
                         {
                             "id": "six_cerveza",
-                            "title": "Six Cerveza"
+                            "title": "🍺 Six Cerveza"
                         },
                         {
                             "id": "bacardi_blanco",
-                            "title": "Bacardi Blanco"
+                            "title": "🥃 Bacardi Blanco"
                         },
                         {
                             "id": "presidente_clasico",
-                            "title": "Presidente Clásico"
+                            "title": "🥃 Presidente Clásico"
                         },
                         {
                             "id": "cazadores",
-                            "title": "Cazadores"
+                            "title": "🥃 Cazadores"
                         },
                         {
                             "id": "wyboroba",
-                            "title": "Wyboroba"
+                            "title": "🥃 Wyboroba"
                         },
                         {
                             "id": "azteca_oro",
-                            "title": "Azteca de Oro"
+                            "title": "🥃 Azteca de Oro"
                         }
                     ]
                 },
@@ -275,45 +275,37 @@
                     "__example__": [
                         {
                             "id": "coca_cola",
-                            "title": "Coca-Cola"
-                        },
-                        {
-                            "id": "coca_cola_zero",
-                            "title": "Coca-Cola Zero"
-                        },
-                        {
-                            "id": "coca_cola_light",
-                            "title": "Coca-Cola Light"
-                        },
-                        {
-                            "id": "sidral_mundet",
-                            "title": "Sidral Mundet"
-                        },
-                        {
-                            "id": "fresca",
-                            "title": "Fresca"
-                        },
-                        {
-                            "id": "schweppes",
-                            "title": "Schweppes"
-                        },
-                        {
-                            "id": "penafiel",
-                            "title": "Peñafiel"
+                            "title": "🥤 Coca-Cola"
                         },
                         {
                             "id": "fanta",
-                            "title": "Fanta"
+                            "title": "🥤 Fanta"
                         },
                         {
-                            "id": "delaware_punch",
-                            "title": "Delaware Punch"
+                            "id": "sprite",
+                            "title": "🥤 Sprite"
+                        },
+                        {
+                            "id": "gatorade",
+                            "title": "🥤 Gatorade"
+                        },
+                        {
+                            "id": "coca_cola_zero",
+                            "title": "🥤 Coca-Cola Zero"
+                        },
+                        {
+                            "id": "fanta_zero",
+                            "title": "🥤 Fanta Zero"
+                        },
+                        {
+                            "id": "coca_cola_light",
+                            "title": "🥤 Coca-Cola Light"
                         }
                     ]
                 },
                 "is_refresco_enabled": {
                     "type": "boolean",
-                    "__example__": false
+                    "__example__": true
                 }
             },
             "layout": {

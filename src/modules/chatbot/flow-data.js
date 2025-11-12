@@ -105,13 +105,13 @@ const BOTELLAS_DATA = {
 
 // ✅ OPCIONES DE REFRESCOS
 const REFRESCOS_DATA = [
-  {"title": "Coca-Cola"},
-  {"title": "Fanta"},
-  {"title": "Sprite"},
-  {"title": "Gatorade"},
-  {"title": "Coca-Cola Zero"},
-  {"title": "Fanta Zero"},
-  {"title": "Coca-Cola Light"}
+  {"id": "coca_cola", "title": "🥤 Coca-Cola"},
+  {"id": "fanta", "title": "🥤 Fanta"},
+  {"id": "sprite", "title": "🥤 Sprite"},
+  {"id": "gatorade", "title": "🥤 Gatorade"},
+  {"id": "coca_cola_zero", "title": "🥤 Coca-Cola Zero"},
+  {"id": "fanta_zero", "title": "🥤 Fanta Zero"},
+  {"id": "coca_cola_light", "title": "🥤 Coca-Cola Light"}
 ];
 
 function getHabitacionesPorPaquete(paqueteId) {
@@ -143,14 +143,18 @@ function getNombrePaquete(paqueteId) {
 }
 
 // ✅ FUNCIÓN PARA OBTENER NOMBRE DE BOTELLA
-function getNombreBotella(paqueteId) {
-  const botella = BOTELLAS_DATA[paqueteId];
-  return botella ? botella.title : paqueteId;
+function getNombreBotella(botellaId) {
+  // Buscar en todos los paquetes
+  for (const paquete in BOTELLAS_DATA) {
+    const botella = BOTELLAS_DATA[paquete].find(b => b.id === botellaId);
+    if (botella) return botella.title;
+  }
+  return botellaId;
 }
 
 // ✅ FUNCIÓN PARA OBTENER NOMBRE DE REFRESCO
 function getNombreRefresco(refrescoId) {
-  const refresco = REFRESCOS_DATA.find(r => r.title === refrescoId);
+  const refresco = REFRESCOS_DATA.find(r => r.id === refrescoId);
   return refresco ? refresco.title : refrescoId;
 }
 
