@@ -116,7 +116,6 @@ const REFRESCOS_DATA = [
   {"id": "delaware", "title": "🥤 Delaware Punch"},
   {"id": "ginger_ale", "title": "🥤 Schweppes Ginger Ale"},
   {"id": "agua_tonica", "title": "🥤 Schweppes Agua Tónica"},
-  {"id": "agua_tonica", "title": "🥤 Schweppes Agua Tónica"},
   {"id": "jugo_granada", "title": "🥤 Jugo de Granada"},
   {"id": "jugo_arandano", "title": "🥤 Jugo de Arándano"},
 ];
